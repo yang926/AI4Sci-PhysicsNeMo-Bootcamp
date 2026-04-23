@@ -1,4 +1,4 @@
-# End-to-End AI for Science Deployment Guide 
+# AI-Powered-Physics-Bootcamp Deployment Guide 
 
 This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. In addition, the Bootcamp will provide hands-on experience with visualizing the results of physics simulations using ParaView. This Lab will also introduce you to Earth2Studio where you get to try out different workflows for various Weather forecasting models!
 
@@ -31,7 +31,7 @@ For instance:
 `sudo docker build -t openhackathons:AI-Powered-Physics-Bootcamp  .`
 
 and to run the container, run:
-`sudo docker run --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864  -p 8888:8888 -p 8889:8889 -it --rm openhackathons:ai-for-science`
+`sudo docker run --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864  -p 8888:8888 -p 8889:8889 -it --rm openhackathons:AI-Powered-Physics-Bootcamp`
 
 The container launches jupyter lab and runs on port 8888
 `jupyter-lab --ip 0.0.0.0 --port 8888 --no-browser --allow-root`
