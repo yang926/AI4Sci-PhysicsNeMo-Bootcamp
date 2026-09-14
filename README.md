@@ -1,31 +1,67 @@
-# AI4Sci PhysicsNeMo Bootcamp
+# AI4Sci · AI-Powered Physics Bootcamp
 
-점심·휴식을 포함한 6~7시간 동안 PINN의 원리를 배우고, 투사체와 파동 문제에서 물리 조건과 코드의 관계를 확인하는 한국어 워크숍입니다.
+**[전체 실습 순서와 실행 안내](ai4sci/README.md)** · [시작 노트북](Start_Here.ipynb) · [환경 확인](ai4sci/00_환경확인.ipynb)
 
-**[참가자 수업 안내](ai4sci/README.md)** 에서 순서와 완료 기준을 확인하고 **[환경 확인 노트북](ai4sci/00_환경확인.ipynb)** 을 엽니다.
+PhysicsNeMo 소개, 네 개의 Training Lab, 네 개의 Challenge를 차례로 진행합니다. 각 노트북에는 이전·다음 이동 링크와 실제 Python 파일의 읽기·수정·저장·실행 방법을 안내했습니다.
 
-## 현재 버전
+아래 **Bootcamp contents**는 원본 README의 주제명을 유지합니다. 실제 파일의 실행 순서는 원본 `Start_Here.ipynb`를 따릅니다. 두 문서의 챌린지 이름 차이는 [주제와 파일 대조표](ai4sci/INSTRUCTOR.md)에 함께 기록했습니다.
 
-행사 준비용 개편 초안입니다. 기존 PhysicsNeMo 25.11 환경을 기준으로 구성했습니다. 파동 해석해의 CPU 수치 검증과 자료 구조 검사를 수행했으며, 컨테이너 빌드·행사 GPU 학습·Brev 접속 리허설은 아직 필요합니다.
+This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. This bootcamp consists of:
 
-| 자료 | 용도 |
-|---|---|
-| [한국어 수업 안내](ai4sci/README.md) | 실습 순서, 결과, 완료 기준 |
-| [파동 PINN 실습](ai4sci/01_Wave_PINN.ipynb) | 완성된 기본 코드 실행과 조건 변경 |
-| [6시간·7시간 강의안](ai4sci/course-plan.md) | 점심·휴식을 포함한 편성 초안 |
-| [강사 준비 안내](ai4sci/INSTRUCTOR.md) | 환경, 검증 상태, 리허설 절차 |
+- 2 Hours of Training Labs: Foundation building with hands-on exercises
+- 4 Hours of Challenges: Progressive problem-solving with increasing complexity
 
-`tutorial/`과 `challenge/`는 출처 추적을 위해 보존한 원본 자료입니다. 일부 심화 예제에는 의도적인 `FIXME` 과제와 별도의 수식·데이터 불일치가 있습니다. 필수 실습은 참가자 수업 안내의 경로를 따릅니다. Darcy·FourCastNet·MHD를 모두 구현한 과정으로 안내하지 않습니다.
+<p align="center">
+  <img width="600" height="400" src="https://github.com/openhackathons-org/End-to-End-AI-for-Science/blob/d403086ce59c49b26be430bbea0056c37bd4d5f6/workspace/python/jupyter_notebook/omniverse/images/tcwv.gif">
+</p>
 
-## 원본과의 관계
 
-이 저장소는 [OpenHackathons AI-Powered-Physics-Bootcamp](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp)의 원본 커밋 `9cae27f8303268cdaf7528fe963ce12ba439377f`와 이력을 보존한 AI4Sci 전용 독립 저장소입니다. 기존 KSC2026 포크는 별도로 유지합니다.
+## Bootcamp contents:
 
-[원본 강의 개요](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp/blob/9cae27f8303268cdaf7528fe963ce12ba439377f/README.md)와 행사 개편안을 구분합니다. 최신 PhysicsNeMo로의 API 이식은 별도 검증이 필요합니다.
+The content is structured in multiple modules covering the following:
+
+- Introduction to NVIDIA PhysicsNeMo
+- Module 1: 2 Hours of Training Labs
+  - Lab 1: Introduction to Physics-Informed Neural Networks
+  - Lab 2: Solving ODEs with PhysicsNeMo
+  - Lab 3: From ODEs to PDEs - Diffusion Problems
+  - Lab 4: Advanced PDE Systems
+- Module 2: 4 Hours of Challenges
+  - Challenge 1: Advanced Wave Dynamics
+  - Challenge 2: Solving the Darcy-Flow problem using AFNO
+  - Challenge 3: Forecasting weather using FourCastNet
+  - Challenge 4: Modeling Magnetohydrodynamics with Physics Informed Neural Operators
+
+## Tools and frameworks:
+
+The tools and frameworks used in the bootcamp are as follows:
+
+- [NVIDIA® PhysicsNeMo](https://developer.nvidia.com/PhysicsNeMo)
+- [ParaView](https://www.paraview.org/)
+
+## Bootcamp duration:
+
+The overall bootcamp will take approximately 6 hours (2 hours training + 4 hours challenges).
+
+## Bootcamp prerequisites:
+
+Mathematical background in Differential equations, Python proficiency, and familiarity with deep learning fundamentals and frameworks are required.
+
+## Deploying the Bootcamp materials:
+
+For deploying the materials, please refer to the Deployment guide present [here](Deployment_Guide.MD)
+
+## Teaching and deployment
+
+- [전체 실습 순서](ai4sci/README.md): 각 Lab·Challenge의 노트북, 실행 파일, 완료 기준.
+- [원래 강의 시간표](ai4sci/course-plan.md): 공유 강의안의 제목과 시간.
+- [강사 준비 및 문서 대조](ai4sci/INSTRUCTOR.md): 실행 환경과 확인할 항목.
+
+이 AI4Sci 전용 저장소는 OpenHackathons 원본 커밋 `9cae27f8303268cdaf7528fe963ce12ba439377f`와 Git 이력을 보존합니다. GPU 학습과 컨테이너 실행 상태는 강사 준비 안내에서 확인합니다.
 
 ## Attribution
 
-This material originates from the OpenHackathons Github repository. Check out additional materials [here](https://github.com/openhackathons-org)
+This material originates from the OpenHackathons GitHub repository. Check out additional materials [here](https://github.com/openhackathons-org)
 
 Don't forget to check out additional [Open Hackathons Resources](https://www.openhackathons.org/s/technical-resources) and join our [OpenACC and Hackathons Slack Channel](https://www.openacc.org/community#slack) to share your experience and get more help from the community.
 

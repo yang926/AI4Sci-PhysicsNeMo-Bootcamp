@@ -1,14 +1,16 @@
-"""Validate the authored AI4Sci route without training or installing packages.
+"""Validate the complete original course and AI4Sci editorial changes.
 
 Run with a Python environment containing NumPy for the CPU reference tests:
     python ai4sci/validate_materials.py --output /tmp/ai4sci-validation.json
 
-Original tutorial/challenge content is linked but is outside the authored-code
-checks. A successful run does not certify the GPU/container environment.
+Compare original content with upstream commit 9cae27f; validate all notebooks
+and repository Markdown. Exercise completion and GPU/container execution are
+not performed. Supplementary wave CPU checks are reported separately.
 """
 
 import argparse
 import ast
+import copy
 import json
 import os
 from pathlib import Path
@@ -20,6 +22,42 @@ from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
+UPSTREAM = "9cae27f8303268cdaf7528fe963ce12ba439377f"
+FENCED = re.compile(r"```[^\n]*\n.*?```", re.DOTALL)
+MATH = re.compile(r"\$\$.*?\$\$|(?<!\\)\$(?!\$).*?(?<!\\)\$|\\begin\{equation\}.*?\\end\{equation\}", re.DOTALL)
+GENERATED = {
+    "tutorial/projectile/outputs/projectile/constraints/IC.vtp",
+    "tutorial/projectile/outputs/projectile/constraints/interior.vtp",
+    "tutorial/projectile/outputs/projectile/inferencers/inferencer_data.vtp",
+    "tutorial/projectile/outputs/projectile/validators/validator.vtp",
+}
+
+
+def git(*arguments):
+    return subprocess.run(["git", *arguments], cwd=ROOT, check=True, capture_output=True).stdout
+
+
+def markdown_text(path):
+    if path.suffix == ".ipynb":
+        d = json.loads(path.read_text(encoding="utf-8"))
+        return "\n".join(source_text(c) for c in d["cells"] if c["cell_type"] == "markdown")
+    return path.read_text(encoding="utf-8")
+
+
+def fragments(path):
+    text = FENCED.sub("", markdown_text(path))
+    found = set(re.findall(r"\bid=[\"']([^\"']+)[\"']", text))
+    counts = {}
+    for heading in re.findall(r"^#{1,6}\s+(.+?)\s*#*\s*$", text, re.MULTILINE):
+        clean = re.sub(r"<[^>]*>", "", heading).strip()
+        found.add(clean.replace(" ", "-"))
+        clean = re.sub(r"[`*_~]", "", clean)
+        slug = re.sub(r"[^\w\- ]", "", clean.lower()).replace(" ", "-")
+        number = counts.get(slug, 0)
+        found.add(slug + (f"-{number}" if number else ""))
+        counts[slug] = number + 1
+    return found
+
 
 
 def source_text(cell):
@@ -36,8 +74,10 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     report = {
-        "scope": "authored ai4sci route plus root entry/deployment documents",
-        "excluded": "original tutorial/challenge exercise internals; GPU training; container build; external links",
+        "scope": "nine original content notebooks, Start_Here, two AI4Sci notebooks and all repository Markdown",
+        "upstream_commit": UPSTREAM,
+        "preservation": {"files": [], "notebooks": []},
+        "excluded": "original challenge .py execution and exercise completion; GPU training; container build; external links and downloads",
         "python": [], "notebooks": [], "links": [], "schedules": {},
         "errors": [], "limitations": [],
     }
@@ -45,6 +85,40 @@ def main():
     def check(condition, message):
         if not condition:
             report["errors"].append(message)
+
+    originals = []
+    protected = []
+    for entry in git("ls-tree", "-r", UPSTREAM, "--", "tutorial", "challenge").decode().splitlines():
+        metadata, relative = entry.split("\t", 1)
+        if relative.endswith(".ipynb"):
+            originals.append(ROOT / relative)
+        elif relative != "tutorial/readme.md":
+            protected.append((relative, metadata.split()[2]))
+    check(len(originals) == 9, "Expected nine original content notebooks")
+    for relative, expected in protected:
+        actual = git("hash-object", "--no-filters", "--", relative).decode().strip() if (ROOT / relative).is_file() else None
+        equal = expected == actual
+        check(equal, f"Original file bytes changed or missing: {relative}")
+        report["preservation"]["files"].append({"path": relative, "upstream_git_blob": expected, "current_git_blob": actual, "bytes_equal": equal})
+    report["preservation"]["protected_file_count"] = len(protected)
+    def extract(d, pattern):
+        return [v for c in d["cells"] if c["cell_type"] == "markdown" for v in pattern.findall(source_text(c))]
+    for path in originals:
+        relative = str(path.relative_to(ROOT))
+        base = json.loads(git("show", f"{UPSTREAM}:{relative}"))
+        current = json.loads(path.read_text(encoding="utf-8"))
+        old = base["cells"]
+        new = [c for c in current["cells"] if "ai4sci-navigation" not in c.get("metadata", {}).get("tags", [])]
+        findings = {
+            "code_cells_outputs_and_metadata_equal": [c for c in old if c["cell_type"] != "markdown"] == [c for c in new if c["cell_type"] != "markdown"],
+            "existing_cell_types_and_metadata_equal": [(c["cell_type"], c.get("metadata")) for c in old] == [(c["cell_type"], c.get("metadata")) for c in new],
+            "notebook_metadata_equal": {k:v for k,v in base.items() if k != "cells"} == {k:v for k,v in current.items() if k != "cells"},
+            "fenced_code_examples_equal": extract(base, FENCED) == extract(current, FENCED),
+            "all_math_equal": extract(base, MATH) == extract(current, MATH),
+        }
+        for key, equal in findings.items():
+            check(equal, f"{relative}: preservation check failed: {key}")
+        report["preservation"]["notebooks"].append({"path": relative, **findings})
 
     documents = []
     for path in sorted((ROOT / "ai4sci").rglob("*.py")):
@@ -64,11 +138,21 @@ def main():
             "IPython unavailable: standalone !/% lines are replaced by pass for Python syntax checks; shell/magic semantics are not validated."
         )
 
-    for path in sorted((ROOT / "ai4sci").rglob("*.ipynb")):
+    try:
+        import nbformat
+    except ImportError:
+        nbformat = None
+        report["limitations"].append("nbformat unavailable: notebook JSON structure, required cell fields and Python syntax are checked directly; full nbformat schema validation is not performed.")
+    notebook_paths = originals + [ROOT / "Start_Here.ipynb"] + sorted((ROOT / "ai4sci").rglob("*.ipynb"))
+    check(len(notebook_paths) == 12, "Expected 12 notebooks")
+    for path in notebook_paths:
         relative = str(path.relative_to(ROOT))
         info = {"path": relative, "code_cells_compiled": 0, "magic_lines_skipped": 0}
         try:
             notebook = json.loads(path.read_text(encoding="utf-8"))
+            if nbformat is not None:
+                nbformat.validate(copy.deepcopy(notebook))
+            info["schema"] = "nbformat pass" if nbformat is not None else "direct required-field checks"
             check(notebook.get("nbformat") == 4, f"{relative}: nbformat must be 4")
             check(isinstance(notebook.get("nbformat_minor"), int), f"{relative}: missing nbformat_minor")
             check(isinstance(notebook.get("metadata"), dict), f"{relative}: invalid metadata")
@@ -78,10 +162,11 @@ def main():
             ids = set()
             for number, cell in enumerate(cells, 1):
                 location = f"{relative} cell {number}"
-                identifier = cell.get("id", "")
-                check(isinstance(identifier, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", identifier), f"{location}: invalid cell id")
-                check(identifier not in ids, f"{location}: duplicate cell id")
-                ids.add(identifier)
+                identifier = cell.get("id")
+                if identifier is not None or notebook["nbformat_minor"] >= 5:
+                    check(isinstance(identifier, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", identifier), f"{location}: invalid cell id")
+                    check(identifier not in ids, f"{location}: duplicate cell id")
+                    ids.add(identifier)
                 kind = cell.get("cell_type")
                 check(kind in {"code", "markdown", "raw"}, f"{location}: invalid cell type")
                 check(isinstance(cell.get("metadata"), dict), f"{location}: invalid metadata")
@@ -110,33 +195,42 @@ def main():
             check(False, f"{relative}: {exc}")
         report["notebooks"].append(info)
 
-    markdown_paths = sorted((ROOT / "ai4sci").rglob("*.md")) + [ROOT / "README.md", ROOT / "Deployment_Guide.MD"]
+    markdown_paths = sorted(p for p in ROOT.rglob("*") if p.is_file() and p.suffix.lower() == ".md" and ".git" not in p.parts)
     for path in markdown_paths:
         documents.append((path, str(path.relative_to(ROOT)), path.read_text(encoding="utf-8")))
+    fragment_cache = {}
     for path, location, source in documents:
-        source = re.sub(r"^```.*?^```\s*$", "", source, flags=re.MULTILINE | re.DOTALL)
+        source = FENCED.sub("", source)
         targets = re.findall(r"\[[^\]]*\]\(\s*(<[^>]+>|[^)\s]+)", source)
         targets += [match[1] for match in re.findall(r"(?:href|src)=([\"'])(.*?)\1", source)]
         for raw_target in targets:
             target = raw_target.strip("<>")
             url = urlsplit(target)
-            if url.scheme or url.netloc or not url.path:
+            if url.scheme or url.netloc:
                 continue
-            resolved = (path.parent / unquote(url.path)).resolve()
+            resolved = (path.parent / unquote(url.path)).resolve() if url.path else path.resolve()
             exists = resolved.exists()
             inside = resolved.is_relative_to(ROOT)
-            check(inside and exists, f"{location}: missing or outside-repo relative link {target}")
-            report["links"].append({"source": location, "target": target, "exists": exists, "inside_repo": inside})
+            relative = str(resolved.relative_to(ROOT)) if inside else str(resolved)
+            generated = relative in GENERATED
+            check(inside and (exists or generated), f"{location}: missing or outside-repo relative link {target}")
+            item = {"source": location, "target": target, "exists": exists, "inside_repo": inside, "generated_after_training": generated}
+            if generated:
+                check("output links below become available after training" in markdown_text(path), f"{location}: generated output requires after-training explanation")
+            if url.fragment and exists and resolved.suffix.lower() in {".md", ".ipynb"}:
+                if resolved not in fragment_cache:
+                    fragment_cache[resolved] = fragments(resolved)
+                match = unquote(url.fragment) in fragment_cache[resolved]
+                item["fragment_exists"] = match
+                check(match, f"{location}: missing heading fragment {target}")
+            report["links"].append(item)
 
     course = (ROOT / "ai4sci/course-plan.md").read_text(encoding="utf-8")
-    active, previous_end = None, None
+    active, previous_end = False, None
+    schedule = {"minutes": 0, "education": 0, "lunch": 0, "break": 0, "rows": 0, "categories": {}}
     for line in course.splitlines():
-        heading = re.match(r"## ([67])시간안", line)
-        if heading:
-            active, previous_end = heading[1], None
-            report["schedules"][active] = {"minutes": 0, "categories": {}, "rows": 0}
-        elif line.startswith("## "):
-            active = None
+        if line.startswith("## "):
+            active = bool(re.match(r"## 7시간", line))
         if not active:
             continue
         row = re.match(r"\|\s*(\d\d):(\d\d)[–—-](\d\d):(\d\d)\s*\|\s*(\d+)\s*\|\s*([^|]+)\|", line)
@@ -144,26 +238,22 @@ def main():
             sh, sm, eh, em, minutes = map(int, row.groups()[:5])
             start, end = sh * 60 + sm, eh * 60 + em
             category = row.group(6).strip()
-            check(end - start == minutes and minutes > 0, f"{active}h schedule: interval/duration mismatch: {line}")
-            check(previous_end is None or previous_end == start, f"{active}h schedule: gap/overlap before {line}")
+            check(end - start == minutes and minutes > 0, f"7h schedule: interval/duration mismatch: {line}")
+            check(previous_end is None or previous_end == start, f"7h schedule: gap/overlap before {line}")
             previous_end = end
-            schedule = report["schedules"][active]
             schedule["minutes"] += minutes
             schedule["rows"] += 1
             schedule["categories"][category] = schedule["categories"].get(category, 0) + minutes
+            schedule[{"점심":"lunch", "휴식":"break"}.get(category, "education")] += minutes
         if "**합계**" in line:
             total = re.search(r"\*\*합계\*\*\s*\|\s*\*\*(\d+)\*\*", line)
-            check(total is not None and int(total.group(1)) == report["schedules"][active]["minutes"], f"{active}h summary total mismatch")
-            for category in ("교육", "점심", "휴식"):
+            check(total is not None and int(total.group(1)) == schedule["minutes"], "7h summary total mismatch")
+            for category, field in (("교육", "education"), ("점심", "lunch"), ("휴식", "break")):
                 declared = re.search(category + r"\s+(\d+)", line)
-                check(declared is not None and int(declared.group(1)) == report["schedules"][active]["categories"].get(category), f"{active}h summary category mismatch: {category}")
-    for hours in ("6", "7"):
-        schedule = report["schedules"].get(hours, {})
-        check(schedule.get("minutes") == int(hours) * 60, f"{hours}h schedule total must be {int(hours) * 60}")
-    participant_guide = (ROOT / "ai4sci/README.md").read_text(encoding="utf-8")
-    participant_minutes = sum(map(int, re.findall(r"^\|\s*\d+\.[^|]+\|\s*(\d+)분", participant_guide, flags=re.MULTILINE)))
-    report["participant_guide_education_minutes"] = participant_minutes
-    check(participant_minutes == report["schedules"].get("7", {}).get("categories", {}).get("교육"), "participant guide duration differs from 7h teaching total")
+                check(declared is not None and int(declared.group(1)) == schedule[field], f"7h summary category mismatch: {category}")
+    check(schedule["minutes"] == 420, "Shared 7h schedule must total 420 minutes")
+    check((schedule["education"], schedule["lunch"], schedule["break"]) == (320, 60, 40), "Shared 7h schedule must contain education 320, lunch 60, break 40 minutes")
+    report["schedules"] = {"7": schedule, "6": {"status": "pending_time_allocation", "arithmetic_validation": "not_applicable_no_schedule_proposed"}}
 
     docker = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     workdir = re.search(r"^WORKDIR\s+(\S+)\s*$", docker, re.MULTILINE)
@@ -191,7 +281,7 @@ state = {key: namespace.get(key) for key in ("CHECK_EVENT_GPU", "missing_files",
 print("PREFLIGHT_STATE=" + json.dumps(state))
 '''
         preflight = subprocess.run([sys.executable, "-c", preflight_code, str(ROOT / "ai4sci/00_환경확인.ipynb")], cwd=ROOT / "ai4sci", env=environment, text=True, capture_output=True, timeout=60)
-        report["preflight"] = {"exit_code": preflight.returncode, "stdout": preflight.stdout, "stderr": preflight.stderr}
+        report["preflight"] = {"scope": "Read-only local environment/file checks; no GPU training", "exit_code": preflight.returncode, "stdout": preflight.stdout, "stderr": preflight.stderr}
         check(preflight.returncode == 0, "preflight notebook execution failed")
         states = [line.split("=", 1)[1] for line in preflight.stdout.splitlines() if line.startswith("PREFLIGHT_STATE=")]
         if states:
@@ -202,8 +292,8 @@ print("PREFLIGHT_STATE=" + json.dumps(state))
         else:
             check(False, "preflight did not report its final state")
         reference = subprocess.run([sys.executable, "test_reference.py"], cwd=ROOT / "ai4sci/wave", env=environment, text=True, capture_output=True, timeout=60)
-        report["reference_tests"] = {"exit_code": reference.returncode, "stdout": reference.stdout, "stderr": reference.stderr}
-        check(reference.returncode == 0, "CPU wave reference tests failed")
+        report["supplementary_wave_cpu_checks"] = {"scope": "Added ai4sci/wave reference only; not original Wave Challenge or GPU validation", "exit_code": reference.returncode, "stdout": reference.stdout, "stderr": reference.stderr}
+        check(reference.returncode == 0, "Supplementary wave CPU reference checks failed")
 
     report["status"] = "pass" if not report["errors"] else "fail"
     args.output.parent.mkdir(parents=True, exist_ok=True)

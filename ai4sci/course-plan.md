@@ -1,85 +1,60 @@
 # AI4Sci · PhysicsNeMo 강의 운영안
 
-**운영 제안:** 점심·휴식을 포함한 10:00–17:00 행사에서 두 가지 핵심 실습을 완주하고, 나머지 주제는 개념 설명·강사 시연·후속 자료로 연결합니다. 6시간 대안은 10:00–16:00입니다. 진행자 명단은 Mingyu Yang·유영건이며, 아래 역할 배분은 협의 전 제안입니다.
+이 행사는 원본 GitHub의 전체 Lab·Challenge를 유지합니다. 학습 순서는 [원본 시작 노트북](../Start_Here.ipynb)을 기준으로 안내하고, 실제 파일과 실행 방법은 [한국어 참가자 안내](README.md)에서 확인합니다. 이전의 두 실습 중심 축소안은 철회했습니다. PPT는 사용자가 이 교재에 맞춰 수정합니다.
 
-## 기준
+## 전체 학습 순서
 
-- 총시간에 점심과 휴식을 포함합니다. 7시간안은 교육 310분 + 점심 60분 + 휴식 50분, 6시간안은 교육 260분 + 점심 60분 + 휴식 40분입니다.
-- [공유 강의안](https://docs.google.com/spreadsheets/d/1KS1z-Bmop8Jcn-PKLxuaCopveItRkmx2ImscphaLZfo/edit)에는 약 110명(교육생 100명 + 운영진 10명)이 계획 인원으로 기재되어 있습니다. 최종 참가 인원·구체적인 수준·GPU 구성은 확인 필요입니다. Python과 딥러닝 기초를 전제로 하고, 미분방정식 초심자를 위해 입력·출력·초기조건·경계조건을 먼저 설명합니다.
-- 전체 주제를 소개하되 참가자가 직접 완주할 실습은 투사체 PINN과 2차원 파동 PINN 두 개로 한정하는 안입니다. 원본의 모든 챌린지와 모든 Level을 현장에서 완성하는 일정은 포함하지 않습니다.
-- [참가자 안내](README.md)가 노트북의 시작점입니다. 슬라이드의 실습 전환 화면에도 같은 노트북 이름과 완료 기준을 사용합니다.
-- 표의 실습 시간은 교육 배분입니다. 학습 실행 시간이나 수렴 보장이 아니며, 행사 GPU 리허설을 통해 최종 학습 스텝과 설정을 결정합니다.
+원본 `Start_Here.ipynb`의 순서와 제목입니다. 각 Challenge의 모든 Level을 포함합니다.
 
-## 7시간안 · 10:00–17:00
-
-| 시각 | 분 | 구분 | 활동 | 진행 역할 제안 |
-|---|---:|---|---|---|
-| 10:00–10:20 | 20 | 교육 | 접속·환경 확인, 목표와 실습 순서 안내 | Mingyu 진행 / 유영건 접속 지원 |
-| 10:20–10:50 | 30 | 교육 | 물리 기반 AI, PINN의 입력·출력·손실, PhysicsNeMo Sym 흐름 | Mingyu 진행 / 유영건 질문 수집 |
-| 10:50–11:00 | 10 | 휴식 | 휴식 | — |
-| 11:00–12:00 | 60 | 교육 | 핵심 실습 A: 투사체의 초기조건·ODE·검증·시각화 | 유영건 진행 / Mingyu 실습 지원 |
-| 12:00–13:00 | 60 | 점심 | 점심 | — |
-| 13:00–13:30 | 30 | 교육 | ODE → PDE: 1차원 확산과 경계·접합 조건 시연 | Mingyu 진행 / 유영건 시연 지원 |
-| 13:30–14:45 | 75 | 교육 | 핵심 실습 B: 2차원 파동의 기준 해·학습·오차 비교 | 유영건 진행 / Mingyu 실습 지원 |
-| 14:45–15:05 | 20 | 휴식 | 휴식 | — |
-| 15:05–15:50 | 45 | 교육 | 신경 연산자: FNO → AFNO → PINO의 데이터·모델·손실 비교 | 유영건 진행 / Mingyu 적용 맥락 설명 |
-| 15:50–16:10 | 20 | 휴식 | 휴식 | — |
-| 16:10–16:35 | 25 | 교육 | 유동·단순 기후·복합물리: 예제 가정과 후속 학습 경로 | Mingyu 진행 / 유영건 기술 보충 |
-| 16:35–17:00 | 25 | 교육 | 두 실습 결과 공유, 적용 문제 선정, 질문 | 공동 진행 |
-| **합계** | **420** | **교육 310 / 점심 60 / 휴식 50** | **7시간** | |
-
-## 6시간안 · 10:00–16:00
-
-핵심 실습의 기본 실행과 결과 해석을 유지하고, 매개변수 변경 실험과 심화 시연의 분량을 줄입니다.
-
-| 시각 | 분 | 구분 | 활동 |
-|---|---:|---|---|
-| 10:00–10:20 | 20 | 교육 | 접속·환경 확인 |
-| 10:20–10:45 | 25 | 교육 | PINN 기초와 PhysicsNeMo Sym |
-| 10:45–11:00 | 15 | 휴식 | 휴식 |
-| 11:00–12:00 | 60 | 교육 | 핵심 실습 A: 투사체 |
-| 12:00–13:00 | 60 | 점심 | 점심 |
-| 13:00–13:20 | 20 | 교육 | 확산과 PDE 연결 시연 |
-| 13:20–14:20 | 60 | 교육 | 핵심 실습 B: 2차원 파동 |
-| 14:20–14:35 | 15 | 휴식 | 휴식 |
-| 14:35–15:10 | 35 | 교육 | FNO·AFNO·PINO 개념과 코드 읽기 |
-| 15:10–15:20 | 10 | 휴식 | 휴식 |
-| 15:20–15:40 | 20 | 교육 | 유동·기후·복합물리 연결 |
-| 15:40–16:00 | 20 | 교육 | 결과 공유와 질문 |
-| **합계** | **360** | **교육 260 / 점심 60 / 휴식 40** | **6시간** |
-
-## 강의·노트북 연결
-
-| 강의 구간 | 연결 파일 | 참가자가 수행할 일 | 강사가 확인할 완료 기준 |
+| 순서 | 원본 과정 | 연결 자료 | 포함 내용 |
 |---|---|---|---|
-| 환경 확인 | [00 · 환경 확인](00_환경확인.ipynb) | 패키지·CUDA 상태 읽기 | 지정 환경 여부와 오류 항목 확인 |
-| PINN 기초 | [PhysicsNeMo 소개](../tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb), [PINN 기초](../tutorial/introduction/Introductory_Notebook.ipynb) | 입력·출력·잔차·조건을 예제에 연결 | 방정식 오차와 조건 오차의 역할 설명 |
-| 투사체 | [투사체 노트북](../tutorial/projectile/Getting_Started_Projectile.ipynb) | 기본 학습, 검증 결과 열기, 해석해 비교 | `x(t), y(t)` 비교 그림과 학습 범위 확인 |
-| 확산 | [확산 노트북](../tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb) | 강사 시연에서 경계·접합 조건 찾기 | ODE 예제와 달라진 조건 설명 |
-| 파동 | [01 · 파동 PINN](01_Wave_PINN.ipynb) | 기준 해 확인, 학습과 오차 비교 | 기준 해·예측·오차 및 검증 범위 설명 |
-| 신경 연산자 | [원본 신경 연산자 자료](../challenge/neural_operator/Advanced_Neural_Operators.ipynb) | 합성 데이터와 모델 입출력, 물리 손실 확인 | 문제군을 학습하는 방식과 PINN 비교 |
-| 유동·기후 | [블록 주변 유동](../challenge/fuild/Fluid_Structure_Interaction.ipynb), [단순 기후 모형](../challenge/climate/Multi-Physics_Climate_Modeling.ipynb) | 가정·데이터·변수를 비교 | 적용할 때 추가로 필요한 근거 설명 |
+| 소개 | Getting started with PhysicsNeMo | [PhysicsNeMo 소개](../tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb) | Physics-informed·data-driven 접근 |
+| Lab 1 | Introduction to Physics-Informed Neural Networks (PINNs) | [PINN 소개](../tutorial/introduction/Introductory_Notebook.ipynb) | 신경망 해법, 매개변수 문제, 역문제 |
+| Lab 2 | Solving ODEs with PhysicsNeMo | [투사체 운동](../tutorial/projectile/Getting_Started_Projectile.ipynb) | 투사체 ODE, 결과 시각화, ParaView |
+| Lab 3 | From ODEs to PDEs - Diffusion Problems | [1D 확산](../tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb) | 복합 막대의 정상 확산, 매개변수 확산 |
+| Lab 4 | Advanced PDE Systems | [Navier–Stokes 기상 예제](../tutorial/navier_stokes/Weather-forecasting-navier-stokes.ipynb) | 해수면 기상 예측 예제, 데이터·학습·시각화 |
+| Challenge 1 | Advanced Wave Dynamics | [파동](../challenge/wave/Advanced_Wave_Dynamics.ipynb) | Level 1 기본 2D 파동 → Level 2 가변 파동 속도 → Level 3 복잡한 경계·원형 영역 |
+| Challenge 2 | Fluid-Structure Interaction | [유동](../challenge/fuild/Fluid_Structure_Interaction.ipynb) | Level 1 2D 유동 → Level 2 복수 블록 → Level 3 시간 의존 유동 |
+| Challenge 3 | Multi-Physics Climate Modeling | [기후](../challenge/climate/Multi-Physics_Climate_Modeling.ipynb) | Level 1 단순 대기 → Level 2 대기·해양 결합 |
+| Challenge 4 | Advanced Neural Operators | [신경 연산자](../challenge/neural_operator/Advanced_Neural_Operators.ipynb) | Level 1 FNO → Level 2 AFNO → Level 3 PINO |
 
-신경 연산자 원본에는 FNO·AFNO·PINO용 스크립트와 합성 데이터가 있습니다. 데이터 생성식·PDE 잔차에 정합성 문제가 확인되어, 해당 원본은 코드 읽기와 문제 정의 토의에 사용합니다. 행사에서 학습 시연을 하려면 먼저 수식·데이터·실행 경로를 수정하고 검증해야 합니다. Darcy flow, FourCastNet, MHD를 완성된 현장 실습으로 표시하려면 해당 구현·데이터·실행 검증을 추가해야 합니다. 블록 주변 유동은 현재 코드의 물리 범위에 맞춰 설명하고, 구조물 변형을 포함하는 FSI 실습으로 소개하지 않습니다.
+원본 README의 `Bootcamp contents`에는 Challenge 2–4가 각각 Darcy/AFNO, FourCastNet, MHD/PINO로 기재되어 있습니다. 이 제목과 위 노트북 제목은 원본에서부터 다릅니다. 해당 이름을 그대로 옮긴 공유 강의안이 잘못 복사된 것은 아닙니다. 두 목록의 관계는 아래 강사 확인 사항으로 남기며, 다른 주제로 대체하거나 같은 구현이라고 임의 연결하지 않습니다.
 
-## 슬라이드에 반영할 사항
+## 7시간 시간표 · 공유 강의안 표기
 
-1. 첫 화면에 총시간과 두 핵심 실습의 산출물을 표시합니다.
-2. PINN 소개에서는 `입력 → 예측 → 자동미분 → 방정식/조건 오차 → 학습 → 별도 검증`을 예제 코드와 연결합니다. 프레임워크 작업 흐름과 신경망 구조를 각각 명시합니다.
-3. 투사체는 ODE, 파동은 공간·시간을 다루는 PDE로 표기합니다. 식·초기조건·해석해와 실행 파일의 상수를 일치시킵니다.
-4. 실습 전환 화면마다 해당 노트북 링크, 실행할 범위, 예상 결과, 완료 기준을 넣습니다.
-5. 후반부는 신경 연산자의 학습 방식과 실제 적용 문제를 구분합니다. 시연 대상은 저장소에 확인된 구현으로 지정합니다.
-6. 슬라이드의 강사 이름과 시간표는 두 강사의 역할·분량 합의 후 확정합니다.
+아래는 [공유 강의안](https://docs.google.com/spreadsheets/d/1KS1z-Bmop8Jcn-PKLxuaCopveItRkmx2ImscphaLZfo/edit)의 2026-09-14 확인본에 있는 시각·제목을 유지한 표입니다. 표에서 비어 있던 10분 간격은 휴식으로 표시했습니다. 사전 등록은 09:30–10:00이며, 행사 전체 7시간은 점심·휴식을 포함한 10:00–17:00입니다.
 
-## 행사 전 리허설
+| 시각 | 분 | 구분 | 공유 강의안 표기 |
+|---|---:|---|---|
+| 10:00–10:50 | 50 | 소개 | Introduction to NVIDIA PhysicsNeMo |
+| 10:50–11:00 | 10 | 휴식 | 강의안의 빈 시간 |
+| 11:00–12:00 | 60 | Lab | Training Labs: Fron PINN to PDE system problems |
+| 12:00–13:00 | 60 | 점심 | Lunch |
+| 13:00–13:50 | 50 | Challenge | Challenge 1: Advanced Wave Dynamics |
+| 13:50–14:00 | 10 | 휴식 | 강의안의 빈 시간 |
+| 14:00–14:50 | 50 | Challenge | Challenge 2: Solving the Darcy-Flow problem using AFNO |
+| 14:50–15:00 | 10 | 휴식 | 강의안의 빈 시간 |
+| 15:00–15:50 | 50 | Challenge | Challenge 3: Forecasting weather using FourCastNet |
+| 15:50–16:00 | 10 | 휴식 | 강의안의 빈 시간 |
+| 16:00–16:50 | 50 | Challenge | Challenge 4: Modeling Magnetohydrodynamics with Physics Informed Neural Operators |
+| 16:50–17:00 | 10 | 정리 | Wrap-up |
+| **합계** | **420** | **교육 320 / 점심 60 / 휴식 40** | **7시간** |
 
-| 확인할 일 | 확인 자료 | 아직 필요한 결정 |
-|---|---|---|
-| 참가자 수준과 학습 목표 조정 | Python·딥러닝·미분방정식 경험, 참가 인원 | 선수 지식과 사전 안내 |
-| 실행 환경 지정 | GPU·컨테이너·커널 구성과 환경 확인 결과 | 행사 접속 방법, 지원 담당 |
-| 두 핵심 실습을 새 작업 폴더에서 끝까지 실행 | 실제 로그, 소요 시간, 검증 그림·오차 | 학습 스텝·배치·모델 크기 |
-| 장애 복구 흐름 검증 | 재접속·커널 재시작·경로 오류 복구 | 지원 담당의 운영 절차 |
-| 시연용 결과 준비 | 동일 코드·설정으로 생성한 결과와 생성 기록 | 파일 위치와 시연 범위 |
-| 슬라이드와 노트북 최종 대조 | 식·상수·모듈명·노트북 링크·완료 기준 | 두 강사의 최종 역할 배분 |
+`Fron`은 공유 강의안에 있는 오탈자이며 `From`으로 고칠 수 있습니다. 공유 시트는 이번 작업에서 수정하지 않았습니다.
 
-환경 확인 노트북은 파일·패키지·CUDA의 기본 상태만 읽습니다. 통과 결과가 학습 완료·수렴·행사 배포 완료를 의미하지는 않습니다. 원본 자료의 노트북·스크립트는 보존하고, AI4Sci용 진입 자료와 파동 실습은 `ai4sci/`에서 관리합니다.
+Lab·Challenge 배정은 총 260분입니다. 원본 README가 안내하는 Lab 120분 + Challenge 240분과는 시간 배정이 다릅니다. 이는 실습을 없애야 한다는 결론이 아니라, 전체 교재를 유지하면서 강사별 진행 분량과 실제 소요 시간을 확인할 항목입니다. 아직 측정하지 않은 실행 시간을 근거로 각 단계의 완주를 보장하지 않습니다.
+
+## 6시간 운영
+
+점심·휴식을 포함한 전체 6시간으로 진행할 경우의 시간 배정은 **확인 필요**입니다. 위 전체 Lab·Challenge와 11개 Level을 유지하며, 이 문서에서 일부를 생략하거나 시연으로 전환하는 시간표를 새로 만들지 않습니다.
+
+## 강사 확인 사항
+
+| 항목 | 확인할 내용 |
+|---|---|
+| README와 시작 노트북의 제목 | Challenge 2–4의 명칭과 연결 파일을 원본 관리 기준에 맞춰 확인. 확인 전에는 Darcy=Fluid, FourCastNet=Climate, MHD=Neural Operators라고 대응시키지 않음 |
+| 두 강사의 역할 | Mingyu Yang·유영건의 실제 담당 구간과 실습 지원 역할은 협의 후 확정 |
+| 전체 과정 리허설 | 소개·Lab 4개·Challenge 11개 Level의 설명, 파일 편집, 실행, 결과 확인에 걸리는 시간 측정 |
+| PPT 연결 | 사용자가 GitHub의 실제 노트북·수식·실습 전환 순서에 맞춰 수정. 이 작업에서는 PPT를 편집하지 않음 |
+
+수식·데이터 관련 확인 항목은 [강사 준비 안내](INSTRUCTOR.md)에 별도로 기록합니다. 이번 정비는 안내·오탈자·링크를 다루며, 원본 학습 Python 파일·YAML·노트북 코드 셀의 문제 정의와 구현은 유지합니다. 기존에 추가한 `ai4sci/01_Wave_PINN.ipynb`와 `ai4sci/wave/`는 개발 참고 자료로 보존하며 원본 파동 Challenge를 대체하지 않습니다.

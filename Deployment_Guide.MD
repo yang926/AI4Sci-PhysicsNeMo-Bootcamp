@@ -1,14 +1,14 @@
-# AI-Powered-Physics-Bootcamp Deployment Guide 
+# AI-Powered-Physics-Bootcamp Deployment Guide
 
 > AI4Sci 행사 버전의 현재 배포·검증 안내는 [강사 준비 안내](ai4sci/INSTRUCTOR.md)입니다. 아래는 원본의 역사적 배포 설명입니다. 행사 준비에는 현재 안내를 사용합니다.
 
-This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. In addition, the Bootcamp will provide hands-on experience with visualizing the results of physics simulations using ParaView. This Lab will also introduce you to Earth2Studio where you get to try out different workflows for various Weather forecasting models!
+This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. In addition, the Bootcamp will provide hands-on experience with visualizing the results of physics simulations using ParaView. This Lab will also introduce you to Earth2Studio, where you get to try out different workflows for various Weather forecasting models!
 
 
 ## Deploying the materials
 
 ### Prerequisites
-To run this tutorial you will need a machine with NVIDIA GPU with atleast 20GB of GPU memory for training large models as part of this Bootcamp.
+To run this tutorial you will need a machine with NVIDIA GPU with at least 20GB of GPU memory for training large models as part of this Bootcamp.
 
 - Install the latest [Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) or [Singularity](https://sylabs.io/docs/).
 
@@ -18,15 +18,15 @@ To run this tutorial you will need a machine with NVIDIA GPU with atleast 20GB o
 
 ### Tested environment
 
-This materials was tested with both Docker and Singularity on an NVIDIA RTX 3080Ti GPU in an x86-64 platform installed with a driver version of `535.104.05`. 
+These materials were tested with both Docker and Singularity on an NVIDIA RTX 3080Ti GPU in an x86-64 platform installed with a driver version of `535.104.05`.
 
-### Deploying with container 
+### Deploying with container
 
 This material can be deployed with either Docker or Singularity container, refer to the respective sections for the instructions.
 
 #### Docker Container
 
-To build a docker container, run: 
+To build a docker container, run:
 `sudo docker build -t <imagename>:<tagnumber> .`
 
 For instance:
@@ -43,7 +43,7 @@ Start working on the lab by clicking on the `Start_Here.ipynb` notebook.
 
 #### Singularity Container
 
-To build the singularity container, run: 
+To build the singularity container, run:
 `singularity build --fakeroot --sandbox AI-Powered-Physics-Bootcamp.sif Singularity`
 
 Then, run the container:
@@ -53,4 +53,4 @@ Then, open the jupyter lab in browser: http://localhost:8888
 Start working on the lab by clicking on the `Start_Here.ipynb` notebook.
 
 ### Known issues
-- Please go through the list of exisiting bugs/issues or file a new issue at [Github](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp/issues).
+- Please go through the list of existing bugs/issues or file a new issue at [Github](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp/issues).

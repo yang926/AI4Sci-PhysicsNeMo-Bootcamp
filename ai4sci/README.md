@@ -1,85 +1,90 @@
-# AI4Sci · PhysicsNeMo 실습 안내
+# AI4Sci · PhysicsNeMo 전체 실습 안내
 
-물리 법칙을 신경망의 학습 조건으로 표현하고, 예측 결과를 해석해와 비교합니다. 투사체 운동에서 출발해 2차원 파동으로 확장한 뒤, 확산·유동·신경 연산자의 연결점을 살펴봅니다.
+PhysicsNeMo 소개부터 Training Lab 1–4, Challenge 1–4까지 차례로 진행합니다. 실습 순서는 원본 [시작 노트북](../Start_Here.ipynb)에 연결된 파일을 기준으로 합니다.
 
-**첫 단계: [00 · 환경 확인 노트북](00_환경확인.ipynb)을 엽니다.** JupyterLab에서 이 안내를 읽으려면 파일 목록의 `README.md`를 우클릭하고 **Open With → Markdown Preview**를 선택하세요.
+**처음에는 [환경 확인 노트북](00_환경확인.ipynb)을 엽니다.** JupyterLab의 파일 목록에서 이 README를 우클릭하고 **Open With → Markdown Preview**를 선택하면 안내와 링크를 읽기 편합니다.
 
-행사는 점심과 휴식을 포함해 7시간입니다. Python의 함수·배열과 신경망 학습의 기본 개념을 알고 있다고 가정합니다. 미분방정식은 필요한 항부터 함께 설명합니다. 강의용 구성은 리허설 전 검토본이며, 행사 GPU에서의 학습 시간과 수렴 결과는 확인이 필요합니다.
+## 전체 진행 순서
 
-## 오늘의 학습 목표
+| 순서 | 원본 실습 | 열 노트북 | 학습 목표와 확인할 결과 |
+|---|---|---|---|
+| 소개 | Getting Started with PhysicsNeMo | [PhysicsNeMo 소개](../tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb) | 물리 기반 학습과 데이터 기반 학습의 차이 이해 |
+| Lab 1 | Introduction to Physics-Informed Neural Networks | [PINN 기초](../tutorial/introduction/Introductory_Notebook.ipynb) | 신경망의 입력·출력, PDE 잔차, 매개변수 문제와 역문제 구분 |
+| Lab 2 | Solving ODEs with PhysicsNeMo | [투사체 운동](../tutorial/projectile/Getting_Started_Projectile.ipynb) | 초기조건과 운동 방정식을 코드에 연결하고 예측·해석해 비교, ParaView 사용 |
+| Lab 3 | From ODEs to PDEs — Diffusion Problems | [1차원 확산](../tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb) | 복합 막대의 경계·접합 조건과 매개변수화된 문제 실행 |
+| Lab 4 | Advanced PDE Systems | [Navier–Stokes 예제](../tutorial/navier_stokes/Weather-forecasting-navier-stokes.ipynb) | 데이터 준비, 유동 방정식, 학습·시각화 연결 |
+| Challenge 1 | Advanced Wave Dynamics | [파동 챌린지](../challenge/wave/Advanced_Wave_Dynamics.ipynb) | Level 1–3: 기본 파동, 가변 속도, 복잡한 경계 |
+| Challenge 2 | Fluid-Structure Interaction | [유동 챌린지](../challenge/fuild/Fluid_Structure_Interaction.ipynb) | Level 1–3: 기본 유동, 복수 블록, 시간에 따라 변하는 유동 |
+| Challenge 3 | Multi-Physics Climate Modeling | [기후 챌린지](../challenge/climate/Multi-Physics_Climate_Modeling.ipynb) | Level 1–2: 단순 대기와 대기·해양 결합 모형 |
+| Challenge 4 | Advanced Neural Operators | [신경 연산자 챌린지](../challenge/neural_operator/Advanced_Neural_Operators.ipynb) | Level 1–3: FNO, AFNO, PINO의 데이터·모델·물리 손실 |
 
-1. **문제를 정의합니다.** 입력·출력·정의역과 초기조건·경계조건을 구분합니다.
-2. **물리식을 손실에 연결합니다.** 방정식의 잔차와 초기·경계조건의 오차가 각각 무엇을 줄이는지 설명합니다.
-3. **PINN 결과를 검증합니다.** 예측 그림과 해석해를 비교하고 학습 손실만으로 정확도를 판단하지 않습니다.
-4. **다음 문제를 선택합니다.** 한 문제의 해를 학습하는 PINN과 여러 입력 함수에 대한 해를 학습하는 신경 연산자의 차이를 설명합니다.
+위 표는 실제 노트북의 순서와 제목입니다. [저장소 첫 화면](../README.md)의 Bootcamp contents에 실린 Darcy·FourCastNet·MHD 주제명도 유지되어 있으며, 강의 준비 시 확인할 명칭·파일 대응은 [강사 안내](INSTRUCTOR.md)에 정리되어 있습니다.
 
-## 진행 순서
+## 노트북과 Python 파일의 역할
 
-아래 시간은 7시간 운영안의 교육 시간 310분입니다. 점심 60분과 휴식 50분을 더하면 총 420분입니다. 실제 시각과 6시간 대안은 [강의 운영안](course-plan.md)에 있습니다.
-
-| 순서 | 시간 | 자료와 활동 | 확인할 결과 |
-|---|---:|---|---|
-| 0. 접속과 환경 확인 | 20분 | [환경 확인](00_환경확인.ipynb)에서 현재 커널·패키지·CUDA 상태 확인 | 검사 결과를 읽고 GPU 실습 세션 여부 확인 |
-| 1. 물리 기반 AI와 PINN | 30분 | [PhysicsNeMo 소개](../tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb), [PINN 기초](../tutorial/introduction/Introductory_Notebook.ipynb)를 강사와 함께 읽기 | 신경망 입력·출력과 물리 손실 구분 |
-| 2. 핵심 실습 A · 투사체 | 60분 | [투사체 노트북](../tutorial/projectile/Getting_Started_Projectile.ipynb)에서 코드 구조를 읽고 기본 학습·시각화 실행 | 시간에 따른 위치 예측과 해석해 비교 |
-| 3. ODE에서 PDE로 | 30분 | [1차원 확산](../tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb)의 정의역·경계·접합 조건을 강사 시연으로 확인 | 투사체와 달라진 입력·조건 설명 |
-| 4. 핵심 실습 B · 2차원 파동 | 75분 | [파동 PINN 실습](01_Wave_PINN.ipynb)에서 기준 해를 확인하고 학습·비교 실행 | 기준 해·예측·오차를 비교하고 조건을 코드에 연결 |
-| 5. 신경 연산자 | 45분 | [FNO·AFNO·PINO 자료](../challenge/neural_operator/Advanced_Neural_Operators.ipynb)의 데이터·모델·손실 구조 읽기 | 입력장 `f`에서 해 `u`를 예측하는 문제와 PINN의 차이 설명 |
-| 6. 유동·기후·복합물리 연결 | 25분 | 아래 확장 자료를 통해 가정·데이터·계산 비용 비교 | 본인 문제에 필요한 물리식 또는 데이터 정리 |
-| 7. 결과 공유와 질문 | 25분 | 두 핵심 실습 결과를 설명하고 다음 학습 경로 선택 | 결과 해석과 아직 해결하지 못한 문제 구분 |
-
-## 핵심 실습 A · 투사체
-
-목표는 시간 `t`를 입력받아 위치 `x(t), y(t)`를 예측하고, 초기 위치·초기 속도와 가속도 조건을 학습에 연결하는 것입니다. 이 예제는 시간 한 변수에 대한 **상미분방정식(ODE)**을 다룹니다.
-
-1. [투사체 노트북](../tutorial/projectile/Getting_Started_Projectile.ipynb)을 열고 초기조건, 운동 방정식, 해석해를 먼저 확인합니다.
-2. [실행 코드](../tutorial/projectile/source_code/projectile.py)에서 `IC`, `interior`, `validator`가 각각 어떤 조건과 비교 기준을 맡는지 찾습니다. 노트북의 설명용 코드 블록과 실제 실행 셀을 구분합니다.
-3. 강사의 안내에 따라 학습 실행 셀을 실행합니다. 노트북은 `tutorial/projectile` 폴더를 작업 위치로 사용합니다. 경로 오류가 나면 아래 복구 안내를 따릅니다.
-4. 학습 후 그래프 셀을 실행합니다. 기본 노트북이 읽는 검증 결과는 `tutorial/projectile/outputs/projectile/validators/validator.npz`이며, 그림은 노트북 폴더의 `prediction.png`로 저장됩니다. 실제 생성 여부는 실행 후 확인합니다.
-5. `0 ≤ t < 5` 구간의 예측과 해석해를 비교합니다. 추론 코드에는 학습 범위 밖의 시간도 포함되므로, 그 구간의 정확도는 별도로 검증해야 합니다.
-
-**완료 기준:** 예측과 해석해를 한 그림에서 확인하고, 초기조건 손실과 운동 방정식 손실이 각각 무엇을 제한하는지 설명합니다. 짧은 학습의 결과가 정확한 해와 다를 때에는 오차가 큰 구간을 찾습니다.
-
-## 핵심 실습 B · 2차원 파동
-
-목표는 공간 `x, y`와 시간 `t`를 입력받아 변위 `u(x,y,t)`를 예측하는 것입니다. 투사체에서 배운 초기조건·방정식 제약에 공간 경계조건이 더해집니다.
-
-1. [파동 PINN 실습](01_Wave_PINN.ipynb)에서 정의역, 파동 속도, 초기·경계조건을 확인합니다.
-2. 해석해가 같은 방정식과 조건을 만족하는지 확인합니다. 파동 속도 `c`에 따른 진동수도 함께 읽습니다.
-3. 안내된 기본 설정으로 학습하고, 검증 결과를 불러옵니다. 결과는 `ai4sci/wave/runs/<실행 이름>/`의 `prediction.npz`와 `metrics.json`에 저장됩니다. 이미 사용한 실행 이름은 그대로 보존하므로, 새 실험은 새 이름으로 실행합니다.
-4. 같은 시점의 기준 해·예측·오차를 비교합니다. 학습을 마쳤다는 사실과 원하는 정확도에 도달했다는 판단을 구분합니다.
-5. 시간이 남으면 파동 속도 `c`를 `0.5` 또는 `2.0`으로 바꾸고 결과를 비교합니다. 기준 해도 같은 속도로 계산됩니다. 다른 조건은 유지해 무엇이 바뀌었는지 설명합니다.
-
-**완료 기준:** 기본 실행의 결과를 읽고, 초기조건·경계조건·파동 방정식이 연결된 코드 위치를 찾습니다. 실습에서 산출한 오차를 제시하고 그 값이 측정된 시간·공간 범위를 설명합니다.
-
-## 확장 자료
-
-핵심 실습 이후에 읽을 자료입니다. 원본 챌린지에는 직접 완성해야 하는 `FIXME`가 있으므로, 강의 중에는 지정한 부분을 함께 읽습니다. 신경 연산자 자료는 데이터 생성식과 방정식의 정합성 검토를 위한 코드 읽기 자료로 사용합니다.
-
-| 자료 | 이 저장소에서 다루는 내용 | 오늘 연결할 개념 |
+| 파일 | 역할 | 실습할 때 하는 일 |
 |---|---|---|
-| [1차원 확산](../tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb) | 두 구간의 정상 확산과 매개변수화 | 경계·접합 조건, 입력에 매개변수 추가 |
-| [파동 심화](../challenge/wave/Advanced_Wave_Dynamics.ipynb) | 가변 파동 속도와 원형 정의역 챌린지 | 물성·형상 변화 |
-| [신경 연산자](../challenge/neural_operator/Advanced_Neural_Operators.ipynb) | FNO·AFNO·PINO, 합성 데이터와 장 예측 | 데이터 손실과 물리 손실 |
-| [블록 주변 유동](../challenge/fuild/Fluid_Structure_Interaction.ipynb) | 채널 속 블록 주변의 정상·비정상 유동 챌린지 | 질량·운동량 보존, 장애물 경계 |
-| [단순 기후 모형](../challenge/climate/Multi-Physics_Climate_Modeling.ipynb) | 온도 이류·확산·반응과 대기·해양 열교환 챌린지 | 결합된 상태 변수와 보존식 |
-| [Navier–Stokes 예제](../tutorial/navier_stokes/Weather-forecasting-navier-stokes.ipynb) | ERA5 초기장을 이용한 단순화된 2차원 유동 예제 | 데이터 전처리와 모형 가정 |
+| `.ipynb` | 문제 설명, 수식, 코드 예시, 실행 명령, 그래프 | 위에서 아래로 읽고 지정한 실행 셀을 실행 |
+| `.py` | 실제 방정식·모델·조건·학습·평가 프로그램 | 기초 Lab에서는 코드 읽기, Challenge에서는 `FIXME` 완성 후 저장 |
+| `conf/*.yaml` | 신경망·학습 반복 횟수·배치 등 설정 | 본문과 강사가 안내한 설정 항목 확인 |
 
-자료를 적용할 때에는 계산 영역, 물리 가정, 검증 데이터의 범위를 함께 확인합니다. FNO·AFNO·PINO는 모델·학습 방식이고, Darcy flow·기상예측·자기유체역학은 적용 문제입니다. 오늘의 실행 대상으로 지정한 파일은 위 표와 핵심 실습의 링크를 기준으로 합니다.
+노트북 본문에 표시된 코드 블록은 설명용 텍스트일 수 있습니다. **설명용 코드 블록을 편집해도 옆의 `.py` 파일에는 반영되지 않습니다.** 실행 셀에 `!python wave_l1.py`라고 적혀 있으면 실제로 실행되는 파일은 `wave_l1.py`입니다. `!`는 노트북에서 터미널 명령을 실행한다는 뜻입니다.
+
+이 교재는 긴 학습 프로그램을 `.py`에 두고 설명·그래프를 노트북에 두는 방식으로 구성되어 있습니다. JupyterLab 안에서 두 파일을 나란히 열면 편집과 실행을 한 화면에서 할 수 있습니다.
+
+## 한 Level을 진행하는 방법
+
+1. **노트북 설명을 읽습니다.** 이번 Level의 방정식, 정의역, 초기조건·경계조건과 구현할 항목을 확인합니다.
+2. **실제 Python 파일을 엽니다.** 아래 표의 링크 또는 JupyterLab 파일 목록에서 해당 `.py`를 열고 노트북 옆에 둡니다. GitHub 웹 화면에서 수정하는 것이 아니라 행사 JupyterLab의 작업 파일을 수정합니다.
+3. **과제를 완성하고 저장합니다.** Challenge는 파일 안에서 `FIXME`를 찾아 노트북의 힌트에 맞게 채웁니다. **Ctrl+S 또는 ⌘S**로 저장합니다. 기초 Lab은 준비된 코드를 먼저 읽고 실행합니다.
+4. **노트북으로 돌아와 실행합니다.** 현재 Level의 `!python ...` 셀을 **Shift+Enter**로 실행합니다. 학습 로그가 출력되는지 확인합니다.
+5. **출력을 확인합니다.** 실행이 끝나면 다음 평가·그래프 셀을 진행합니다. Challenge는 표시된 지표와 `challenge/leaderboard_metrics.csv`의 새 기록을 확인합니다. 이 CSV는 현재 작업 환경에 저장되는 결과 파일입니다.
+6. **다음 Level로 이동합니다.** 오류가 있으면 해당 셀의 마지막 오류를 해결하고 다시 실행합니다. 그 뒤 같은 노트북의 다음 Level 또는 맨 아래의 다음 실습 링크로 이동합니다.
+
+노트북 작업 폴더는 해당 노트북이 있는 폴더입니다. 실행 파일을 찾지 못하면 먼저 `%pwd`로 확인합니다. 강사 안내 없이 패키지 설치나 데이터 덮어쓰기를 반복하기보다, 현재 파일·폴더·오류 문장을 함께 확인합니다.
+
+## Training Lab 실행 파일
+
+| Lab | 읽고 실행할 파일 | 노트북에서 확인할 결과 |
+|---|---|---|
+| Lab 1 | [PINN 기초 노트북](../tutorial/introduction/Introductory_Notebook.ipynb)의 설명 | 순방향·매개변수·역문제의 입력과 학습 대상 구분 |
+| Lab 2 | [projectile.py](../tutorial/projectile/source_code/projectile.py), [projectile_eqn.py](../tutorial/projectile/source_code/projectile_eqn.py) | 위치 예측과 해석해 그래프, ParaView 출력 |
+| Lab 3 | [diffusion_bar.py](../tutorial/diffusion_1d/source_code/diffusion_bar.py), [diffusion_bar_parameterized.py](../tutorial/diffusion_1d/source_code/diffusion_bar_parameterized.py) | 두 구간의 해와 접합 조건, 매개변수화 결과 |
+| Lab 4 | [navier_stokes.py](../tutorial/navier_stokes/source_code/navier_stokes.py) | 본문의 데이터 준비 결과와 유동 시각화 |
+
+## Challenge별 편집 파일
+
+각 행은 별도의 Level입니다. 실제 실행 명령은 해당 노트북의 기존 셀을 사용합니다.
+
+| Challenge | Level | 편집할 Python 파일 | 설정 파일 |
+|---|---|---|---|
+| Wave | 1 | [wave_l1.py](../challenge/wave/wave_l1.py) | [config_wave.yaml](../challenge/wave/conf/config_wave.yaml) |
+| Wave | 2 | [wave_l2.py](../challenge/wave/wave_l2.py) | [config_wave.yaml](../challenge/wave/conf/config_wave.yaml) |
+| Wave | 3 | [wave_l3.py](../challenge/wave/wave_l3.py) | [config_wave.yaml](../challenge/wave/conf/config_wave.yaml) |
+| Fluid | 1 | [chip_2d_l1.py](../challenge/fuild/chip_2d_l1.py) | [config_chip_2d.yaml](../challenge/fuild/conf/config_chip_2d.yaml) |
+| Fluid | 2 | [chip_2d_l2.py](../challenge/fuild/chip_2d_l2.py) | [config_chip_2d.yaml](../challenge/fuild/conf/config_chip_2d.yaml) |
+| Fluid | 3 | [chip_2d_l3.py](../challenge/fuild/chip_2d_l3.py) | [config_chip_2d.yaml](../challenge/fuild/conf/config_chip_2d.yaml) |
+| Climate | 1 | [climate_l1.py](../challenge/climate/climate_l1.py) | [config_atmos.yaml](../challenge/climate/conf/config_atmos.yaml) |
+| Climate | 2 | [climate_l2.py](../challenge/climate/climate_l2.py) | [config_coupled.yaml](../challenge/climate/conf/config_coupled.yaml) |
+| Neural Operators | 1 · FNO | [fno_physicsnemo_l1.py](../challenge/neural_operator/fno_physicsnemo_l1.py) | [config_FNO.yaml](../challenge/neural_operator/conf/config_FNO.yaml) |
+| Neural Operators | 2 · AFNO | [fno_physicsnemo_l2.py](../challenge/neural_operator/fno_physicsnemo_l2.py) | [config_AFNO.yaml](../challenge/neural_operator/conf/config_AFNO.yaml) |
+| Neural Operators | 3 · PINO | [fno_physicsnemo_l3.py](../challenge/neural_operator/fno_physicsnemo_l3.py) | [config_PINO.yaml](../challenge/neural_operator/conf/config_PINO.yaml) |
+
+Neural Operators 노트북에는 모델 학습 전 [generate_data.py](../challenge/neural_operator/generate_data.py)를 실행하는 단계도 있습니다. 데이터 준비 순서는 노트북의 **Step 0: Data Generation**을 따릅니다.
 
 ## 막혔을 때
 
-| 증상 | 다음 행동 | 계속 참여하는 방법 |
-|---|---|---|
-| 링크에서 노트북이 코드처럼 보임 | JupyterLab의 파일 목록에서 `.ipynb` 파일을 열기 | 이 안내에서 해당 실습의 목표를 먼저 읽기 |
-| `ModuleNotFoundError` 또는 `physicsnemo.sym` 불러오기 실패 | 환경 확인 노트북의 실패 항목을 강사에게 보여주고 지정 커널·서버 확인 | 강사 시연에서 코드와 손실의 연결을 따라가기 |
-| 행사 GPU 세션에서 CUDA가 감지되지 않음 | 로컬 커널과 행사 커널을 구분하고 접속 상태 확인 | 해석해·그림 해석부터 진행 |
-| `source_code`나 결과 파일을 찾지 못함 | 노트북이 있는 폴더를 기준으로 실행했는지 확인. 투사체는 첫 실행 셀 앞에서 `%pwd`로 작업 위치 확인 | 이미지를 보며 결과가 생성되는 단계를 확인 |
-| 학습 중 오류·메모리 부족·시간 초과 | 실행을 중단하고 마지막 오류·진행 단계를 강사에게 전달. 강사가 지정한 짧은 설정으로 재실행 | 강사 시연 화면의 결과를 보며 해석 단계 참여 |
-| 학습은 끝났지만 그래프가 기대와 다름 | 검증 결과 생성 여부와 실행 설정을 먼저 확인한 뒤 학습 구간·오차 비교 | 오차가 큰 위치와 원인을 토의 |
+| 증상 | 확인할 항목 |
+|---|---|
+| `NameError: name 'FIXME' is not defined` | 실행한 `.py`에 과제 빈칸이 남았는지 확인 |
+| 코드를 고쳤는데 같은 오류가 남음 | 노트북 설명용 코드만 바꾸었는지, 실제 `.py`를 저장했는지 확인 |
+| `can't open file` 또는 상대 경로 오류 | `%pwd`로 노트북 작업 폴더와 파일 위치 확인 |
+| 모듈 import 또는 CUDA 오류 | [환경 확인](00_환경확인.ipynb)의 결과와 행사 커널 확인 |
+| 학습 오류 뒤 예전 그래프가 보임 | 이번 실행이 정상 종료했고 새 출력이 생성됐는지 확인 |
+| 그림·데이터 파일이 없음 | 파일이 저장소에 포함된 자료인지, 앞 단계에서 생성·다운로드되는 파일인지 본문에서 확인 |
 
-개인 노트북에서 CUDA가 감지되지 않아도 자료를 읽고 사전 확인을 진행할 수 있습니다. GPU 학습은 행사에서 안내받은 실행 환경을 사용합니다. 접속 장애가 생기면 기존 안내받은 세션으로 다시 접속하고, 강사와 확인한 뒤 중단 지점부터 진행합니다.
+[처음 실습 시작](../tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb) · [원래 강의 시간표](course-plan.md) · [강사 안내](INSTRUCTOR.md)
 
 ## 출처
 
-[OpenHackathons AI-Powered-Physics-Bootcamp](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp)의 자료를 기반으로 구성했습니다. 원본 고지와 파일별 라이선스를 유지합니다. [저장소 안내](../README.md) · [라이선스](../LICENSE)
+[OpenHackathons AI-Powered-Physics-Bootcamp](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp)의 전체 과정과 원본 저작권·라이선스 고지를 유지합니다. [라이선스](../LICENSE)
