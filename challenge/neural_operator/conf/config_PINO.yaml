@@ -14,46 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for Level 3: Physics-Informed Neural Operator (PINO)
-# Problem: 2D Poisson Equation - Δu + f = 0
-# Includes physics loss (PDE residual)
-
-defaults :
-  - physicsnemo_default
-  - /arch/conv_fully_connected_cfg@arch.decoder
-  - /arch/fno_cfg@arch.fno
-  - scheduler: tf_exponential_lr
-  - optimizer: adam
-  - loss: sum
-  - _self_
-
-arch:
-  decoder:
-    input_keys: [z, 32]
-    output_keys: u
-    nr_layers: 1
-    layer_size: 32
-
-  fno:
-    input_keys: f
-    dimension: 2
-    nr_fno_layers: 4
-    fno_modes: 12
-    padding: 9
-
-scheduler:
-  decay_rate: 0.95
-  decay_steps: 1000
-
+# PhysicsNeMo 2.2.2 / Level 3: PINO
+# Periodic reaction-diffusion: u - Laplacian(u) = f, [0,1)^2.
+# Plain YAML loaded by the explicit PyTorch loop; no Hydra defaults.
+data:
+  grid_size: 64
+model:
+  latent_channels: 32
+  num_fno_layers: 4
+  num_fno_modes: 12
+  padding: 0
+  coord_features: false
+  decoder_layers: 1
+  decoder_layer_size: 32
 training:
-  rec_results_freq : 1000
-  max_steps : 10000
-
-batch_size:
-  grid: 32
-  validation: 32
-
-# Custom settings for PINO
-custom:
-  gradient_method: "fourier"  # Use spectral derivatives for Laplacian
-  physics_weight: 1.0         # Weight for physics loss
+  steps: 10000
+  batch_size: 32
+  learning_rate: 0.001
+  cpu_threads: 2
+  physics_weight: 1.0  # residual is divided by training f_std before MSE

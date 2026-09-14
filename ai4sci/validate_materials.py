@@ -1,40 +1,29 @@
-"""Validate the complete original course and AI4Sci editorial changes.
+"""Static integrity checks for the PhysicsNeMo 2.2.2 course.
 
-Run with a Python environment containing NumPy for the CPU reference tests:
-    python ai4sci/validate_materials.py --output /tmp/ai4sci-validation.json
-
-Compare original content with upstream commit 9cae27f; validate all notebooks
-and repository Markdown. Exercise completion and GPU/container execution are
-not performed. Supplementary wave CPU checks are reported separately.
+Runtime tests are separate: python ai4sci/run_validation.py --suite all ...
 """
-
 import argparse
 import ast
 import copy
+import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import subprocess
-import sys
-import tempfile
 from urllib.parse import unquote, urlsplit
 
+import nbformat
+from IPython.core.inputtransformer2 import TransformerManager
 
 ROOT = Path(__file__).resolve().parents[1]
 UPSTREAM = "9cae27f8303268cdaf7528fe963ce12ba439377f"
 FENCED = re.compile(r"```[^\n]*\n.*?```", re.DOTALL)
-MATH = re.compile(r"\$\$.*?\$\$|(?<!\\)\$(?!\$).*?(?<!\\)\$|\\begin\{equation\}.*?\\end\{equation\}", re.DOTALL)
-GENERATED = {
-    "tutorial/projectile/outputs/projectile/constraints/IC.vtp",
-    "tutorial/projectile/outputs/projectile/constraints/interior.vtp",
-    "tutorial/projectile/outputs/projectile/inferencers/inferencer_data.vtp",
-    "tutorial/projectile/outputs/projectile/validators/validator.vtp",
-}
+OLD_API = re.compile(r"(?:from|import)\s+physicsnemo\.sym\.(?:solver|domain|key|models|geometry|hydra)(?:[.\s]|$)")
+EXCLUDE = {".git", ".venv", "__pycache__", ".pytest_cache", "validation-runs", "runs", "outputs"}
 
 
-def git(*arguments):
-    return subprocess.run(["git", *arguments], cwd=ROOT, check=True, capture_output=True).stdout
+def is_active(path):
+    return not any(part in EXCLUDE or part.startswith("._") for part in path.relative_to(ROOT).parts)
 
 
 def markdown_text(path):
@@ -73,136 +62,98 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    report = {
-        "scope": "nine original content notebooks, Start_Here, two AI4Sci notebooks and all repository Markdown",
-        "upstream_commit": UPSTREAM,
-        "preservation": {"files": [], "notebooks": []},
-        "excluded": "original challenge .py execution and exercise completion; GPU training; container build; external links and downloads",
-        "python": [], "notebooks": [], "links": [], "schedules": {},
-        "errors": [], "limitations": [],
-    }
-
+    report = {"scope": "static source, full course coverage, notebooks, local links, schedule and assets",
+              "physicsnemo": "2.2.2", "upstream_commit": UPSTREAM,
+              "python": [], "notebooks": [], "links": [], "assets": [], "errors": [],
+              "runtime_training_tested": False}
     def check(condition, message):
         if not condition:
             report["errors"].append(message)
-
-    originals = []
-    protected = []
-    for entry in git("ls-tree", "-r", UPSTREAM, "--", "tutorial", "challenge").decode().splitlines():
-        metadata, relative = entry.split("\t", 1)
-        if relative.endswith(".ipynb"):
-            originals.append(ROOT / relative)
-        elif relative != "tutorial/readme.md":
-            protected.append((relative, metadata.split()[2]))
-    check(len(originals) == 9, "Expected nine original content notebooks")
-    for relative, expected in protected:
-        actual = git("hash-object", "--no-filters", "--", relative).decode().strip() if (ROOT / relative).is_file() else None
-        equal = expected == actual
-        check(equal, f"Original file bytes changed or missing: {relative}")
-        report["preservation"]["files"].append({"path": relative, "upstream_git_blob": expected, "current_git_blob": actual, "bytes_equal": equal})
-    report["preservation"]["protected_file_count"] = len(protected)
-    def extract(d, pattern):
-        return [v for c in d["cells"] if c["cell_type"] == "markdown" for v in pattern.findall(source_text(c))]
-    for path in originals:
+    manifest = json.loads((ROOT / "ai4sci/course_manifest.json").read_text())
+    check(manifest["physicsnemo"] == "2.2.2", "manifest version mismatch")
+    check(len(manifest["course"]) == 9, "nine original course notebooks required")
+    check(len({c["id"] for c in manifest["course"]}) == 9, "duplicate course IDs")
+    check(len(manifest["runs"]) == 18, "18 executable lesson modes required")
+    for course in manifest["course"]:
+        check((ROOT / course["notebook"]).is_file(), "missing course: " + course["notebook"])
+    for course, levels in {"wave": 3, "fluid": 3, "climate": 2, "operators": 3}.items():
+        actual = sorted(r["level"] for r in manifest["runs"] if r["course"] == course)
+        check(actual == list(range(1, levels + 1)), "missing/duplicate challenge level: " + course)
+    for run in manifest["runs"]:
+        check((ROOT / run["script"]).is_file(), "missing executable: " + run["script"])
+    report["coverage"] = {"course_notebooks": len(manifest["course"]), "executable_modes": len(manifest["runs"]), "challenge_levels": 11}
+    # Original data and figures are retained byte-for-byte. Code/config changes are authorized.
+    tree = subprocess.run(["git", "ls-tree", "-r", UPSTREAM, "--", "tutorial", "challenge"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if tree.returncode == 0:
+        for entry in tree.stdout.splitlines():
+            metadata, relative = entry.split("\t", 1)
+            if Path(relative).suffix.lower() in {".py", ".yaml", ".yml", ".md", ".ipynb"}:
+                continue
+            path = ROOT / relative
+            expected = metadata.split()[2]
+            actual = None
+            if path.is_file():
+                data = path.read_bytes()
+                actual = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+            check(expected == actual, "original asset modified/missing: " + relative)
+            report["assets"].append({"path": relative, "upstream_git_blob": expected, "unchanged": expected == actual})
+        report["asset_check"] = "upstream Git blob comparison"
+    else:
+        report["asset_check"] = "unavailable: source snapshot has no upstream Git object"
+    language_files = []
+    hangul = re.compile(r"[\u1100-\u11ff\u3130-\u318f\uac00-\ud7a3]")
+    for path in sorted(p for p in ROOT.rglob("*") if p.is_file() and is_active(p)):
+        if path.suffix.lower() not in {".py", ".md", ".json", ".ipynb", ".yaml", ".yml", ".txt"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if path.suffix in {".json", ".ipynb"}:
+            text = json.dumps(json.loads(text), ensure_ascii=False)
         relative = str(path.relative_to(ROOT))
-        base = json.loads(git("show", f"{UPSTREAM}:{relative}"))
-        current = json.loads(path.read_text(encoding="utf-8"))
-        old = base["cells"]
-        new = [c for c in current["cells"] if "ai4sci-navigation" not in c.get("metadata", {}).get("tags", [])]
-        findings = {
-            "code_cells_outputs_and_metadata_equal": [c for c in old if c["cell_type"] != "markdown"] == [c for c in new if c["cell_type"] != "markdown"],
-            "existing_cell_types_and_metadata_equal": [(c["cell_type"], c.get("metadata")) for c in old] == [(c["cell_type"], c.get("metadata")) for c in new],
-            "notebook_metadata_equal": {k:v for k,v in base.items() if k != "cells"} == {k:v for k,v in current.items() if k != "cells"},
-            "fenced_code_examples_equal": extract(base, FENCED) == extract(current, FENCED),
-            "all_math_equal": extract(base, MATH) == extract(current, MATH),
-        }
-        for key, equal in findings.items():
-            check(equal, f"{relative}: preservation check failed: {key}")
-        report["preservation"]["notebooks"].append({"path": relative, **findings})
-
+        check(not hangul.search(text) and not hangul.search(relative), "English-only course: Hangul found in " + relative)
+        language_files.append(relative)
+    report["english_only_scan"] = {"files": len(language_files), "scope": "text, decoded JSON and filenames; mathematical symbols are allowed"}
     documents = []
-    for path in sorted((ROOT / "ai4sci").rglob("*.py")):
+    for path in sorted(p for p in ROOT.rglob("*.py") if is_active(p)):
         relative = str(path.relative_to(ROOT))
         try:
-            ast.parse(path.read_text(encoding="utf-8"), filename=relative)
+            source = path.read_text(encoding="utf-8")
+            ast.parse(source, filename=relative)
+            # This validator's regex mentions paths as data, not imports.
+            check(not OLD_API.search(source), "removed legacy import: " + relative)
             report["python"].append({"path": relative, "ast": "pass"})
         except (SyntaxError, UnicodeError) as exc:
             check(False, f"{relative}: {exc}")
-
-    try:
-        from IPython.core.inputtransformer2 import TransformerManager
-        transform = TransformerManager().transform_cell
-    except ImportError:
-        transform = None
-        report["limitations"].append(
-            "IPython unavailable: standalone !/% lines are replaced by pass for Python syntax checks; shell/magic semantics are not validated."
-        )
-
-    try:
-        import nbformat
-    except ImportError:
-        nbformat = None
-        report["limitations"].append("nbformat unavailable: notebook JSON structure, required cell fields and Python syntax are checked directly; full nbformat schema validation is not performed.")
-    notebook_paths = originals + [ROOT / "Start_Here.ipynb"] + sorted((ROOT / "ai4sci").rglob("*.ipynb"))
-    check(len(notebook_paths) == 12, "Expected 12 notebooks")
-    for path in notebook_paths:
+    transform = TransformerManager().transform_cell
+    for path in sorted(p for p in ROOT.rglob("*.ipynb") if is_active(p)):
         relative = str(path.relative_to(ROOT))
-        info = {"path": relative, "code_cells_compiled": 0, "magic_lines_skipped": 0}
+        info = {"path": relative, "code_cells_compiled": 0}
         try:
-            notebook = json.loads(path.read_text(encoding="utf-8"))
-            if nbformat is not None:
-                nbformat.validate(copy.deepcopy(notebook))
-            info["schema"] = "nbformat pass" if nbformat is not None else "direct required-field checks"
-            check(notebook.get("nbformat") == 4, f"{relative}: nbformat must be 4")
-            check(isinstance(notebook.get("nbformat_minor"), int), f"{relative}: missing nbformat_minor")
-            check(isinstance(notebook.get("metadata"), dict), f"{relative}: invalid metadata")
-            cells = notebook.get("cells")
-            if not isinstance(cells, list):
-                raise ValueError("cells must be a list")
-            ids = set()
-            for number, cell in enumerate(cells, 1):
+            notebook = nbformat.read(path, as_version=4)
+            nbformat.validate(copy.deepcopy(notebook))
+            for number, cell in enumerate(notebook.cells, 1):
+                source = cell.source
                 location = f"{relative} cell {number}"
-                identifier = cell.get("id")
-                if identifier is not None or notebook["nbformat_minor"] >= 5:
-                    check(isinstance(identifier, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", identifier), f"{location}: invalid cell id")
-                    check(identifier not in ids, f"{location}: duplicate cell id")
-                    ids.add(identifier)
-                kind = cell.get("cell_type")
-                check(kind in {"code", "markdown", "raw"}, f"{location}: invalid cell type")
-                check(isinstance(cell.get("metadata"), dict), f"{location}: invalid metadata")
-                source = source_text(cell)
-                if kind == "markdown":
+                if cell.cell_type == "markdown":
                     documents.append((path, location, source))
-                elif kind == "code":
-                    check(isinstance(cell.get("outputs"), list), f"{location}: invalid outputs")
-                    check("execution_count" in cell and (cell["execution_count"] is None or isinstance(cell["execution_count"], int)), f"{location}: invalid execution_count")
-                    if transform:
-                        compiled_source = transform(source)
-                    else:
-                        lines = []
-                        for line in source.splitlines():
-                            if line.lstrip().startswith("%%"):
-                                raise ValueError(f"{location}: cell magic requires IPython to validate")
-                            if line.lstrip().startswith(("!", "%")):
-                                line = line[:len(line) - len(line.lstrip())] + "pass # IPython line omitted"
-                                info["magic_lines_skipped"] += 1
-                            lines.append(line)
-                        compiled_source = "\n".join(lines)
-                    compile(compiled_source, location, "exec")
+                    # Historical migration notes belong in MIGRATION.md, not executable lesson examples.
+                    check(not OLD_API.search(source), "removed legacy API in lesson example: " + location)
+                elif cell.cell_type == "code":
+                    compile(transform(source), location, "exec")
+                    check(not OLD_API.search(source), "removed legacy import: " + location)
+                    check(not cell.get("outputs"), "clear stale notebook outputs: " + location)
                     info["code_cells_compiled"] += 1
-            info["cells"] = len(cells)
-        except (ValueError, TypeError, SyntaxError, KeyError, AttributeError) as exc:
+            info["schema"] = "pass"
+        except Exception as exc:
             check(False, f"{relative}: {exc}")
         report["notebooks"].append(info)
-
-    markdown_paths = sorted(p for p in ROOT.rglob("*") if p.is_file() and p.suffix.lower() == ".md" and ".git" not in p.parts)
-    for path in markdown_paths:
+    for path in sorted(p for p in ROOT.rglob("*") if p.is_file() and p.suffix.lower() == ".md" and is_active(p)):
         documents.append((path, str(path.relative_to(ROOT)), path.read_text(encoding="utf-8")))
     fragment_cache = {}
     for path, location, source in documents:
         source = FENCED.sub("", source)
         targets = re.findall(r"\[[^\]]*\]\(\s*(<[^>]+>|[^)\s]+)", source)
-        targets += [match[1] for match in re.findall(r"(?:href|src)=([\"'])(.*?)\1", source)]
+        targets += [m[1] for m in re.findall(r"(?:href|src)=([\"'])(.*?)\1", source)]
         for raw_target in targets:
             target = raw_target.strip("<>")
             url = urlsplit(target)
@@ -211,26 +162,21 @@ def main():
             resolved = (path.parent / unquote(url.path)).resolve() if url.path else path.resolve()
             exists = resolved.exists()
             inside = resolved.is_relative_to(ROOT)
-            relative = str(resolved.relative_to(ROOT)) if inside else str(resolved)
-            generated = relative in GENERATED
-            check(inside and (exists or generated), f"{location}: missing or outside-repo relative link {target}")
-            item = {"source": location, "target": target, "exists": exists, "inside_repo": inside, "generated_after_training": generated}
-            if generated:
-                check("output links below become available after training" in markdown_text(path), f"{location}: generated output requires after-training explanation")
+            check(inside and exists, f"{location}: missing or outside-repo relative link {target}")
+            item = {"source": location, "target": target, "exists": exists}
             if url.fragment and exists and resolved.suffix.lower() in {".md", ".ipynb"}:
                 if resolved not in fragment_cache:
                     fragment_cache[resolved] = fragments(resolved)
                 match = unquote(url.fragment) in fragment_cache[resolved]
-                item["fragment_exists"] = match
                 check(match, f"{location}: missing heading fragment {target}")
             report["links"].append(item)
-
+    check("nvidia-physicsnemo[sym]==2.2.2" in (ROOT / "requirements.txt").read_text(), "PhysicsNeMo version must be pinned")
     course = (ROOT / "ai4sci/course-plan.md").read_text(encoding="utf-8")
     active, previous_end = False, None
     schedule = {"minutes": 0, "education": 0, "lunch": 0, "break": 0, "rows": 0, "categories": {}}
     for line in course.splitlines():
         if line.startswith("## "):
-            active = bool(re.match(r"## 7시간", line))
+            active = bool(re.match(r"## 7-hour", line))
         if not active:
             continue
         row = re.match(r"\|\s*(\d\d):(\d\d)[–—-](\d\d):(\d\d)\s*\|\s*(\d+)\s*\|\s*([^|]+)\|", line)
@@ -244,11 +190,11 @@ def main():
             schedule["minutes"] += minutes
             schedule["rows"] += 1
             schedule["categories"][category] = schedule["categories"].get(category, 0) + minutes
-            schedule[{"점심":"lunch", "휴식":"break"}.get(category, "education")] += minutes
-        if "**합계**" in line:
-            total = re.search(r"\*\*합계\*\*\s*\|\s*\*\*(\d+)\*\*", line)
+            schedule[{"Lunch":"lunch", "Break":"break"}.get(category, "education")] += minutes
+        if "**Total**" in line:
+            total = re.search(r"\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*", line)
             check(total is not None and int(total.group(1)) == schedule["minutes"], "7h summary total mismatch")
-            for category, field in (("교육", "education"), ("점심", "lunch"), ("휴식", "break")):
+            for category, field in (("Teaching", "education"), ("Lunch", "lunch"), ("Break", "break")):
                 declared = re.search(category + r"\s+(\d+)", line)
                 check(declared is not None and int(declared.group(1)) == schedule[field], f"7h summary category mismatch: {category}")
     check(schedule["minutes"] == 420, "Shared 7h schedule must total 420 minutes")
@@ -257,48 +203,21 @@ def main():
 
     docker = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     workdir = re.search(r"^WORKDIR\s+(\S+)\s*$", docker, re.MULTILINE)
-    copy = re.search(r"^COPY\s+\.\s+(\S+)\s*$", docker, re.MULTILINE)
-    check(workdir is not None and copy is not None and workdir.group(1).rstrip("/") == copy.group(1).rstrip("/"), "Docker COPY . destination must match WORKDIR")
+    copy_match = re.search(r"^COPY\s+\.\s+(\S+)\s*$", docker, re.MULTILINE)
+    check(workdir is not None and copy_match is not None and workdir.group(1).rstrip("/") == copy_match.group(1).rstrip("/"), "Docker COPY . destination must match WORKDIR")
     command = next((line[4:].strip() for line in docker.splitlines() if line.startswith("CMD ")), "[]")
     try:
         command = json.loads(command)
         landing = next((arg.split("=/lab/tree/", 1)[1] for arg in command if arg.startswith("--LabApp.default_url=/lab/tree/")), None)
         check(landing is not None and (ROOT / landing).is_file(), "Docker landing document missing")
-        report["docker"] = {"copy_to_workdir": bool(workdir and copy and workdir.group(1).rstrip("/") == copy.group(1).rstrip("/")), "landing": landing, "runtime_tested": False}
+        report["docker"] = {"copy_to_workdir": bool(workdir and copy_match and workdir.group(1).rstrip("/") == copy_match.group(1).rstrip("/")), "landing": landing, "runtime_tested": False}
     except (ValueError, TypeError):
         check(False, "Docker CMD must be a JSON command array")
-
-    with tempfile.TemporaryDirectory(prefix="ai4sci-validate-") as temporary:
-        environment = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "MPLCONFIGDIR": temporary}
-        preflight_code = '''import json, pathlib, sys
-notebook = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-namespace = {}
-for number, cell in enumerate(notebook["cells"], 1):
-    if cell["cell_type"] == "code":
-        source = cell["source"]
-        exec(compile("".join(source) if isinstance(source, list) else source, f"preflight cell {number}", "exec"), namespace)
-state = {key: namespace.get(key) for key in ("CHECK_EVENT_GPU", "missing_files", "package_issues", "interface_issues", "cuda_available", "environment_issues")}
-print("PREFLIGHT_STATE=" + json.dumps(state))
-'''
-        preflight = subprocess.run([sys.executable, "-c", preflight_code, str(ROOT / "ai4sci/00_환경확인.ipynb")], cwd=ROOT / "ai4sci", env=environment, text=True, capture_output=True, timeout=60)
-        report["preflight"] = {"scope": "Read-only local environment/file checks; no GPU training", "exit_code": preflight.returncode, "stdout": preflight.stdout, "stderr": preflight.stderr}
-        check(preflight.returncode == 0, "preflight notebook execution failed")
-        states = [line.split("=", 1)[1] for line in preflight.stdout.splitlines() if line.startswith("PREFLIGHT_STATE=")]
-        if states:
-            state = json.loads(states[-1])
-            report["preflight"]["state"] = state
-            check(state.get("missing_files") == [], "preflight could not locate required files")
-            report["preflight"]["event_gpu_basic_checks_passed"] = bool(state.get("CHECK_EVENT_GPU") and state.get("cuda_available") and not state.get("environment_issues"))
-        else:
-            check(False, "preflight did not report its final state")
-        reference = subprocess.run([sys.executable, "test_reference.py"], cwd=ROOT / "ai4sci/wave", env=environment, text=True, capture_output=True, timeout=60)
-        report["supplementary_wave_cpu_checks"] = {"scope": "Added ai4sci/wave reference only; not original Wave Challenge or GPU validation", "exit_code": reference.returncode, "stdout": reference.stdout, "stderr": reference.stderr}
-        check(reference.returncode == 0, "Supplementary wave CPU reference checks failed")
 
     report["status"] = "pass" if not report["errors"] else "fail"
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"status": report["status"], "python": len(report["python"]), "notebooks": len(report["notebooks"]), "links": len(report["links"]), "schedules": report["schedules"], "errors": report["errors"]}, ensure_ascii=False, indent=2))
+    print(json.dumps({"status": report["status"], "python": len(report["python"]), "notebooks": len(report["notebooks"]), "links": len(report["links"]), "coverage": report["coverage"], "errors": report["errors"]}, ensure_ascii=False, indent=2))
     return 0 if report["status"] == "pass" else 1
 
 

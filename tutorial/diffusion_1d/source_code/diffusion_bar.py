@@ -1,5 +1,5 @@
 # Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -7,10 +7,10 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -19,285 +19,141 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""Lab 3: steady heat conduction across two materials, with soft BC/interface losses."""
+import sys
+from pathlib import Path
 import torch
-import numpy as np
-from sympy import Symbol, Eq, Function, Number
-
-import physicsnemo
-from physicsnemo.sym.hydra import instantiate_arch , PhysicsNeMoConfig
-from physicsnemo.sym.solver import Solver
-from physicsnemo.sym.domain import Domain
-from physicsnemo.sym.geometry.primitives_1d import Line1D
-from physicsnemo.sym.domain.constraint import (
-    PointwiseBoundaryConstraint,
-    PointwiseInteriorConstraint,
-)
-
-from physicsnemo.sym.domain.validator import PointwiseValidator
-from physicsnemo.sym.domain.monitor import PointwiseMonitor
-from physicsnemo.sym.key import Key
-from physicsnemo.sym.node import Node
-
+from sympy import Function, Symbol
 from physicsnemo.sym.eq.pde import PDE
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from tutorial.runtime import parser, setup, mlp, derivative, informer, optimize, save_run
 
-
-# params for domain
-L1 = Line1D(0, 1)
-L2 = Line1D(1, 2)
-
-D1 = 1e1
-D2 = 1e-1
-
-Tc = 100
-Ta = 0
-Tb = (Tc + (D1 / D2) * Ta) / (1 + (D1 / D2))
-
-print(Ta)
-print(Tb)
-print(Tc)
+D2, TA, TC = 0.1, 0.0, 100.0
 
 
 class Diffusion(PDE):
-    name = "Diffusion"
-
-    def __init__(self, T="T", D="D", Q=0, dim=3, time=True):
-        # set params
-        self.T = T
-        self.dim = dim
-        self.time = time
-
-        # coordinates
-        x, y, z = Symbol("x"), Symbol("y"), Symbol("z")
-
-        # time
-        t = Symbol("t")
-
-        # make input variables
-        input_variables = {"x": x, "y": y, "z": z, "t": t}
-        if self.dim == 1:
-            input_variables.pop("y")
-            input_variables.pop("z")
-        elif self.dim == 2:
-            input_variables.pop("z")
-        if not self.time:
-            input_variables.pop("t")
-
-        # Temperature
-        assert type(T) == str, "T needs to be string"
-        T = Function(T)(*input_variables)
-
-        # Diffusivity
-        if type(D) is str:
-            D = Function(D)(*input_variables)
-        elif type(D) in [float, int]:
-            D = Number(D)
-
-        # Source
-        if type(Q) is str:
-            Q = Function(Q)(*input_variables)
-        elif type(Q) in [float, int]:
-            Q = Number(Q)
-
-        # set equations
-        self.equations = {}
-        self.equations["diffusion_" + self.T] = (
-            T.diff(t)
-            - (D * T.diff(x)).diff(x)
-            - (D * T.diff(y)).diff(y)
-            - (D * T.diff(z)).diff(z)
-            - Q
-        )
+    def __init__(self, field="u", conductivity="D1"):
+        self.dim = 1
+        x = Symbol("x")
+        u = Function(field)(x)
+        d = Symbol(conductivity) if isinstance(conductivity, str) else conductivity
+        self.equations = {"diffusion": -d * u.diff(x, 2)}
 
 
 class DiffusionInterface(PDE):
-    name = "DiffusionInterface"
-
-    def __init__(self, T_1, T_2, D_1, D_2, dim=3, time=True):
-        # set params
-        self.T_1 = T_1
-        self.T_2 = T_2
-        self.dim = dim
-        self.time = time
-
-        # coordinates
-        x, y, z = Symbol("x"), Symbol("y"), Symbol("z")
-        normal_x, normal_y, normal_z = (
-            Symbol("normal_x"),
-            Symbol("normal_y"),
-            Symbol("normal_z"),
-        )
-
-        # time
-        t = Symbol("t")
-
-        # make input variables
-        input_variables = {"x": x, "y": y, "z": z, "t": t}
-        if self.dim == 1:
-            input_variables.pop("y")
-            input_variables.pop("z")
-        elif self.dim == 2:
-            input_variables.pop("z")
-        if not self.time:
-            input_variables.pop("t")
-
-        # Diffusivity
-        if type(D_1) is str:
-            D_1 = Function(D_1)(*input_variables)
-        elif type(D_1) in [float, int]:
-            D_1 = Number(D_1)
-        if type(D_2) is str:
-            D_2 = Function(D_2)(*input_variables)
-        elif type(D_2) in [float, int]:
-            D_2 = Number(D_2)
-
-        # variables to match the boundary conditions (example Temperature)
-        T_1 = Function(T_1)(*input_variables)
-        T_2 = Function(T_2)(*input_variables)
-
-        # set equations
-        self.equations = {}
-        self.equations["diffusion_interface_dirichlet_" + self.T_1 + "_" + self.T_2] = (
-            T_1 - T_2
-        )
-        flux_1 = D_1 * (
-            normal_x * T_1.diff(x) + normal_y * T_1.diff(y) + normal_z * T_1.diff(z)
-        )
-        flux_2 = D_2 * (
-            normal_x * T_2.diff(x) + normal_y * T_2.diff(y) + normal_z * T_2.diff(z)
-        )
-        self.equations["diffusion_interface_neumann_" + self.T_1 + "_" + self.T_2] = (
-            flux_1 - flux_2
-        )
+    def __init__(self):
+        self.dim = 1
+        x, d1 = Symbol("x"), Symbol("D1")
+        a, b = Function("u_1")(x), Function("u_2")(x)
+        self.equations = {"temperature_jump": a - b,
+                          "flux_jump": d1 * a.diff(x) - D2 * b.diff(x)}
 
 
-@physicsnemo.sym.main(config_path="conf", config_name="config")
-def run(cfg: PhysicsNeMoConfig) -> None:
+class CompositeBar(torch.nn.Module):
+    def __init__(self, cfg, parameterized=False):
+        super().__init__()
+        self.parameterized = parameterized
+        self.left = mlp(2 if parameterized else 1, 1, cfg)
+        self.right = mlp(2 if parameterized else 1, 1, cfg)
 
-    # make list of nodes to unroll graph on
-    diff_u1 = Diffusion(T="u_1", D=D1, dim=1, time=False)
-    diff_u2 = Diffusion(T="u_2", D=D2, dim=1, time=False)
-    diff_in = DiffusionInterface("u_1", "u_2", D1, D2, dim=1, time=False)
+    def forward(self, x, d1):
+        inputs = torch.cat((x - 1, (d1 - 15) / 10), dim=1) if self.parameterized else x - 1
+        return 100 * self.left(inputs), 100 * self.right(inputs)
 
-    diff_net_u_1 = instantiate_arch(
-        input_keys=[Key("x")],
-        output_keys=[Key("u_1")],
-        cfg=cfg.arch.fully_connected,
-    )
-    diff_net_u_2 = instantiate_arch(
-        input_keys=[Key("x")],
-        output_keys=[Key("u_2")],
-        cfg=cfg.arch.fully_connected,
-    )
 
-    nodes = (
-        diff_u1.make_nodes()
-        + diff_u2.make_nodes()
-        + diff_in.make_nodes()
-        + [diff_net_u_1.make_node(name="u1_network", jit=cfg.jit)]
-        + [diff_net_u_2.make_node(name="u2_network", jit=cfg.jit)]
-    )
+def analytical(x, d1=10.0):
+    tb = (TC + (d1 / D2) * TA) / (1 + d1 / D2)
+    return torch.where(x <= 1, x * tb + (1 - x) * TA,
+                       (x - 1) * TC + (2 - x) * tb)
 
-    # make domain add constraints to the solver
-    domain = Domain()
 
-    # sympy variables
-    x = Symbol("x")
+def loss_terms(model, physics, batch_size, device):
+    d1 = 5 + 20 * torch.rand(batch_size, 1, device=device) if model.parameterized else torch.full((batch_size, 1), 10.0, device=device)
+    xl = torch.rand(batch_size, 1, device=device, requires_grad=True)
+    xr = (1 + torch.rand(batch_size, 1, device=device)).requires_grad_()
+    ul, _ = model(xl, d1)
+    _, ur = model(xr, d1)
+    rl = physics[0].forward({"coordinates": xl, "u_1": ul, "D1": d1})["diffusion"]
+    rr = physics[1].forward({"coordinates": xr, "u_2": ur})["diffusion"]
+    xi = torch.ones_like(xl, requires_grad=True)
+    ui, vi = model(xi, d1)
+    interface = physics[2].forward({"coordinates": xi, "u_1": ui, "u_2": vi, "D1": d1})
+    at_left, _ = model(torch.zeros_like(xl), d1)
+    _, at_right = model(torch.full_like(xr, 2), d1)
+    return {"physics": (rl / (100 * d1)).square().mean() + (rr / (100 * D2)).square().mean(),
+            "boundary": ((at_left - TA) / 100).square().mean() + ((at_right - TC) / 100).square().mean(),
+            "interface_temperature": (interface["temperature_jump"] / 100).square().mean(),
+            "interface_flux": (interface["flux_jump"] / (100 * d1)).square().mean()}
 
-    # right hand side (x = 2) Pt c
-    rhs = PointwiseBoundaryConstraint(
-        nodes=nodes,
-        geometry=L2,
-        outvar={"u_2": Tc},
-        batch_size=cfg.batch_size.rhs,
-        criteria=Eq(x, 2),
-    )
-    domain.add_constraint(rhs, "right_hand_side")
 
-    # left hand side (x = 0) Pt a
-    lhs = PointwiseBoundaryConstraint(
-        nodes=nodes,
-        geometry=L1,
-        outvar={"u_1": Ta},
-        batch_size=cfg.batch_size.lhs,
-        criteria=Eq(x, 0),
-    )
-    domain.add_constraint(lhs, "left_hand_side")
+def evaluate(model, physics, device):
+    errors, residual_values, objectives = [], [], []
+    for d in ([7.5, 17.5, 22.5] if model.parameterized else [10.0]):
+        xl = torch.linspace(.013, .987, 71, device=device)[:, None].requires_grad_()
+        xr = (xl.detach() + 1).requires_grad_()
+        dl, dr = torch.full_like(xl, d), torch.full_like(xr, d)
+        ul, _ = model(xl, dl)
+        _, ur = model(xr, dr)
+        errors.extend((ul - analytical(xl, d), ur - analytical(xr, d)))
+        rl = physics[0].forward({"coordinates": xl, "u_1": ul, "D1": dl})["diffusion"]
+        rr = physics[1].forward({"coordinates": xr, "u_2": ur})["diffusion"]
+        residual_values.extend((rl, rr))
+        xi = torch.ones(1, 1, device=device, requires_grad=True)
+        di = torch.full_like(xi, d)
+        ui, vi = model(xi, di)
+        jumps = physics[2].forward({"coordinates": xi, "u_1": ui, "u_2": vi, "D1": di})
+        at_left, _ = model(torch.zeros_like(xi), di)
+        _, at_right = model(torch.full_like(xi, 2), di)
+        objective = (rl / (100 * d)).square().mean() + (rr / (100 * D2)).square().mean()
+        objective = objective + ((at_left - TA) / 100).square().mean() + ((at_right - TC) / 100).square().mean()
+        objective = objective + (jumps["temperature_jump"] / 100).square().mean() + (jumps["flux_jump"] / (100 * d)).square().mean()
+        objectives.append(objective)
+    return {"objective": float(torch.stack(objectives).mean().detach()),
+            "solution_rmse": float(torch.cat(errors).square().mean().sqrt().detach()),
+            "pde_rmse": float(torch.cat(residual_values).square().mean().sqrt().detach())}
 
-    # interface 1-2
-    interface = PointwiseBoundaryConstraint(
-        nodes=nodes,
-        geometry=L1,
-        outvar={
-            "diffusion_interface_dirichlet_u_1_u_2": 0,
-            "diffusion_interface_neumann_u_1_u_2": 0,
-        },
-        batch_size=cfg.batch_size.interface,
-        criteria=Eq(x, 1),
-    )
-    domain.add_constraint(interface, "interface")
 
-    # interior 1
-    interior_u1 = PointwiseInteriorConstraint(
-        nodes=nodes,
-        geometry=L1,
-        outvar={"diffusion_u_1": 0},
-        bounds={x: (0, 1)},
-        batch_size=cfg.batch_size.interior_u1,
-    )
-    domain.add_constraint(interior_u1, "interior_u1")
-
-    # interior 2
-    interior_u2 = PointwiseInteriorConstraint(
-        nodes=nodes,
-        geometry=L2,
-        outvar={"diffusion_u_2": 0},
-        bounds={x: (1, 2)},
-        batch_size=cfg.batch_size.interior_u2,
-    )
-    domain.add_constraint(interior_u2, "interior_u2")
-
-    # validation data
-    x = np.expand_dims(np.linspace(0, 1, 100), axis=-1)
-    u_1 = x * Tb + (1 - x) * Ta
-    invar_numpy = {"x": x}
-    outvar_numpy = {"u_1": u_1}
-    val = PointwiseValidator(nodes=nodes,invar=invar_numpy, true_outvar=outvar_numpy)
-    domain.add_validator(val, name="Val1")
-
-    # make validation data line 2
-    x = np.expand_dims(np.linspace(1, 2, 100), axis=-1)
-    u_2 = (x - 1) * Tc + (2 - x) * Tb
-    invar_numpy = {"x": x}
-    outvar_numpy = {"u_2": u_2}
-    val = PointwiseValidator(nodes=nodes, invar=invar_numpy, true_outvar=outvar_numpy)
-    domain.add_validator(val, name="Val2")
-
-    # make monitors
-    invar_numpy = {"x": [[1.0]]}
-    monitor = PointwiseMonitor(
-        invar_numpy,
-        output_names=["u_1__x"],
-        metrics={"flux_u1": lambda var: torch.mean(var["u_1__x"])},
-        nodes=nodes,
-        requires_grad=True,
-    )
-    domain.add_monitor(monitor)
-
-    monitor = PointwiseMonitor(
-        invar_numpy,
-        output_names=["u_2__x"],
-        metrics={"flux_u2": lambda var: torch.mean(var["u_2__x"])},
-        nodes=nodes,
-        requires_grad=True,
-    )
-    domain.add_monitor(monitor)
-
-    # make solver
-    slv = Solver(cfg, domain)
-
-    # start solver
-    slv.solve()
+def main(parameterized=False):
+    filename = "config_param.yaml" if parameterized else "config.yaml"
+    p = parser(__doc__, Path(__file__).parent / "conf" / filename)
+    p.set_defaults(output_dir=Path("outputs/diffusion_bar_parameterized" if parameterized else "outputs/diffusion_bar"))
+    args = p.parse_args()
+    cfg, device = setup(args)
+    model = CompositeBar(cfg, parameterized).to(device)
+    physics = (informer(Diffusion("u_1", "D1"), device),
+               informer(Diffusion("u_2", D2), device), informer(DiffusionInterface(), device))
+    heldout_before = evaluate(model, physics, device)
+    history = optimize(model, lambda: loss_terms(model, physics, cfg["batch_size"], device), cfg)
+    x = torch.linspace(0, 2, 201, device=device)[:, None]
+    dvals = [5.0, 10.0, 25.0] if parameterized else [10.0]
+    predictions, references, jumps, flux_jumps = [], [], [], []
+    for d in dvals:
+        d1 = torch.full_like(x, d)
+        with torch.no_grad():
+            left, right = model(x, d1)
+            predictions.append(torch.where(x <= 1, left, right))
+            references.append(analytical(x, d))
+        xi = torch.ones(1, 1, device=device, requires_grad=True)
+        left, right = model(xi, torch.full_like(xi, d))
+        jumps.append(float((left - right).detach()))
+        flux_jumps.append(float((d * derivative(left, xi) - D2 * derivative(right, xi)).detach()))
+    pred, exact = torch.stack(predictions), torch.stack(references)
+    def plot(plt, a):
+        fig, ax = plt.subplots(figsize=(8, 4))
+        for i, d in enumerate(dvals):
+            ax.plot(a["x"], a["reference"][i, :, 0], "--", label=f"exact D1={d:g}")
+            ax.plot(a["x"], a["prediction"][i, :, 0], label=f"PINN D1={d:g}")
+        ax.axvline(1, color="grey", alpha=.4)
+        ax.set(xlabel="x", ylabel="temperature")
+        ax.legend()
+        return fig
+    save_run(args, cfg, model, history, {"x": x, "D1": dvals, "prediction": pred, "reference": exact},
+             {"problem": "parameterized_composite_bar" if parameterized else "composite_bar",
+              "heldout_before": heldout_before, "heldout_after": evaluate(model, physics, device),
+              "validation_rmse": float((pred - exact).square().mean().sqrt()),
+              "temperature_jumps": jumps, "physical_flux_jumps": flux_jumps,
+              "parameter_training_range": [5, 25] if parameterized else None}, plot)
 
 
 if __name__ == "__main__":
-    run()
+    main()

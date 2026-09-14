@@ -1,56 +1,52 @@
-# AI-Powered-Physics-Bootcamp Deployment Guide
+# Installation and validation
 
-> AI4Sci 행사 버전의 현재 배포·검증 안내는 [강사 준비 안내](ai4sci/INSTRUCTOR.md)입니다. 아래는 원본의 역사적 배포 설명입니다. 행사 준비에는 현재 안내를 사용합니다.
+Use **PhysicsNeMo 2.2.2**, Python **3.11–3.14**, and PyTorch **2.10 or later**. An isolated Python 3.12 virtual environment is recommended. See the [validation record](ai4sci/VALIDATION.md) for measured environments and results.
 
-This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. In addition, the Bootcamp will provide hands-on experience with visualizing the results of physics simulations using ParaView. This Lab will also introduce you to Earth2Studio, where you get to try out different workflows for various Weather forecasting models!
+## Linux CPU environment
 
+Run these commands from the repository root. Install CPU PyTorch first.
 
-## Deploying the materials
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install 'torch>=2.10' 'torchvision>=0.25' --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -r requirements.txt
+python -m pip check
+python -m ipykernel install --prefix "$VIRTUAL_ENV" --name python3 --display-name 'AI4Sci PhysicsNeMo 2.2.2'
+jupyter lab
+```
 
-### Prerequisites
-To run this tutorial you will need a machine with NVIDIA GPU with at least 20GB of GPU memory for training large models as part of this Bootcamp.
+For exact reproduction on Linux x86_64/Python 3.12, install [requirements-linux-cpu.lock.txt](requirements-linux-cpu.lock.txt) in a new virtual environment instead of the two package-installation commands above.
 
-- Install the latest [Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) or [Singularity](https://sylabs.io/docs/).
+On macOS, omit the `--index-url` argument and install PyTorch from PyPI. The tested macOS arm64/Python 3.12 package set is [requirements-macos.lock.txt](requirements-macos.lock.txt). Do not use that platform-specific lock file on Linux. Use `--device cpu` for CPU runs. AMD GPU and Apple MPS execution have not been validated here.
 
-- The base containers required for the lab may require users to create a NGC account and generate an API key (https://docs.nvidia.com/ngc/ngc-catalog-user-guide/index.html#registering-activating-ngc-account)
+Open the [course guide](ai4sci/README.md) in JupyterLab's Markdown Preview and run the [environment check](ai4sci/00_environment_check.ipynb). Confirm that the kernel uses the intended virtual environment.
 
-- Internet is needed during Container building and runtime to download and setup the required files.
+## NVIDIA GPU container
 
-### Tested environment
+The Dockerfile starts from the [official 26.08 container](https://docs.nvidia.com/physicsnemo/26.08/release-notes/index.html) and installs the course's pinned 2.2.2 package. Check the container release notes for host-driver compatibility. Actual build and GPU execution status are recorded separately in the validation record.
 
-These materials were tested with both Docker and Singularity on an NVIDIA RTX 3080Ti GPU in an x86-64 platform installed with a driver version of `535.104.05`.
+```bash
+docker build -t ai4sci-physicsnemo:2.2.2 .
+docker run --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
+  -p 127.0.0.1:8888:8888 -it --rm ai4sci-physicsnemo:2.2.2
+```
 
-### Deploying with container
+Connect using the token printed in the log. For a remote event, use the authenticated access route provided by the organizers. Work stored only inside this `--rm` container disappears when it exits; use a dedicated workspace volume for participant work that must persist.
 
-This material can be deployed with either Docker or Singularity container, refer to the respective sections for the instructions.
+## Reproduce the checks
 
-#### Docker Container
+Run from the repository root and choose a fresh output directory each time.
 
-To build a docker container, run:
-`sudo docker build -t <imagename>:<tagnumber> .`
+```bash
+python ai4sci/validate_materials.py --output validation-runs/static.json
+python ai4sci/run_validation.py --suite unit --device cpu --output-dir validation-runs/unit
+python ai4sci/run_validation.py --suite smoke --device cpu --output-dir validation-runs/smoke
+python ai4sci/run_validation.py --suite convergence --device cpu --output-dir validation-runs/convergence
+python ai4sci/run_notebooks.py --device cpu --steps 2 --output-dir validation-runs/notebooks
+```
 
-For instance:
-`sudo docker build -t openhackathons:AI-Powered-Physics-Bootcamp  .`
+Use `--device cuda` to require a GPU; missing CUDA fails rather than silently passing a CPU run. Smoke checks execute all eighteen lesson modes and validate their artifacts. The separate improvement suite checks held-out or analytical error reduction; it does not certify full convergence or weather-forecast accuracy. Notebook checks execute all twelve notebooks and require embedded plots for each practical lesson.
 
-and to run the container, run:
-`sudo docker run --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864  -p 8888:8888 -p 8889:8889 -it --rm openhackathons:AI-Powered-Physics-Bootcamp`
-
-The container launches jupyter lab and runs on port 8888
-`jupyter-lab --ip 0.0.0.0 --port 8888 --no-browser --allow-root`
-
-Then, open the jupyter lab in browser: http://localhost:8888
-Start working on the lab by clicking on the `Start_Here.ipynb` notebook.
-
-#### Singularity Container
-
-To build the singularity container, run:
-`singularity build --fakeroot --sandbox AI-Powered-Physics-Bootcamp.sif Singularity`
-
-Then, run the container:
-`singularity run --writable --nv AI-Powered-Physics-Bootcamp.sif jupyter-lab --no-browser --allow-root --ip=0.0.0.0 --port=8888 --NotebookApp.token="" --notebook-dir=/workspace/python`
-
-Then, open the jupyter lab in browser: http://localhost:8888
-Start working on the lab by clicking on the `Start_Here.ipynb` notebook.
-
-### Known issues
-- Please go through the list of existing bugs/issues or file a new issue at [Github](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp/issues).
+[Complete course](Start_Here.ipynb) · [Instructor guide](ai4sci/INSTRUCTOR.md)

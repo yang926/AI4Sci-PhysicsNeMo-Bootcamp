@@ -1,21 +1,33 @@
-# Tutorial 학습 순서
+# Tutorial learning sequence
 
-[전체 수업 안내](../ai4sci/README.md) · [Start Here](../Start_Here.ipynb)
+[Full course guide](../ai4sci/README.md) · [Start Here](../Start_Here.ipynb) · [Environment check](../ai4sci/00_environment_check.ipynb)
 
-아래 순서는 원본 `Start_Here.ipynb`의 입문 및 Training Labs 순서입니다. 각 노트북의 처음과 끝에서도 이전·다음 수업으로 이동할 수 있습니다.
+The sequence below follows the introduction and Training Labs in the original `Start_Here.ipynb`. Each notebook also links to the previous and next lesson at its beginning and end.
 
-| 순서 | 노트북 | 진행 방식 |
+| Order | Notebook | Activities |
 |---|---|---|
-| 1 | [PhysicsNeMo 소개](introduction/Getting_Started_PhysicsNeMo.ipynb) | 개념과 구성 요소 읽기 |
-| 2 | [PINN 기초](introduction/Introductory_Notebook.ipynb) | PINN 손실·매개변수화·역문제 읽기 |
-| 3 | [Projectile](projectile/Getting_Started_Projectile.ipynb) | 기존 Python 예제 실행 → 궤적 비교 → ParaView |
-| 4 | [Diffusion](diffusion_1d/Diffusion_Problem_Notebook.ipynb) | 기본 확산 → 매개변수 확산 → 결과 비교 |
-| 5 | [Navier–Stokes](navier_stokes/Weather-forecasting-navier-stokes.ipynb) | 데이터 준비 → 기존 Python 예제 실행 → 시간별 결과 확인 |
+| 1 | [PhysicsNeMo introduction](introduction/Getting_Started_PhysicsNeMo.ipynb) | Read the concepts and components |
+| 2 | [PINN fundamentals](introduction/Introductory_Notebook.ipynb) | Run forward, parameterized, and inverse PINNs |
+| 3 | [Projectile](projectile/Getting_Started_Projectile.ipynb) | Train with the current API, compare in-domain and extrapolated trajectories, export ParaView CSV |
+| 4 | [Diffusion](diffusion_1d/Diffusion_Problem_Notebook.ipynb) | Fixed-conductivity diffusion, parameterized diffusion, and result comparison |
+| 5 | [Navier–Stokes](navier_stokes/Weather-forecasting-navier-stokes.ipynb) | Check synthetic execution, select original initial data, inspect time slices |
 
-이어서 Challenge는 [Wave](../challenge/wave/Advanced_Wave_Dynamics.ipynb) → [Fluid](../challenge/fuild/Fluid_Structure_Interaction.ipynb) → [Climate](../challenge/climate/Multi-Physics_Climate_Modeling.ipynb) → [Neural Operators](../challenge/neural_operator/Advanced_Neural_Operators.ipynb) 순서로 확인합니다. 각 Challenge 안에서는 Level 순서대로 진행합니다.
+Continue with [Wave](../challenge/wave/Advanced_Wave_Dynamics.ipynb) → [Fluid](../challenge/fuild/Fluid_Structure_Interaction.ipynb) → [Climate](../challenge/climate/Multi-Physics_Climate_Modeling.ipynb) → [Neural Operators](../challenge/neural_operator/Advanced_Neural_Operators.ipynb). Complete the levels of each challenge in order.
 
-## Python 파일을 여는 이유
+## Current environment and results
 
-노트북에는 문제 설명과 코드 예시, 실행 셀, 결과 확인 방법이 들어 있습니다. `.py`는 실행 셀이 실제로 시작하는 학습 프로그램이고, `conf/*.yaml`은 학습 설정입니다.
+These tutorials use **nvidia-physicsnemo==2.2.2**, `FullyConnected`, `PDE`, `PhysicsInformer`, and explicit PyTorch training loops. See [MIGRATION.md](MIGRATION.md) for the changes.
 
-Tutorial은 이미 작성된 프로그램을 읽고 실행하는 방식입니다. Challenge는 해당 `.py` 파일의 `FIXME` 등 빈칸을 작성하는 방식입니다. JupyterLab 파일 편집기에서 파일을 열고 → 필요한 부분을 편집하고 → 저장한 다음 → 노트북의 기존 실행 셀을 실행합니다. 노트북의 설명용 코드 블록만 수정해도 `.py` 파일에 자동으로 반영되지는 않습니다.
+Notebooks default to CPU and 200 steps. Override these with `AI4SCI_DEVICE` and `AI4SCI_STEPS`. A short run checks execution; it does not certify convergence. Each execution creates a new run directory containing `model.pt`, `predictions.npz`, `preview.png`, `metrics.json`, and `loss.csv`. Selecting an existing output directory fails instead of overwriting it.
+
+In `metrics.json`, `initial_loss` and `final_loss` compare the objective at the same fixed evaluation coordinates before training and after the final optimizer update. Per-minibatch training losses are recorded separately in `loss.csv`. Where an analytical solution is available, also compare solution errors.
+
+The Navier–Stokes notebook initially uses the explicitly labeled Taylor–Green synthetic fixture. Set `SMOKE_DATA=False` to use the original `data_lat.npy`. These checks do not validate weather-forecast accuracy. Review the [data provenance and assumptions](navier_stokes/DATA_PROVENANCE.md).
+
+## Why open the Python files?
+
+The notebook contains the problem explanation, code examples, execution cells, and result-inspection steps. The `.py` file is the training program started by an execution cell; `conf/*.yaml` contains training settings.
+
+Tutorials provide complete programs to read and run. Challenges ask you to fill in the designated `FIXME` functions in their `.py` files. Open the file in the JupyterLab editor, make the required edits, save it, then rerun the notebook's execution cell. Editing a Markdown code block does not automatically update the `.py` file.
+
+The challenge option `--reference` selects the instructor's completed implementation. Participants should follow each notebook's instructions, complete and save the FIXME functions, and then run them. Basic tutorials require neither a reference option nor unfinished-code edits.

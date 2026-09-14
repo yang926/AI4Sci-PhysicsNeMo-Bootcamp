@@ -1,5 +1,5 @@
 # Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -7,10 +7,10 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -19,27 +19,14 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from sympy import Symbol, Function, Number, sin, pi, exp
+"""Projectile equations: zero residuals, equivalent to x''=0 and y''=-g."""
+from sympy import Function, Symbol
 from physicsnemo.sym.eq.pde import PDE
 
 
 class ProjectileEquation(PDE):
-    name = "ProjectileEquation"
-
-    def __init__(self):
-
-        #time
+    def __init__(self, gravity=9.81):
+        self.dim = 1
         t = Symbol("t")
-
-        #make input variables
-        input_variables = {"t": t}
-
-        #make y function
-        x = Function("x")(*input_variables)
-        y = Function("y")(*input_variables)
-        
-
-        #set equation
-        self.equations = {}
-        self.equations["ode_x"] = x.diff(t,2)
-        self.equations["ode_y"] = y.diff(t,2)
+        x, y = Function("x")(t), Function("y")(t)
+        self.equations = {"ode_x": x.diff(t, 2), "ode_y": y.diff(t, 2) + gravity}

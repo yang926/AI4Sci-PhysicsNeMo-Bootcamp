@@ -1,63 +1,45 @@
-# AI4Sci · AI-Powered Physics Bootcamp
+# AI4Sci PhysicsNeMo Bootcamp
 
-**[전체 실습 순서와 실행 안내](ai4sci/README.md)** · [시작 노트북](Start_Here.ipynb) · [환경 확인](ai4sci/00_환경확인.ipynb)
+A complete, updated edition of the OpenHackathons AI-Powered-Physics-Bootcamp using **PhysicsNeMo 2.2.2** and Python **3.11–3.14**.
 
-PhysicsNeMo 소개, 네 개의 Training Lab, 네 개의 Challenge를 차례로 진행합니다. 각 노트북에는 이전·다음 이동 링크와 실제 Python 파일의 읽기·수정·저장·실행 방법을 안내했습니다.
+Start with the [course guide](ai4sci/README.md) and [environment check](ai4sci/00_environment_check.ipynb). The course includes the introduction, all four training Labs, and all eleven Challenge levels. All teaching materials and instructor references are in English.
 
-아래 **Bootcamp contents**는 원본 README의 주제명을 유지합니다. 실제 파일의 실행 순서는 원본 `Start_Here.ipynb`를 따릅니다. 두 문서의 챌린지 이름 차이는 [주제와 파일 대조표](ai4sci/INSTRUCTOR.md)에 함께 기록했습니다.
+[Installation and tests](Deployment_Guide.MD) · [Validation results](ai4sci/VALIDATION.md) · [Start Here](Start_Here.ipynb)
 
-This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. This bootcamp consists of:
-
-- 2 Hours of Training Labs: Foundation building with hands-on exercises
-- 4 Hours of Challenges: Progressive problem-solving with increasing complexity
+Researchers learn to combine physics and partial differential equations with neural networks, and compare physics-informed and data-driven approaches. The upstream material estimated two hours of Labs and four hours of Challenges, excluding breaks. The AI4Sci event allows six or seven hours **including lunch and breaks**; see the [event schedule](ai4sci/course-plan.md). Full-course rehearsal is required to establish what can be completed in that time.
 
 <p align="center">
   <img width="600" height="400" src="https://github.com/openhackathons-org/End-to-End-AI-for-Science/blob/d403086ce59c49b26be430bbea0056c37bd4d5f6/workspace/python/jupyter_notebook/omniverse/images/tcwv.gif">
 </p>
 
+## Bootcamp contents
 
-## Bootcamp contents:
+| Order | Topic | Notebook | Learning outcome |
+|---|---|---|---|
+| Introduction | Introduction to PhysicsNeMo | [Open notebook](tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb) | Distinguish physics-informed and data-driven learning. |
+| Lab 1 | PINN fundamentals | [Open notebook](tutorial/introduction/Introductory_Notebook.ipynb) | Run forward, parameterized and inverse PINNs. |
+| Lab 2 | Projectile ODEs | [Open notebook](tutorial/projectile/Getting_Started_Projectile.ipynb) | Connect initial conditions and ODE residuals; compare with the analytical trajectory. |
+| Lab 3 | Diffusion PDEs | [Open notebook](tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb) | Solve a two-material bar and verify interface temperature and heat flux. |
+| Lab 4 | Navier–Stokes | [Open notebook](tutorial/navier_stokes/Weather-forecasting-navier-stokes.ipynb) | Prepare data, evaluate incompressible flow equations and inspect predictions. |
+| Challenge 1 | Wave dynamics | [Open notebook](challenge/wave/Advanced_Wave_Dynamics.ipynb) | Level 1–3: constant speed, variable speed, circular Robin boundary. |
+| Challenge 2 | Fluid flow | [Open notebook](challenge/fuild/Fluid_Structure_Interaction.ipynb) | Level 1–3: one obstacle, multiple obstacles, time-dependent flow. |
+| Challenge 3 | Climate modeling | [Open notebook](challenge/climate/Multi-Physics_Climate_Modeling.ipynb) | Level 1–2: atmospheric transport and atmosphere–ocean coupling. |
+| Challenge 4 | Neural operators | [Open notebook](challenge/neural_operator/Advanced_Neural_Operators.ipynb) | Level 1–3: FNO, AFNO and PINO on a shared benchmark. |
 
-The content is structured in multiple modules covering the following:
+FNO, AFNO and PINO are implemented in the Neural Operators Challenge. The original README advertised Darcy/AFNO, FourCastNet and MHD/PINO for Challenges 2–4, while its linked files contained the topics above. The [migration notes](ai4sci/MIGRATION.md) preserve the original titles and explain the mapping. FourCastNet and MHD are not presented as implemented models.
 
-- Introduction to NVIDIA PhysicsNeMo
-- Module 1: 2 Hours of Training Labs
-  - Lab 1: Introduction to Physics-Informed Neural Networks
-  - Lab 2: Solving ODEs with PhysicsNeMo
-  - Lab 3: From ODEs to PDEs - Diffusion Problems
-  - Lab 4: Advanced PDE Systems
-- Module 2: 4 Hours of Challenges
-  - Challenge 1: Advanced Wave Dynamics
-  - Challenge 2: Solving the Darcy-Flow problem using AFNO
-  - Challenge 3: Forecasting weather using FourCastNet
-  - Challenge 4: Modeling Magnetohydrodynamics with Physics Informed Neural Operators
+## Prerequisites and tools
 
-## Tools and frameworks:
-
-The tools and frameworks used in the bootcamp are as follows:
-
-- [NVIDIA® PhysicsNeMo](https://developer.nvidia.com/PhysicsNeMo)
-- [ParaView](https://www.paraview.org/)
-
-## Bootcamp duration:
-
-The overall bootcamp will take approximately 6 hours (2 hours training + 4 hours challenges).
-
-## Bootcamp prerequisites:
-
-Mathematical background in Differential equations, Python proficiency, and familiarity with deep learning fundamentals and frameworks are required.
-
-## Deploying the Bootcamp materials:
-
-For deploying the materials, please refer to the Deployment guide present [here](Deployment_Guide.MD)
+Participants should know Python, differential equations and deep-learning fundamentals. The course uses [NVIDIA PhysicsNeMo](https://developer.nvidia.com/physicsnemo), PyTorch and JupyterLab. [ParaView](https://www.paraview.org/) is optional for exported CSV data.
 
 ## Teaching and deployment
 
-- [전체 실습 순서](ai4sci/README.md): 각 Lab·Challenge의 노트북, 실행 파일, 완료 기준.
-- [원래 강의 시간표](ai4sci/course-plan.md): 공유 강의안의 제목과 시간.
-- [강사 준비 및 문서 대조](ai4sci/INSTRUCTOR.md): 실행 환경과 확인할 항목.
+- [Course guide](ai4sci/README.md): notebook order, program files and completion checks.
+- [Schedule](ai4sci/course-plan.md): timing from the shared event plan.
+- [Instructor guide](ai4sci/INSTRUCTOR.md): reference mode, evaluation and rehearsal.
+- [Deployment guide](Deployment_Guide.MD): isolated environments and reproducible tests.
 
-이 AI4Sci 전용 저장소는 OpenHackathons 원본 커밋 `9cae27f8303268cdaf7528fe963ce12ba439377f`와 Git 이력을 보존합니다. GPU 학습과 컨테이너 실행 상태는 강사 준비 안내에서 확인합니다.
+This AI4Sci repository retains the upstream history at commit `9cae27f8303268cdaf7528fe963ce12ba439377f`. Source updates, measured CPU validation, GPU/container verification and event deployment are recorded separately.
 
 ## Attribution
 

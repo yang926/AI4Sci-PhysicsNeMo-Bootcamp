@@ -1,5 +1,5 @@
 # Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -7,10 +7,10 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -19,19 +19,29 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""Plot the modern composite-bar predictions.npz output."""
+import argparse
+from pathlib import Path
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-network_dir = "./outputs/diffusion_bar/validators/"
-data_1 = np.load(network_dir + "Val1.npz", allow_pickle=True)
-data_2 = np.load(network_dir + "Val2.npz", allow_pickle=True)
-data_1 = np.atleast_1d(data_1.f.arr_0)[0]
-data_2 = np.atleast_1d(data_2.f.arr_0)[0]
 
-plt.plot(data_1["x"][:, 0], data_1["pred_u_1"][:, 0], "--", label="u_1_pred")
-plt.plot(data_2["x"][:, 0], data_2["pred_u_2"][:, 0], "--", label="u_2_pred")
-plt.plot(data_1["x"][:, 0], data_1["true_u_1"][:, 0], label="u_1_true")
-plt.plot(data_2["x"][:, 0], data_2["true_u_2"][:, 0], label="u_2_true")
+def main(default="outputs/diffusion_bar"):
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--output-dir", type=Path, default=Path(default))
+    args = p.parse_args()
+    data = np.load(args.output_dir / "predictions.npz", allow_pickle=False)
+    fig, ax = plt.subplots(figsize=(8, 4))
+    for i, d1 in enumerate(data["D1"]):
+        ax.plot(data["x"], data["reference"][i, :, 0], "--", label=f"analytical D1={d1:g}")
+        ax.plot(data["x"], data["prediction"][i, :, 0], label=f"PINN D1={d1:g}")
+    ax.set(xlabel="x", ylabel="temperature")
+    ax.legend()
+    fig.savefig(args.output_dir / "preview.png", dpi=130, bbox_inches="tight")
+    plt.close(fig)
 
-plt.legend()
-plt.savefig("image_diffusion_problem_bootcamp")
+
+if __name__ == "__main__":
+    main()

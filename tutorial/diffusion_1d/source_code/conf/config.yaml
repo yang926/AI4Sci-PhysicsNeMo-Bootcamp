@@ -1,32 +1,6 @@
-defaults :
-  - physicsnemo_default
-  - arch:
-      - fully_connected
-  - scheduler: tf_exponential_lr
-  - optimizer: adam
-  - loss: sum
-  - _self_
-
-arch:
-    fully_connected:
-        layer_size: 256
-
-save_filetypes : "vtk,npz"
-
-scheduler:
-  decay_rate: 0.95
-  decay_steps: 100
-
-optimizer: 
-  lr : 1e-4
-
-training:
-  rec_results_freq: 1000
-  max_steps : 5000
-
-batch_size:
-  rhs: 2
-  lhs: 2
-  interface: 2
-  interior_u1: 200
-  interior_u2: 200
+# PhysicsNeMo 2.2.2 / explicit PyTorch loop. CLI --steps overrides steps.
+steps: 5000
+batch_size: 128
+learning_rate: 0.001
+layer_size: 64
+num_layers: 3

@@ -10,3 +10,14 @@ ai4sci/wave/runs/
 .env.*
 .cdsapirc
 *.pem
+
+# Reproducible execution results stay separate from teaching source.
+.venv/
+.pytest_cache/
+validation-runs/
+**/runs/
+**/datasets/Reaction_Diffusion/
+**/datasets/smoke_*/
+
+# macOS resource fork metadata is not course content.
+._*

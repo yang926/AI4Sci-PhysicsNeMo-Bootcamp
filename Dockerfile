@@ -5,11 +5,12 @@
 # Finally, open http://127.0.0.1:8888/
 
 # Select Base Image 
-FROM nvcr.io/nvidia/physicsnemo/physicsnemo:25.11
+FROM nvcr.io/nvidia/physicsnemo/physicsnemo:26.08
 
 # Install required python packages
-RUN pip3 install gdown ipympl cdsapi
-RUN pip3 install nbconvert
+COPY requirements.txt /tmp/ai4sci-requirements.txt
+RUN python -m pip install --no-cache-dir -r /tmp/ai4sci-requirements.txt \
+    && python -m pip check
 
 WORKDIR /workspace/ai4sci
 COPY . /workspace/ai4sci

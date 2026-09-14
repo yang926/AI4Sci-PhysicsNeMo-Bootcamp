@@ -14,35 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for Level 2: Adaptive Fourier Neural Operator (AFNO)
-# Problem: 2D Poisson Equation - Δu + f = 0
-
-defaults :
-  - physicsnemo_default
-  - /arch/afno_cfg@arch.afno
-  - scheduler: tf_exponential_lr
-  - optimizer: adam
-  - loss: sum
-  - _self_
-
-arch:
-  afno:
-    input_keys: f
-    output_keys: u
-    patch_size: 8
-    embed_dim: 256
-    depth: 4
-    num_blocks: 8
-
-scheduler:
-  decay_rate: 0.95
-  decay_steps: 1000
-
+# PhysicsNeMo 2.2.2 / Level 2: AFNO
+# Periodic reaction-diffusion: u - Laplacian(u) = f, [0,1)^2.
+# Plain YAML loaded by the explicit PyTorch loop; no Hydra defaults.
+data:
+  grid_size: 64
+model:
+  patch_size: [4, 4]
+  embed_dim: 64
+  depth: 4
+  num_blocks: 8
+  mlp_ratio: 4.0
 training:
-  rec_results_freq : 1000
-  max_steps : 10000
-
-batch_size:
-  grid: 32
-  validation: 32
-
+  steps: 10000
+  batch_size: 32
+  learning_rate: 0.001
+  cpu_threads: 2

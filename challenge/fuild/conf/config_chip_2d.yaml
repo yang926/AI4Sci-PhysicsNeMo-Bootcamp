@@ -14,29 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-defaults :
-  - physicsnemo_default
-  - arch:
-      - fully_connected
-  - scheduler: tf_exponential_lr
-  - optimizer: adam
-  - loss: sum
-  - _self_
-
-scheduler:
-  decay_rate: 0.95
-  decay_steps: 350
-
+# PhysicsNeMo 2.2.2 explicit-loop config; no Hydra defaults.
 training:
-  rec_results_freq : 1000
-  rec_constraint_freq: 10000
-  max_steps : 40000
-
-batch_size:
-  inlet: 64
-  outlet: 64
-  no_slip: 2800
-  interior: 1000
-  integral_continuity: 512
-  num_integral_continuity: 4
-  IC: 1000
+  steps: 40000
+  learning_rate: 0.001
+model:
+  width: 64
+  layers: 3
+samples:
+  interior: 128
+  initial: 64
+  boundary: 64
+  flux_lines: 4
+  flux_points: 64
