@@ -2,3 +2,11 @@
 __pycache__
 .Trash_0
 .cursor/
+
+# Personal run artifacts and credentials
+ai4sci/wave/runs/
+**/outputs/
+.env
+.env.*
+.cdsapirc
+*.pem

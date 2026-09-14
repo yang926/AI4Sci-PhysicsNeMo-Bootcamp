@@ -9,7 +9,10 @@ FROM nvcr.io/nvidia/physicsnemo/physicsnemo:25.11
 
 # Install required python packages
 RUN pip3 install gdown ipympl cdsapi
-RUN pip3 install --upgrade nbconvert 
+RUN pip3 install nbconvert
 
-## Uncomment this line to run Jupyter notebook by default
-CMD jupyter-lab --no-browser --allow-root --ip=0.0.0.0 --port=8888 --NotebookApp.token="" --notebook-dir=./
+WORKDIR /workspace/ai4sci
+COPY . /workspace/ai4sci
+
+# Jupyter generates a token by default. Use the authenticated event access route.
+CMD ["jupyter-lab", "--no-browser", "--allow-root", "--ip=0.0.0.0", "--port=8888", "--ServerApp.root_dir=/workspace/ai4sci", "--LabApp.default_url=/lab/tree/ai4sci/README.md"]

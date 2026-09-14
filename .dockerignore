@@ -1,0 +1,10 @@
+.git
+.ipynb_checkpoints
+**/.ipynb_checkpoints
+**/__pycache__
+**/runs
+**/outputs
+**/.env
+**/.env.*
+**/.cdsapirc
+**/*.pem

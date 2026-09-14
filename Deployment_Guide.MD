@@ -1,5 +1,7 @@
 # AI-Powered-Physics-Bootcamp Deployment Guide 
 
+> AI4Sci 행사 버전의 현재 배포·검증 안내는 [강사 준비 안내](ai4sci/INSTRUCTOR.md)입니다. 아래는 원본의 역사적 배포 설명입니다. 행사 준비에는 현재 안내를 사용합니다.
+
 This Bootcamp will provide researchers hands-on approaches on how to use NVIDIA PhysicsNeMo, a framework that combines physics and partial differential equations (PDEs) with artificial intelligence (AI) to build robust models. Participants will also learn about the differences between Physics-driven and Data-driven approaches to AI. In addition, the Bootcamp will provide hands-on experience with visualizing the results of physics simulations using ParaView. This Lab will also introduce you to Earth2Studio where you get to try out different workflows for various Weather forecasting models!
 
 

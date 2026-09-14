@@ -1,0 +1,41 @@
+defaults:
+  - physicsnemo_default
+  - arch:
+      - fully_connected
+  - scheduler: tf_exponential_lr
+  - optimizer: adam
+  - loss: sum
+  - _self_
+
+arch:
+  fully_connected:
+    layer_size: 64
+    nr_layers: 4
+
+scheduler:
+  decay_rate: 0.95
+  decay_steps: 1000
+
+training:
+  max_steps: 1000
+  rec_validation_freq: 500
+  rec_inference_freq: 1000
+  rec_monitor_freq: 500
+  rec_constraint_freq: 1000
+
+batch_size:
+  IC: 128
+  BC: 128
+  interior: 512
+
+custom:
+  c: 1.0
+  t_end: 2.0
+  run_name: baseline
+  seed: 42
+
+jit: false
+cuda_graphs: false
+save_filetypes: npz
+graph:
+  func_arch: false
