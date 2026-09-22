@@ -1,4 +1,4 @@
-# Install the PyTorch backend for your machine first (see ai4sci/INSTRUCTOR.md).
+# Install the PyTorch backend for your machine first (see ETC/course_materials/INSTRUCTOR.md).
 # This course targets the integrated symbolic API, not nvidia-physicsnemo.sym.
 nvidia-physicsnemo[sym]==2.2.2
 matplotlib>=3.10,<4
@@ -9,5 +9,6 @@ nbformat>=5.10,<6
 nbclient>=0.10,<1
 ipykernel>=6.29,<8
 jupyterlab>=4.4,<5
+ipywidgets>=8.1,<9
 pytest>=8,<10
 nbconvert>=7.16,<8

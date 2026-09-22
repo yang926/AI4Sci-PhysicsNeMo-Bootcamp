@@ -1,9 +1,16 @@
 .git
+.venv
+.pytest_cache
+ETC/validation-runs
+ETC/environment/LOCAL_UV_SETUP.md
+ETC/environment/requirements-wsl-cuda.lock.txt
 .ipynb_checkpoints
 **/.ipynb_checkpoints
 **/__pycache__
 **/runs
 **/outputs
+**/datasets/Reaction_Diffusion
+**/datasets/smoke_*
 **/.env
 **/.env.*
 **/.cdsapirc

@@ -1,0 +1,210 @@
+{
+  "physicsnemo": "2.2.2",
+  "upstream_commit": "9cae27f8303268cdaf7528fe963ce12ba439377f",
+  "course": [
+    {
+      "id": "intro",
+      "title": "Introduction to PhysicsNeMo",
+      "notebook": "01_Introduction.ipynb"
+    },
+    {
+      "id": "lab1",
+      "title": "PINN fundamentals",
+      "notebook": "01_labs/01_pinn/Lab_1_PINN_Fundamentals.ipynb"
+    },
+    {
+      "id": "lab2",
+      "title": "Projectile ODEs",
+      "notebook": "01_labs/02_projectile/Lab_2_Projectile_Motion.ipynb"
+    },
+    {
+      "id": "lab3",
+      "title": "Steady heat conduction",
+      "notebook": "01_labs/03_heat_conduction/Lab_3_Heat_Conduction.ipynb"
+    },
+    {
+      "id": "lab4",
+      "title": "Incompressible Navier\u2013Stokes",
+      "notebook": "01_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb"
+    },
+    {
+      "id": "wave",
+      "title": "Wave dynamics",
+      "notebook": "02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb"
+    },
+    {
+      "id": "fluid",
+      "title": "Fluid flow",
+      "notebook": "02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb"
+    },
+    {
+      "id": "climate",
+      "title": "Educational climate PDEs",
+      "notebook": "02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb"
+    },
+    {
+      "id": "operators",
+      "title": "Neural operators",
+      "notebook": "02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb"
+    }
+  ],
+  "runs": [
+    {
+      "id": "pinn_forward",
+      "course": "lab1",
+      "script": "01_labs/01_pinn/source_code/pinn_basics.py",
+      "args": [
+        "--mode",
+        "forward"
+      ]
+    },
+    {
+      "id": "pinn_parameterized",
+      "course": "lab1",
+      "script": "01_labs/01_pinn/source_code/pinn_basics.py",
+      "args": [
+        "--mode",
+        "parameterized"
+      ]
+    },
+    {
+      "id": "pinn_inverse",
+      "course": "lab1",
+      "script": "01_labs/01_pinn/source_code/pinn_basics.py",
+      "args": [
+        "--mode",
+        "inverse"
+      ]
+    },
+    {
+      "id": "projectile",
+      "course": "lab2",
+      "script": "01_labs/02_projectile/source_code/projectile.py",
+      "args": []
+    },
+    {
+      "id": "diffusion",
+      "course": "lab3",
+      "script": "01_labs/03_heat_conduction/source_code/diffusion_bar.py",
+      "args": []
+    },
+    {
+      "id": "diffusion_parameterized",
+      "course": "lab3",
+      "script": "01_labs/03_heat_conduction/source_code/diffusion_bar_parameterized.py",
+      "args": []
+    },
+    {
+      "id": "navier_stokes",
+      "course": "lab4",
+      "script": "01_labs/04_navier_stokes/source_code/navier_stokes.py",
+      "args": [
+        "--smoke-data"
+      ]
+    },
+    {
+      "id": "wave_l1",
+      "course": "wave",
+      "level": 1,
+      "script": "02_challenges/01_wave/wave_l1.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "wave_l2",
+      "course": "wave",
+      "level": 2,
+      "script": "02_challenges/01_wave/wave_l2.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "wave_l3",
+      "course": "wave",
+      "level": 3,
+      "script": "02_challenges/01_wave/wave_l3.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "fluid_l1",
+      "course": "fluid",
+      "level": 1,
+      "script": "02_challenges/02_fluid/chip_2d_l1.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "fluid_l2",
+      "course": "fluid",
+      "level": 2,
+      "script": "02_challenges/02_fluid/chip_2d_l2.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "fluid_l3",
+      "course": "fluid",
+      "level": 3,
+      "script": "02_challenges/02_fluid/chip_2d_l3.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "climate_l1",
+      "course": "climate",
+      "level": 1,
+      "script": "02_challenges/03_climate/climate_l1.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "climate_l2",
+      "course": "climate",
+      "level": 2,
+      "script": "02_challenges/03_climate/climate_l2.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "operators_l1",
+      "course": "operators",
+      "level": 1,
+      "script": "02_challenges/04_neural_operators/fno_physicsnemo_l1.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "operators_l2",
+      "course": "operators",
+      "level": 2,
+      "script": "02_challenges/04_neural_operators/fno_physicsnemo_l2.py",
+      "args": [
+        "--reference"
+      ]
+    },
+    {
+      "id": "operators_l3",
+      "course": "operators",
+      "level": 3,
+      "script": "02_challenges/04_neural_operators/fno_physicsnemo_l3.py",
+      "args": [
+        "--reference"
+      ]
+    }
+  ],
+  "notes": {
+    "navier_stokes": "Smoke ETC/tests use explicitly identified synthetic analytic data; production data run is checked separately.",
+    "challenges": "--reference selects instructor answers; default is the participant exercise.",
+    "operators": "Smoke ETC/tests generate a fresh small reaction-diffusion dataset in the output directory."
+  }
+}

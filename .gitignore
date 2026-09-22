@@ -4,7 +4,7 @@ __pycache__
 .cursor/
 
 # Personal run artifacts and credentials
-ai4sci/wave/runs/
+ETC/course_materials/wave/runs/
 **/outputs/
 .env
 .env.*
@@ -14,7 +14,10 @@ ai4sci/wave/runs/
 # Reproducible execution results stay separate from teaching source.
 .venv/
 .pytest_cache/
-validation-runs/
+ETC/validation-runs/
+/ETC/environment/LOCAL_UV_SETUP.md
+/ETC/environment/requirements-wsl-cuda.lock.txt
+/ETC/course_materials/LOCAL_EVENT_NOTES.md
 **/runs/
 **/datasets/Reaction_Diffusion/
 **/datasets/smoke_*/
