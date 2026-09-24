@@ -253,16 +253,66 @@ def test_environment_key_depends_on_locked_packages_and_python(installer_workspa
 
 def test_uv_installs_only_to_its_versioned_private_target(tmp_path, monkeypatch):
     commands = []
-    monkeypatch.setattr(install, "run", lambda *args, **kwargs: commands.append([str(arg) for arg in args]))
+    environments = []
+
+    def standalone_run(*args, **kwargs):
+        command = [str(arg) for arg in args]
+        commands.append(command)
+        assert "pip" not in command and install.sys.executable not in command
+        if command[0] == "sh":
+            environment = kwargs["env"]
+            environments.append(environment)
+            binary = Path(environment["UV_UNMANAGED_INSTALL"]) / "uv"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("# Standalone uv fixture\n")
+
+    # Even an inherited installation directory must not redirect the install.
+    monkeypatch.setenv("UV_INSTALL_DIR", str(tmp_path / "unrelated-bin"))
+    monkeypatch.setattr(install, "run", standalone_run)
     monkeypatch.setattr(subprocess, "check_output", lambda *args, **kwargs: "uv 0.8.17 (fixture)\n")
     binary = install.ensure_uv(tmp_path)
     assert binary == tmp_path / ".local/share/ai4sci-tools/uv-0.8.17/bin/uv"
-    assert len(commands) == 1
-    command = commands[0]
-    assert command[1:4] == ["-m", "pip", "install"]
-    assert command[command.index("--target") + 1] == str(binary.parent.parent)
-    assert "uv==0.8.17" in command
-    assert not any(flag in command for flag in ("--user", "--system", "--break-system-packages"))
+    assert len(commands) == 2
+    assert commands[0][0] == "curl" and commands[1][0] == "sh"
+    assert "https://astral.sh/uv/0.8.17/install.sh" in commands[0]
+    assert environments[0]["UV_INSTALL_DIR"] == environments[0]["UV_UNMANAGED_INSTALL"]
+    assert environments[0]["UV_NO_MODIFY_PATH"] == "1"
+    assert not (tmp_path / "unrelated-bin").exists()
+    assert binary.read_text() == "# Standalone uv fixture\n"
+    assert not list(binary.parent.parent.parent.glob(".uv-install-*"))
+    commands.clear()
+    assert install.ensure_uv(tmp_path) == binary
+    assert commands == []
+
+
+@pytest.mark.parametrize("failed_step", ["curl", "sh", "version"])
+def test_failed_standalone_uv_install_can_retry_without_partial_target(tmp_path, monkeypatch, failed_step):
+    def failing_run(*args, **kwargs):
+        if args[0] == "sh":
+            binary = Path(kwargs["env"]["UV_UNMANAGED_INSTALL"]) / "uv"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("# Partially installed fixture\n")
+        if args[0] == failed_step:
+            raise subprocess.CalledProcessError(1, list(args))
+
+    monkeypatch.setattr(install, "run", failing_run)
+    monkeypatch.setattr(subprocess, "check_output", lambda *args, **kwargs: "uv 0.1.0\n")
+    with pytest.raises((subprocess.CalledProcessError, ValueError)):
+        install.ensure_uv(tmp_path)
+    tools = tmp_path / ".local/share/ai4sci-tools"
+    assert not (tools / "uv-0.8.17").exists()
+    assert not list(tools.glob(".uv-install-*"))
+
+
+def test_unrecognized_partial_uv_directory_is_preserved(tmp_path, monkeypatch):
+    tools = tmp_path / ".local/share/ai4sci-tools/uv-0.8.17"
+    tools.mkdir(parents=True)
+    note = tools / "notes.txt"
+    note.write_text("Keep me\n")
+    monkeypatch.setattr(install, "run", lambda *_args, **_kwargs: pytest.fail("Unknown tool directory must not be overwritten."))
+    with pytest.raises(ValueError, match="incomplete tool directory"):
+        install.ensure_uv(tmp_path)
+    assert note.read_text() == "Keep me\n"
 
 
 def test_uv_existing_wrong_version_is_rejected(tmp_path, monkeypatch):

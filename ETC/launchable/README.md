@@ -53,6 +53,26 @@ The prebuilt widgets frontend is made available in the user data directory
 without installing Python packages into Brev's managed Jupyter environment.
 A conflicting frontend/kernel is reported, never silently replaced.
 
+The host needs Python 3, Git, curl and NVIDIA drivers, but does not need pip,
+ensurepip or a preinstalled uv. The pinned uv 0.8.17 standalone installer uses
+a private directory without modifying shell profiles or the host Python.
+
+### Recovering an earlier `No module named pip` failure
+
+The earlier installer at revision `b9e4b48` assumed the host had pip. It failed
+before creating the course environment on a minimal Brev VM. Keep the existing
+instance. In **that instance's terminal**, as the default user (not sudo), run:
+
+```bash
+python3 "$HOME/AI4Sci-PhysicsNeMo-Bootcamp/ETC/launchable/bootstrap.py" --update --ref main
+```
+
+This fetches the corrected installer and course into a separate dated folder.
+The earlier checkout and any student edits remain unchanged. Open the new
+`Start_Here.ipynb` path printed after a successful install. Simply rerunning the
+original setup without `--update` would reuse its old checkout and old installer.
+No `apt install`, global pip installation or new GPU instance is needed for this fix.
+
 ## Updating the course
 
 The checked-in CUDA lock pins all 181 packages, including widgets. Environments
@@ -114,4 +134,6 @@ No live Launchable configuration or cloud GPU was changed during local preparati
 Official references: [Launchables](https://docs.nvidia.com/brev/concepts/launchables),
 [setup scripts](https://docs.nvidia.com/brev/cli/instance-management),
 [Brev Jupyter port conflict](https://docs.nvidia.com/datascience/deployment/stable/cloud/nvidia/brev/),
-[widgets across separate environments](https://ipywidgets.readthedocs.io/en/stable/user_install.html).
+[widgets across separate environments](https://ipywidgets.readthedocs.io/en/stable/user_install.html),
+[uv standalone installation](https://docs.astral.sh/uv/getting-started/installation/),
+[uv unmanaged installer options](https://docs.astral.sh/uv/reference/installer/).

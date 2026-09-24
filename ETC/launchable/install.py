@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 
 
 PYTHON_VERSION = "3.12.11"
@@ -24,16 +25,39 @@ def environment_key(lock):
     return hashlib.sha256((PYTHON_VERSION + "\n").encode() + Path(lock).read_bytes()).hexdigest()[:16]
 
 
-def ensure_uv(home):
-    tools = home / ".local/share/ai4sci-tools" / ("uv-" + UV_VERSION)
-    binary = tools / "bin/uv"
-    if not binary.exists():
-        if tools.exists():
-            raise ValueError("An incomplete tool directory exists. Inspect it or select a clean workspace; nothing was deleted.")
-        run(sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--target", tools, "uv==" + UV_VERSION)
+def check_uv_version(binary):
     version = subprocess.check_output([str(binary), "--version"], text=True).split()
     if version[:2] != ["uv", UV_VERSION]:
         raise ValueError("The private uv tool version does not match the installer.")
+
+
+def ensure_uv(home):
+    tools = home / ".local/share/ai4sci-tools" / ("uv-" + UV_VERSION)
+    binary = tools / "bin/uv"
+    if tools.is_symlink():
+        raise ValueError("The private uv tool directory must not be a symlink.")
+    if not binary.exists():
+        if tools.exists():
+            raise ValueError("An incomplete tool directory exists. Inspect it or select a clean workspace; nothing was deleted.")
+        tools.parent.mkdir(parents=True, exist_ok=True)
+        # Brev's system Python may have neither pip nor ensurepip. Use Astral's
+        # pinned standalone installer, without touching the host Python or PATH.
+        # Stage it first so a failed download does not poison the retry path.
+        with tempfile.TemporaryDirectory(prefix=".uv-install-", dir=tools.parent) as temporary:
+            stage = Path(temporary)
+            payload = stage / "tool"
+            installer = stage / "install.sh"
+            run("curl", "--fail", "--silent", "--show-error", "--location", "--retry", "3",
+                "--connect-timeout", "20", "--max-time", "120",
+                "https://astral.sh/uv/" + UV_VERSION + "/install.sh", "--output", installer)
+            environment = dict(os.environ, UV_INSTALL_DIR=str(payload / "bin"),
+                               UV_UNMANAGED_INSTALL=str(payload / "bin"), UV_NO_MODIFY_PATH="1")
+            run("sh", installer, env=environment)
+            check_uv_version(payload / "bin/uv")
+            if tools.exists() or tools.is_symlink():
+                raise ValueError("The private uv destination appeared during setup; it was not overwritten.")
+            payload.rename(tools)
+    check_uv_version(binary)
     return binary
 
 
