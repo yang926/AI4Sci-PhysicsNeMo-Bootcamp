@@ -1,6 +1,14 @@
 # Evaluating your Challenge results
 
-The afternoon Challenges are individual exercises. The current notebooks give practice feedback, not official points or ranks. Lower error is better. Point weights, submission limits and the final ranking rules will be announced separately; no 100-point conversion is implemented here.
+The afternoon Challenges are individual exercises. Notebook plots and metrics are practice feedback, not submitted scores. A separate [local scoring pilot](../judge/README.md) supports all four Challenges, with provisional points and individual standings. It is not an approved or deployed event judge.
+
+## Practice versus submission
+
+All four Challenges start with `USE_REFERENCE = False`, regardless of a server's `AI4SCI_REFERENCE` setting. An unfinished function should stop with a message. Setting `True` explicitly runs the provided instructor answer and labels its results as a demonstration; those results are not evidence of a completed student exercise.
+
+The **Submit your code** section sends selected exercise implementations directly from the notebook: `student_equations` for Challenges 1-3; dataset/model factories and PINO's PDE for Challenge 4. Before the first submission, enter a **Nickname** and click **Register nickname** in the same panel. The name is reused for all four Challenges and the public scoreboard. Save the `.py` files, select Levels and click **Submit code**. Running the cell does not submit. Queue status, points and evaluation details appear in the same panel; no file download or website upload is needed. The workspace needs a [private judge connection](../environment/JUDGE_CONNECTION.md). The server owns training and evaluation; it does not accept local `metrics.json` as a score. Its pilot board uses one best submission per Challenge, not a mixture of Levels from different attempts. Unsubmitted Levels count as zero within an attempt. The four-Challenge total is 400 provisional points. Final event weights and normalization still need calibration and approval.
+
+Challenge 4 retains the course model configurations and 64x64 grid, but its judge pilot uses a fixed 64/16/16 dataset rather than the full lesson dataset. It checks implementation, test prediction errors and independent FFT PDE error. PINO's PhysicsInformer residual is also checked against FFT. This smaller evaluation is not a claim of full-data convergence or event throughput.
 
 ## Before comparing two runs
 

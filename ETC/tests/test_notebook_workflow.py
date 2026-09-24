@@ -59,7 +59,7 @@ def setup_namespace(relative, monkeypatch, tmp_path, reference="1"):
         raise AssertionError("No real subprocess is allowed in notebook workflow tests")
 
     monkeypatch.setattr(subprocess, "run", forbid_subprocess)
-    setup = next(source for source in code_cells(relative) if "USE_REFERENCE = os.environ" in source)
+    setup = next(source for source in code_cells(relative) if "def show_mode():" in source)
     namespace = {}
     execute(setup, namespace)
     return namespace
@@ -70,6 +70,7 @@ def setup_namespace(relative, monkeypatch, tmp_path, reference="1"):
 def test_setup_respects_automation_and_displays_actual_mode(relative, reference, expected,
                                                            monkeypatch, tmp_path, capsys):
     namespace = setup_namespace(relative, monkeypatch, tmp_path, reference)
+    expected = False  # All student notebooks ignore an inherited demo environment.
     assert namespace["USE_REFERENCE"] is expected
     assert namespace["DEVICE"] == "cuda"
     assert namespace["STEPS"] == 2
@@ -145,7 +146,7 @@ def test_operator_summary_skips_only_the_failed_levels(monkeypatch, tmp_path, ca
         output.mkdir()
         metrics = {"method": f"method-{level}", "steps": 2,
                    "test_relative_l2_before": 1.0, "test_relative_l2_after": 0.5,
-                   "test": {"pde_rmse_fft": 0.1}, "reference": True}
+                   "test": {"pde_rmse_fft": 0.1}, "reference": namespace["USE_REFERENCE"]}
         mock_results(output, metrics)
         namespace["RUN_DIRS"][level] = output
         namespace["RUN_COMPLETED"][level] = level != 2

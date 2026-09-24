@@ -12,7 +12,7 @@ Teach the introduction, Labs 1–4 and all eleven levels of Challenges 1–4 in 
 
 ## Student and instructor modes
 
-Each Challenge notebook exposes `USE_REFERENCE` in its setup cell and prints the active mode before training. `False` executes the learner's exercise code; `True` executes the completed instructor implementation. `AI4SCI_REFERENCE=1` can select reference mode when Jupyter starts, so do not assume that opening a fresh notebook means student mode.
+Each Challenge notebook exposes `USE_REFERENCE` in its setup cell and prints the active mode before training. `False` executes the learner's exercise code; `True` executes the completed instructor implementation. All four Challenges default explicitly to `False` and ignore `AI4SCI_REFERENCE`. The notebook validation tool changes only its executed copies to reference mode, never the student source notebooks.
 
 For a student exercise, explicitly set `USE_REFERENCE = False` in the setup cell and run it (or execute that assignment in a new code cell after setup). Check the mode printed immediately before execution, then edit and save the actual `.py` file. For an instructor comparison, explicitly select `True`. Switching back to `False` must be part of the demonstration, not an invisible server setting. Do not overwrite the student's implementation with the reference answer.
 
@@ -45,6 +45,13 @@ The [migration notes](MIGRATION.md) record the API, equation and data changes, i
 
 ## Evaluation and event operations
 
+Students submit from the Challenge notebook and inspect their results there.
+The projector is a read-only standings display, not an upload site. Configure
+each workspace's [private judge connection](../environment/JUDGE_CONNECTION.md)
+before the session; the notebook does not collect Brev passwords or issue judge
+accounts. The connection hook is implemented, but verified Brev identity handoff
+and the event HTTPS deployment are still outstanding.
+
 Follow the [evaluation guide](ASSESSMENT.md). Challenge evaluation uses the provided PDE rather than the student's equation builder. Training still uses the student's implementation. This distinction makes a wrong equation visible as a poor physical result even when its training loss is small. It is a local diagnostic, not a tamper-proof judge.
 
 Wave and Climate add analytical comparisons over five times when a reference exists. For Climate, read the per-field errors as well as the combined value. Operator validation/test data is reconstructed independently of the student dataset function. A missing analytical reference is not zero error, and raw losses from different problems must not be added into a ranking.
@@ -53,6 +60,6 @@ A short successful run is not a convergence result. Full-course completion requi
 
 Use a new output directory for each experiment. Require `--device cuda` for GPU checks. Verify successful container execution and GitHub publication independently.
 
-The expected audience is 110 individual participants. Give each learner a separate writable checkout so edits and results do not conflict. Participant training resources are not yet decided; an eight-GPU Brev judge and a scoreboard are separate future work. No official point weights, resource budget or submission rules are implied by the local diagnostics.
+The expected audience is 110 individual participants, each with a planned personal Brev GPU environment. Give each learner a separate writable checkout so edits and results do not conflict. A [local judge and scoreboard pilot](../judge/README.md) supports all four Challenges; it is not yet deployed to the planned eight-GPU Brev judge. Confirm the actual GPU model and single-host versus multi-host topology before provisioning. The pilot's point weights and error scales are provisional, not official event rules. Challenge 4's scoring dataset is intentionally smaller than the full lesson dataset; calibrate it on event hardware before freezing the rubric.
 
 Before ranking participants, decide what they may change and how learning resources are made comparable. Reference implementations are visible in this teaching repository; merely selecting student mode does not prove an independently completed exercise. Preserve all eleven levels, and calibrate any eventual points against measured reference performance rather than assigning thresholds from a short smoke run.

@@ -1,7 +1,8 @@
 """Execute authentic course notebooks in the instructor's reference mode.
 
-No cells are replaced or exercise functions filled in. Environment variables
-are documented parameters in the lesson notebooks. Saves executed copies and
+Exercise functions are not filled in. The explicit USE_REFERENCE control in
+Challenges 1-4 is switched in the executed COPY only; source notebooks remain
+in student mode. Environment variables control device and steps. Saves copies and
 HTML outside the source lessons. Use a fresh output directory for every run.
 """
 import argparse
@@ -72,12 +73,17 @@ def main():
     for case in cases:
         path = ROOT / case['notebook']
         nb = nbformat.read(path, as_version=4)
+        for cell in nb.cells:
+            if cell.cell_type == 'code' and 'USE_REFERENCE = False  # Student mode' in cell.source:
+                cell.source = cell.source.replace('USE_REFERENCE = False  # Student mode',
+                                                   'USE_REFERENCE = True  # Instructor validation copy')
         target = output / case['id']
         target.mkdir()
         env = dict(environment, AI4SCI_OUTPUT_DIR=str(target / 'training'),
                    AI4SCI_DATA_DIR=str(target / 'data'))
         started = time.perf_counter()
         record = {'id': case['id'], 'source': case['notebook'],
+                  'mode': 'instructor_reference_in_executed_copy',
                   'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'passed': False}
         try:
             client = NotebookClient(nb, timeout=600, kernel_name='python3',

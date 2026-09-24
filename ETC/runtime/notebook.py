@@ -115,7 +115,10 @@ def result_html(metrics, output):
         table += "<p>No analytical comparison is available for this case. This does not mean zero error.</p>"
     mode = metrics.get("reference", metrics.get("reference_implementation"))
     label = "Instructor reference" if mode is True else "Student" if mode is False else "Worked example"
+    mode_notice = ("Instructor demonstration. The provided answer ran; student edits were not evaluated."
+                   if mode is True else "Local practice result. This run has not been submitted to the scoring server.")
     return (f"<section><h4>{label} · {escape(str(metrics.get('steps', '?')))} training steps</h4>"
+            f"<p><strong>{mode_notice}</strong></p>"
             "<p>Practice feedback, not official points. Compare errors only for the same problem and evaluation settings.</p>"
             + table + f"<p>Saved run: <code>{escape(str(output))}</code></p>"
             "<details><summary>Full metrics and run settings</summary><pre>"

@@ -6,6 +6,8 @@ Open [Start Here](Start_Here.ipynb) for the course order. Read the lessons on Gi
 
 Need an environment? Follow the [uv installation guide](ETC/environment/SETUP.md). If JupyterLab is already running, use Start Here; no reinstall is needed.
 
+For the student Brev Launchable, use the [GitHub-based setup and update guide](ETC/launchable/README.md). It connects an isolated course kernel to Brev-managed Jupyter and preserves existing student work when updating.
+
 ## Attribution
 
 Adapted from [OpenHackathons AI-Powered-Physics-Bootcamp](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp).

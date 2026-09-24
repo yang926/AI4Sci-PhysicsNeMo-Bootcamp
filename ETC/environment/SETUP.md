@@ -2,6 +2,8 @@
 
 The course uses **Python 3.12**, **PhysicsNeMo 2.2.2** with its integrated `sym` extra, and a separate virtual environment. The CUDA recipe below pins the PyTorch versions used by the local RTX 3080 checks. A Brev **NVIDIA L40** is the planned next target, not a tested environment; confirm the actual GPU with `nvidia-smi` before using the CUDA path. See the [validation record](../course_materials/VALIDATION.md) for the scope of each result.
 
+For the student Brev Launchable, use the [managed Jupyter setup](../launchable/README.md). The manual server instructions below are for standalone machines, not an additional server to start beside Brev-managed Jupyter.
+
 Choose the section that matches your situation:
 
 - JupyterLab already opens: go to [Start Here](../../Start_Here.ipynb).
@@ -51,7 +53,7 @@ course_env="$HOME/.venvs/ai4sci-brev-cuda"
     'torch==2.10.0+cu128' 'torchvision==0.25.0+cu128'
   uv pip check --python "$course_env/bin/python"
   "$course_env/bin/python" -m ipykernel install --prefix "$course_env" \
-    --name python3 --display-name 'AI4Sci PhysicsNeMo 2.2.2 (uv CUDA)'
+    --name ai4sci-physicsnemo-uv --display-name 'AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)'
 )
 ```
 
@@ -83,7 +85,7 @@ course_env="$HOME/.venvs/ai4sci-linux-cpu"
   uv pip install --python "$course_env/bin/python" 'ipywidgets>=8.1,<9'
   uv pip check --python "$course_env/bin/python"
   "$course_env/bin/python" -m ipykernel install --prefix "$course_env" \
-    --name python3 --display-name 'AI4Sci PhysicsNeMo 2.2.2 (uv CPU)'
+    --name ai4sci-physicsnemo-uv --display-name 'AI4Sci PhysicsNeMo 2.2.2 (uv CPU)'
 )
 ```
 
@@ -110,15 +112,15 @@ Keep Jupyter running in the remote terminal. If `tmux` is available, start `tmux
 For an instructor's short CUDA rehearsal:
 
 ```bash
-AI4SCI_DEVICE=cuda AI4SCI_REFERENCE=1 AI4SCI_STEPS=20 \
+AI4SCI_DEVICE=cuda AI4SCI_REFERENCE=0 AI4SCI_STEPS=20 \
   jupyter lab --no-browser --ip=127.0.0.1 --port=8888 \
   --ServerApp.port_retries=0 --ServerApp.root_dir="$PWD" \
   --LabApp.default_url=/lab/tree/Start_Here.ipynb
 ```
 
-Keep the generated token authentication enabled and retain the printed localhost URL. If port 8888 is occupied, reuse the intended existing course server or choose another port and match the forward below; do not stop an unrelated server. For a student server use `AI4SCI_REFERENCE=0`. The 20-step override is a short check; omit `AI4SCI_STEPS` for the lesson defaults, mostly 200 steps. These environment variables select defaults when launching a new server; an already-running server and its kernels keep their existing environment. To change an individual Challenge's mode, explicitly set `USE_REFERENCE = False` (student) or `True` (instructor) in the notebook and execute that assignment before training. No server restart is needed; check the mode printed before every run.
+Keep the generated token authentication enabled and retain the printed localhost URL. If port 8888 is occupied, reuse the intended existing course server or choose another port and match the forward below; do not stop an unrelated server. All four Challenges start in student mode and ignore `AI4SCI_REFERENCE`. The 20-step override is a short check; omit `AI4SCI_STEPS` for the lesson defaults, mostly 200 steps. Device and step environment variables select defaults when launching a new server; already-running kernels keep their environment. For a demonstration explicitly set `USE_REFERENCE = True` in the notebook, then return it to `False` for student work. No server restart is needed; check the mode printed before every run.
 
-Open `Start_Here.ipynb`, run the environment check in the matching **AI4Sci** kernel, then follow the introduction and Labs. The introduction is reading material; Lab 1 is the first training exercise. The `python3` kernelspec above also supports the automated notebook runner.
+Open `Start_Here.ipynb`, run the environment check in the matching **AI4Sci** kernel, then follow the introduction and Labs. The introduction is reading material; Lab 1 is the first training exercise. The `ai4sci-physicsnemo-uv` kernelspec above matches the course notebooks.
 
 ## Read Markdown as a document
 
@@ -151,6 +153,11 @@ Leave the forwarding process running and open the remote server's token-bearing 
 Moving networks, sleeping the Mac, or closing its forwarding process can disconnect the browser. Reconnect the Mac, rerun the port forward, and reload the URL. If the instance was restarted, run `brev refresh` first, reconnect to its shell, and check whether Jupyter needs starting again. A lost tunnel alone does not prove that remote training stopped. Check the remote process and current run's artifacts before launching a duplicate job. Keep token URLs and SSH keys out of GitHub and shared screenshots.
 
 ## Data, edits, and saved runs
+
+For Challenge submission, instructors configure the [notebook judge connection](JUDGE_CONNECTION.md).
+Students submit and view results inside the notebook; the separate web page is
+only the scoreboard. This does not require installing another application on
+the student's laptop.
 
 Use a private writable checkout for each learner. Confirm which disk or mounted workspace survives your Brev instance/container lifecycle; a browser connection and an environment do not make storage persistent. Back up saved notebooks, edited `.py` files, and wanted outputs before replacing a workspace or deleting an instance.
 

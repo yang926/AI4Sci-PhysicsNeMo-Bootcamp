@@ -116,7 +116,7 @@ def test_each_challenge_uses_shared_safe_results():
     for path in paths:
         notebook = json.loads(path.read_text())
         sources = ["".join(cell["source"]) for cell in notebook["cells"] if cell["cell_type"] == "code"]
-        setup = next(source for source in sources if "USE_REFERENCE = os.environ" in source)
+        setup = next(source for source in sources if "def show_mode():" in source)
         assert "from ETC.runtime.notebook import" in setup
         assert "validate_settings(DEVICE, STEPS, USE_REFERENCE)" in setup
         results = "\n".join(sources)
@@ -127,7 +127,7 @@ def test_each_challenge_uses_shared_safe_results():
 def test_operator_setup_finds_its_own_program_not_any_challenge(monkeypatch):
     notebook = json.loads((ROOT / "02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb").read_text())
     setup = next("".join(cell["source"]) for cell in notebook["cells"]
-                 if cell["cell_type"] == "code" and "USE_REFERENCE = os.environ" in "".join(cell["source"]))
+                 if cell["cell_type"] == "code" and "def show_mode():" in "".join(cell["source"]))
     monkeypatch.chdir(ROOT / "02_challenges/01_wave")
     namespace = {}
     exec(compile(setup, "<operator-setup>", "exec"), namespace)
