@@ -117,10 +117,19 @@ def result_html(metrics, output):
     label = "Instructor reference" if mode is True else "Student" if mode is False else "Worked example"
     mode_notice = ("Instructor demonstration. The provided answer ran; student edits were not evaluated."
                    if mode is True else "Local practice result. This run has not been submitted to the scoring server.")
-    return (f"<section><h4>{label} · {escape(str(metrics.get('steps', '?')))} training steps</h4>"
+    accuracy_notice = ""
+    accuracy = metrics.get("accuracy")
+    if isinstance(accuracy, dict) and type(accuracy.get("passed")) is bool:
+        label_accuracy = "PASS" if accuracy["passed"] else "NOT MET"
+        accuracy_notice = f"<p><strong>Lesson accuracy checks: {label_accuracy}</strong></p>"
+        accuracy_notice += "<p>" + escape(str(accuracy.get("scope", ""))) + "</p>"
+        if not accuracy["passed"]:
+            accuracy_notice += "<p>Training finished, but the result does not yet meet this lesson's accuracy limits. Inspect both the curves and the error metrics.</p>"
+    step_unit = "optimizer calls" if "training_recipe" in metrics else "training steps"
+    return (f"<section><h4>{label} · {escape(str(metrics.get('steps', '?')))} {step_unit}</h4>"
             f"<p><strong>{mode_notice}</strong></p>"
             "<p>Practice feedback, not official points. Compare errors only for the same problem and evaluation settings.</p>"
-            + table + f"<p>Saved run: <code>{escape(str(output))}</code></p>"
+            + accuracy_notice + table + f"<p>Saved run: <code>{escape(str(output))}</code></p>"
             "<details><summary>Full metrics and run settings</summary><pre>"
             + escape(json.dumps(metrics, indent=2)) + "</pre></details></section>")
 

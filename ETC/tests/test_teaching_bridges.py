@@ -59,8 +59,8 @@ def test_lab1_bridge_precedes_training_and_names_real_program_functions():
     model = next(node for node in basics.body if isinstance(node, ast.ClassDef) and node.name == "BasicPINN")
     assert any(isinstance(node, ast.FunctionDef) and node.name == "forward" for node in model.body)
     assert any(isinstance(node, ast.FunctionDef) and node.name == "loss_terms" for node in basics.body)
-    runtime = syntax("ETC/runtime/labs.py")
-    assert any(isinstance(node, ast.FunctionDef) and node.name == "optimize" for node in runtime.body)
+    assert any(isinstance(node, ast.FunctionDef) and node.name == "optimize_lab" for node in basics.body)
+    assert "source_code/pinn_basics.py" in text
 
 
 def test_heat_reduction_keeps_conductivity_and_diffusivity_distinct():

@@ -21,6 +21,7 @@
 
 """Lab 4: periodic 2-D incompressible flow, not a validated weather forecast."""
 import math
+import json
 import sys
 from pathlib import Path
 import numpy as np
@@ -28,7 +29,7 @@ import torch
 from sympy import Function, Symbol
 from physicsnemo.sym.eq.pde import PDE
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from ETC.runtime.labs import parser, setup, mlp, derivative, informer, optimize, save_run
+from ETC.runtime.labs import parser, setup, mlp, derivative, informer, save_run
 
 LENGTH = 1.440
 LOWER = -0.720
@@ -38,6 +39,8 @@ VELOCITY_SCALE = LENGTH_SCALE / TIME_SCALE
 PRESSURE_SCALE = 1.1614 * VELOCITY_SCALE**2
 LEGACY_PRESSURE_FACTOR = 0.10197
 REAL_NU = 1.655e-5 / (LENGTH_SCALE**2 / TIME_SCALE)
+INITIAL_DATA_WEIGHT = 10.0
+EVALUATION_TIMES = (0.0, 0.13, 0.37, 0.61, 0.83, 1.0)
 
 
 class NavierStokes(PDE):
@@ -101,7 +104,7 @@ class PeriodicFlow(torch.nn.Module):
 
 
 def taylor_green(xy, t, nu=0.01):
-    """Exact periodic incompressible solution used only for synthetic smoke checks."""
+    """Exact synthetic reference: training may use its t=0 initial data only."""
     k = 2 * math.pi / LENGTH
     x, y = k * (xy[:, :1] - LOWER), k * (xy[:, 1:] - LOWER)
     decay = torch.exp(-2 * nu * k**2 * t)
@@ -117,20 +120,83 @@ def residuals(field, xy, t, physics):
                             "u__t": derivative(u, t), "v__t": derivative(v, t)})
 
 
-def loss_terms(model, physics, batch_size, device, initial_data=None):
-    xy = (LOWER + LENGTH * torch.rand(batch_size, 2, device=device)).requires_grad_()
-    t = torch.rand(batch_size, 1, device=device, requires_grad=True)
-    res = residuals(model(xy, t), xy, t, physics)
+def training_points(batch_size, device, initial_data=None, *, initial_size=None):
+    """Sample the PDE domain and initial observations; no future solution labels."""
+    initial_size = batch_size if initial_size is None else initial_size
+    xy = LOWER + LENGTH * torch.rand(batch_size, 2, device=device, dtype=torch.float32)
+    t = torch.rand(batch_size, 1, device=device, dtype=torch.float32)
     if initial_data is None:
-        ix = LOWER + LENGTH * torch.rand(batch_size, 2, device=device)
-        target = taylor_green(ix, torch.zeros(batch_size, 1, device=device))
+        ix = LOWER + LENGTH * torch.rand(initial_size, 2, device=device, dtype=torch.float32)
+        target = taylor_green(ix, torch.zeros_like(ix[:, :1]))
     else:
         coords, values = initial_data
-        index = torch.randint(len(coords), (batch_size,))
+        index = torch.randint(len(coords), (initial_size,))
         ix, target = coords[index].to(device), values[index].to(device)
-    prediction = model(ix, torch.zeros(batch_size, 1, device=device))
+    return xy, t, ix, target
+
+
+def loss_terms(model, physics, batch_size, device, initial_data=None, *, points=None):
+    points = training_points(batch_size, device, initial_data) if points is None else points
+    raw_xy, raw_t, ix, target = points
+    xy, t = raw_xy.detach().requires_grad_(), raw_t.detach().requires_grad_()
+    res = residuals(model(xy, t), xy, t, physics)
+    prediction = model(ix, torch.zeros_like(ix[:, :1]))
     return {"physics": sum(v.square().mean() for v in res.values()),
-            "initial_data": (prediction - target).square().mean()}
+            "initial_data": INITIAL_DATA_WEIGHT * (prediction - target).square().mean()}
+
+
+def optimize_lab(model, physics, cfg, device, initial_data=None):
+    """Stochastic Adam followed by deterministic full-batch L-BFGS in FP32.
+
+    One recorded step is one optimizer.step call. Each line-search closure is
+    counted separately. L-BFGS uses fixed samples so all trial losses compare
+    the same objective; the held-out grids never select or train the model.
+    """
+    adam_steps = min(1000, cfg["steps"] // 3)
+    adam = torch.optim.Adam(model.parameters(), lr=cfg["learning_rate"])
+    lbfgs = torch.optim.LBFGS(model.parameters(), lr=1.0, max_iter=1, max_eval=20,
+                            history_size=50, line_search_fn="strong_wolfe",
+                            tolerance_grad=1e-9, tolerance_change=1e-12)
+    fixed = None
+    history = []
+    for step in range(1, cfg["steps"] + 1):
+        phase = "adam" if step <= adam_steps else "lbfgs"
+        optimizer = adam if phase == "adam" else lbfgs
+        if phase == "lbfgs" and fixed is None:
+            fixed = training_points(max(2048, cfg["batch_size"]), device, initial_data,
+                                    initial_size=max(1024, cfg["batch_size"]))
+        first_terms, evaluations = None, 0
+
+        def closure():
+            nonlocal first_terms, evaluations
+            optimizer.zero_grad(set_to_none=True)
+            terms = loss_terms(model, physics, cfg["batch_size"], device, initial_data,
+                               points=fixed if phase == "lbfgs" else None)
+            loss = sum(terms.values())
+            if not torch.isfinite(loss):
+                raise FloatingPointError(f"Nonfinite {phase} loss at step {step}")
+            loss.backward()
+            gradients = [p.grad for p in model.parameters() if p.grad is not None]
+            if not gradients or not torch.isfinite(torch.cat([g.detach().reshape(-1) for g in gradients])).all():
+                raise FloatingPointError(f"Missing or nonfinite {phase} gradients at step {step}")
+            if first_terms is None:
+                values = torch.stack([loss, *terms.values()]).detach().cpu().tolist()
+                first_terms = dict(zip(("loss", *terms), values))
+            evaluations += 1
+            return loss
+
+        if phase == "adam":
+            closure()
+            optimizer.step()
+        else:
+            optimizer.step(closure)
+        if not torch.isfinite(torch.cat([p.detach().reshape(-1) for p in model.parameters()])).all():
+            raise FloatingPointError(f"Nonfinite parameters at step {step}")
+        row = {"step": step, "phase": phase, "closure_evaluations": evaluations, **first_terms}
+        history.append(row)
+        if step == 1 or step == cfg["steps"] or step % 500 == 0:
+            print(json.dumps(row), flush=True)
+    return history
 
 
 def solution_errors(prediction, reference):
@@ -156,31 +222,88 @@ def solution_errors(prediction, reference):
     return {name: float(value.detach()) for name, value in values.items()}
 
 
+def periodic_errors(model, device, time):
+    """Opposite-edge values and spatial first derivatives at 33 edge points."""
+    line = torch.linspace(LOWER, LOWER + LENGTH, 33, device=device, dtype=torch.float32)
+    value_error, gradient_error = [], []
+    for axis in (0, 1):
+        low = torch.stack((torch.full_like(line, LOWER), line), dim=1)
+        high = torch.stack((torch.full_like(line, LOWER + LENGTH), line), dim=1)
+        if axis == 1:
+            low, high = low.flip(1), high.flip(1)
+        low, high = low.requires_grad_(), high.requires_grad_()
+        a, b = model(low, torch.full_like(low[:, :1], time)), model(high, torch.full_like(high[:, :1], time))
+        value_error.append((a - b).abs().max())
+        for column in range(3):
+            gradient_error.append((derivative(a[:, column:column + 1], low)
+                                   - derivative(b[:, column:column + 1], high)).abs().max())
+    return {"periodic_value_max_abs": float(torch.stack(value_error).max().detach()),
+            "periodic_gradient_max_abs": float(torch.stack(gradient_error).max().detach())}
+
+
 def evaluate(model, physics, device, synthetic, initial_data=None):
-    grid = torch.linspace(LOWER + .017, LOWER + LENGTH - .017, 9, device=device)
+    """Held-out 24x24 cell-center grid at six times, including both endpoints."""
+    grid = LOWER + LENGTH * (torch.arange(24, device=device, dtype=torch.float32) + .5) / 24
     xx, yy = torch.meshgrid(grid, grid, indexing="xy")
-    xy = torch.stack((xx.ravel(), yy.ravel()), dim=1).requires_grad_()
-    t = torch.full_like(xy[:, :1], .37, requires_grad=True)
-    pred = model(xy, t)
-    res = residuals(pred, xy, t, physics)
-    physics_loss = sum(v.square().mean() for v in res.values())
+    base = torch.stack((xx.ravel(), yy.ravel()), dim=1)
+    records = []
+    for time in EVALUATION_TIMES:
+        xy = base.detach().requires_grad_()
+        t = torch.full_like(xy[:, :1], time, requires_grad=True)
+        pred = model(xy, t)
+        res = residuals(pred, xy, t, physics)
+        row = {"time": time,
+               "pde_rmse": float(torch.cat(list(res.values()), dim=1).square().mean().sqrt().detach()),
+               **{f"{name}_rmse": float(value.square().mean().sqrt().detach())
+                  for name, value in res.items()},
+               **periodic_errors(model, device, time)}
+        if synthetic:
+            exact = taylor_green(xy, t)
+            row.update({f"synthetic_{name}": value for name, value in solution_errors(pred, exact).items()})
+            row["synthetic_solution_rmse"] = float((pred - exact).square().mean().sqrt().detach())
+        records.append(row)
     if synthetic:
-        initial_xy = xy.detach()
-        initial_target = taylor_green(initial_xy, torch.zeros_like(t))
+        initial_xy = base
+        initial_target = taylor_green(initial_xy, torch.zeros_like(initial_xy[:, :1]))
     else:
         coords, values = initial_data
         index = torch.linspace(0, len(coords) - 1, min(257, len(coords))).long()
         initial_xy, initial_target = coords[index].to(device), values[index].to(device)
     initial_prediction = model(initial_xy, torch.zeros_like(initial_xy[:, :1]))
-    objective = physics_loss + (initial_prediction - initial_target).square().mean()
-    result = {"objective": float(objective.detach()),
-              "pde_rmse": float(torch.cat(list(res.values()), dim=1).square().mean().sqrt().detach())}
-    if synthetic:
-        exact = taylor_green(xy, t)
-        # Retain the old aggregate for saved-result compatibility, not ranking.
-        result["synthetic_solution_rmse"] = float((pred - exact).square().mean().sqrt().detach())
-        result.update({f"synthetic_{name}": value for name, value in solution_errors(pred, exact).items()})
+    initial_rmse = float((initial_prediction - initial_target).square().mean().sqrt().detach())
+    # Equal grid sizes: pool squared errors, never average RMSEs directly.
+    result = {name: math.sqrt(sum(row[name] ** 2 for row in records) / len(records))
+              for name in records[0] if name.endswith("rmse")}
+    result.update({name: max(row[name] for row in records)
+                   for name in ("periodic_value_max_abs", "periodic_gradient_max_abs")})
+    result.update(objective=3 * result["pde_rmse"] ** 2 + INITIAL_DATA_WEIGHT * initial_rmse ** 2,
+                  initial_data_rmse=initial_rmse, per_time=records,
+                  scope="24x24 held-out spatial cell centers at six times; not a continuous-domain bound")
     return result
+
+
+def accuracy_checks(metrics):
+    """Fixed Taylor-Green lesson criteria, declared before optimizer tuning."""
+    records = metrics.get("per_time", [])
+    if (not isinstance(records, list) or len(records) != len(EVALUATION_TIMES)
+            or any(not isinstance(row, dict) or type(row.get("time")) not in (int, float)
+                   or row["time"] != time for row, time in zip(records, EVALUATION_TIMES))):
+        raise ValueError("Accuracy checks require all six evaluation times")
+    limits = {"synthetic_velocity_rmse": .02,
+              "synthetic_pressure_gauge_aligned_rmse": .02,
+              "pde_rmse": .05, "periodic_value_max_abs": 2e-5,
+              "periodic_gradient_max_abs": 1e-4}
+
+    def check(row, name, limit):
+        value = row.get(name)
+        valid = type(value) in (int, float) and math.isfinite(value) and 0 <= value <= limit
+        return {"time": row.get("time", 0.0), "metric": name, "value": value,
+                "limit": limit, "passed": valid}
+
+    checks = [check(row, name, limit) for row in records for name, limit in limits.items()]
+    checks.append(check(metrics, "initial_data_rmse", .02))
+    return {"passed": all(item["passed"] for item in checks), "checks": checks,
+            "scope": "synthetic Taylor-Green fixture only; six times and a 24x24 held-out grid"}
 
 
 def main():
@@ -191,13 +314,14 @@ def main():
     args = p.parse_args()
     if args.smoke_data and args.data_path is not None:
         p.error("--smoke-data and --data-path are mutually exclusive")
-    cfg, device = setup(args)
+    cfg, device = setup(args, defaults={"steps": 3000})
+    cfg.update(lab4_dtype="float32", lab4_recipe="adam_lbfgs_fp32_v1")
     nu = 0.01 if args.smoke_data else REAL_NU
     initial_data = None if args.smoke_data else tuple(torch.from_numpy(a) for a in read_wf_data(data_path=args.data_path))
-    model = PeriodicFlow(cfg).to(device)
+    model = PeriodicFlow(cfg).to(device=device, dtype=torch.float32)
     physics = informer(NavierStokes(nu=nu, rho=1.0, dim=2, time=True), device)
     heldout_before = evaluate(model, physics, device, args.smoke_data, initial_data)
-    history = optimize(model, lambda: loss_terms(model, physics, cfg["batch_size"], device, initial_data), cfg)
+    history = optimize_lab(model, physics, cfg, device, initial_data)
     axis = torch.linspace(LOWER, LOWER + LENGTH, 33, device=device)[:-1]
     xx, yy = torch.meshgrid(axis, axis, indexing="xy")
     xy = torch.stack((xx.ravel(), yy.ravel()), dim=1)
@@ -219,6 +343,20 @@ def main():
             metrics["synthetic_reference_rmse"] = float((pred - exact).square().mean().sqrt())
             metrics.update({f"synthetic_{name}": value for name, value in solution_errors(pred, exact).items()})
     metrics["heldout_after"] = evaluate(model, physics, device, args.smoke_data, initial_data)
+    metrics["training_recipe"] = {
+        "optimizer": "Adam then full-batch L-BFGS", "dtype": "float32",
+        "adam_step_calls": min(1000, cfg["steps"] // 3),
+        "lbfgs_step_calls": cfg["steps"] - min(1000, cfg["steps"] // 3),
+        "closure_evaluations": sum(row["closure_evaluations"] for row in history),
+        "lbfgs_pde_points": max(2048, cfg["batch_size"]),
+        "lbfgs_initial_points": max(1024, cfg["batch_size"]),
+        "initial_data_weight": INITIAL_DATA_WEIGHT,
+        "loss_history": "before each optimizer step; initial_data is weighted MSE",
+        "positive_time_reference_targets_used_for_training": False,
+    }
+    if args.smoke_data:
+        metrics["accuracy"] = accuracy_checks(metrics["heldout_after"])
+        print("Lesson accuracy checks: " + ("PASS" if metrics["accuracy"]["passed"] else "NOT MET"), flush=True)
     def plot(plt, a):
         fig, ax = plt.subplots(figsize=(6, 5))
         h = ax.scatter(a["xy"][:, 0], a["xy"][:, 1], c=a["prediction"][-1, :, 0], s=10)

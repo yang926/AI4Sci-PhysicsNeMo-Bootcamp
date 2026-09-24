@@ -57,6 +57,26 @@ def test_setup_does_not_publish_an_empty_run(tmp_path):
     assert not args.output_dir.exists()
 
 
+def test_optional_defaults_do_not_leak_to_other_lab_calls(tmp_path):
+    """The common helper receives values, not a Lab-number special case."""
+    args = arguments(tmp_path, steps=None)
+    previous_dtype = torch.get_default_dtype()
+    custom, _ = labs.setup(args, defaults={"steps": 3000, "layer_size": 32, "num_layers": 2})
+    ordinary, _ = labs.setup(args)
+    assert custom["steps"] == 3000 and custom["layer_size"] == 32
+    assert ordinary == {"steps": 2000, "batch_size": 128, "learning_rate": .001,
+                        "layer_size": 64, "num_layers": 3}
+    custom["layer_size"] = 999
+    another, _ = labs.setup(args)
+    assert another == ordinary
+    assert torch.get_default_dtype() == previous_dtype
+
+
+def test_optional_defaults_reject_unknown_settings(tmp_path):
+    with pytest.raises(ValueError, match="Unknown Lab defaults"):
+        labs.setup(arguments(tmp_path), defaults={"lab_number": 1})
+
+
 def save_inputs(tmp_path):
     args = arguments(tmp_path)
     cfg, _ = labs.setup(args)

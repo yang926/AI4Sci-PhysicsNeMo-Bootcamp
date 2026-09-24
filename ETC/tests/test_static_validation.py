@@ -5,7 +5,15 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from ETC.course_materials.validate_materials import ROOT, is_active, notebook_output_messages
+from ETC.course_materials.validate_materials import ROOT, is_active, notebook_output_messages, requires_english_content
+
+
+def test_unicode_python_fixtures_are_not_student_prose():
+    assert not requires_english_content(ROOT / "ETC/tests/test_judge_identity.py")
+    assert requires_english_content(ROOT / "ETC/tests/README.md")
+    assert requires_english_content(ROOT / "ETC/runtime/judge_client.py")
+    assert requires_english_content(ROOT / "Start_Here.ipynb")
+    assert is_active(ROOT / "ETC/tests/test_judge_identity.py")
 
 
 def test_jupyter_checkpoints_are_not_course_sources():

@@ -45,11 +45,16 @@ def parser(description, default_config=None):
     return p
 
 
-def setup(args):
+def setup(args, *, defaults=None):
     if args.output_dir.exists() or args.output_dir.is_symlink():
         raise FileExistsError(f"Output directory already exists: {args.output_dir}. Choose a new --output-dir; existing runs are never overwritten.")
     cfg = {"steps": 2000, "batch_size": 128, "learning_rate": 0.001,
            "layer_size": 64, "num_layers": 3}
+    if defaults is not None:
+        unknown = set(defaults) - set(cfg)
+        if unknown:
+            raise ValueError(f"Unknown Lab defaults: {sorted(unknown)}")
+        cfg.update(defaults)
     if args.config is not None:
         import yaml
         supplied = yaml.safe_load(args.config.read_text(encoding="utf-8"))

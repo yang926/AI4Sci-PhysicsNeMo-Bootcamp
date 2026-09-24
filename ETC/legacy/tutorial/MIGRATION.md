@@ -7,7 +7,7 @@ The original source copyright notices and data/images are retained. Historical c
 ## Changes to teaching implementation
 
 - `PDE.dim` is explicit. The retired predefined Navier–Stokes module is replaced by the same 2-D constant-density equations written in a local PDE class. PhysicsInformer automatically computes spatial derivatives x/y/z; the examples explicitly provide time derivatives through PyTorch autograd where needed.
-- CLI `--device`, `--steps`, `--seed`, `--output-dir`, `--config` makes CPU execution checks and GPU teaching runs use the same scripts. The notebooks default to CPU and 200 steps, configurable with `AI4SCI_DEVICE` and `AI4SCI_STEPS`. Those short runs are execution checks, not certification of convergence.
+- CLI `--device`, `--steps`, `--seed`, `--output-dir`, `--config` makes CPU execution checks and GPU teaching runs use the same scripts. All four Labs train in FP32. Notebook budgets are Lab 1: 3,000, Lab 2: 5,000, Lab 3: 300 and Lab 4: 3,000 optimizer calls, configurable with `AI4SCI_DEVICE` and `AI4SCI_STEPS`. L-BFGS can evaluate multiple trial updates per call; the count is recorded separately. Short execution checks are not accuracy certification.
 - Plain YAML stores steps, batch size, learning rate and network size. MLPs use smooth tanh activation, three layers of width 64 by default. All loss scaling is visible in code; these teaching settings require measured convergence checks for the intended hardware and lesson duration.
 - `.npz`, `model.pt`, `metrics.json`, `loss.csv`, and `preview.png` replace old framework-specific output directory formats. The ParaView sections explicitly export current predictions to CSV.
 - Existing output directories are rejected before training; notebook execution cells create a fresh UUID-suffixed run directory.
@@ -23,5 +23,49 @@ The original source copyright notices and data/images are retained. Historical c
 - The Navier–Stokes array path resolves relative to the script rather than the working directory. The original data normalization is preserved, including the unvalidated pressure factor; see [data provenance](../../../01_labs/04_navier_stokes/DATA_PROVENANCE.md). Its six-hour output wording is made consistent by writing 11 inclusive frames over a 60-hour scale. The synthetic smoke fixture is a separate, explicitly labeled option.
 
 ## Validation boundary
+
+Lab 1's executable implementation was revised after its inverse source recovery
+failed a full teaching run. The current notebook uses 3,000 optimizer calls,
+single precision (FP32), an Adam warm-up and fixed-batch L-BFGS refinement. Forward and
+parameterized runs keep soft boundary penalties (weight 10) and normalize their
+inputs. The inverse run uses two 32-wide, two-hidden-layer tanh networks with
+coordinate features `[2x-1, sin(k*pi*x), cos(k*pi*x)]`, `k=1,...,4`, and enforces
+`u=x*(1-x)*v` exactly. It fits the original 100 noise-free observations as
+`1000 * mean((v-u_observed/[x*(1-x)])**2)`. This boundary-aware scaling and feature
+choice are specific teaching implementation decisions, not original upstream
+settings or a general recipe for noisy inverse problems. True source values
+remain evaluation-only. The current default supersedes the historical short
+execution checks and inverse loss weight described above.
+
+Each Lab 1 run now checks solution, PDE and endpoint errors on 401 points; the
+inverse check also requires source RMSE and maximum error, and the parameterized
+check applies to every reported length. Failed criteria are shown separately
+from successful program execution.
+
+Lab 2 retains its network, equations and loss terms, but decays Adam's learning
+rate from 0.001 toward 0.000001 across 5,000 updates. Its checks include the
+initial position and velocity, not only the trajectory. Extrapolation beyond
+the trained 0–5 second interval remains a separate diagnostic.
+
+Lab 3 rescales each material by its temperature/flux scale and uses normalized
+resistance as the parameter input. The supplied outer temperatures are imposed
+exactly by an output transform; temperature and physical heat-flux continuity
+at the interface remain learned constraints. The two-network model, physical
+coefficients and equation are unchanged. It uses 200 Adam calls and 100 L-BFGS
+calls (at most 20 internal iterations per L-BFGS call). Accuracy is checked in
+each material and at the interface for 41 conductivities across [5,25].
+
+Lab 4 gives the initial-data loss weight 10 and uses 1,000 Adam calls followed
+by 2,000 fixed-batch L-BFGS calls. Synthetic Taylor–Green training uses only
+t=0 reference data, never future reference fields. Checks cover velocity,
+gauge-aligned pressure, PDEs and periodic boundaries at six held-out times.
+These checks do not validate forecasts made from the original weather array.
+
+Each lesson selects its own settings and optimizer explicitly; the common
+`setup(args, defaults=...)` helper does not inspect Lab numbers or change the
+global floating-point dtype. YAML settings then override those defaults, and
+an explicit CLI `--steps` overrides YAML. See
+`ETC/course_materials/LABS_FP32_VALIDATION.md` for current measured results.
+`LAB1_VALIDATION.md` retains the earlier FP64 experiment as historical evidence.
 
 `ETC/tests/test_tutorials.py` checks analytical PDE residuals, initial/boundary conditions, composite-bar interface flux, Taylor–Green periodicity and Navier–Stokes residuals, finite forward/backward passes in all modes, and the loader's exact normalization and missing-data failure. CLI and notebook execution results and hardware verification are reported by the repository's overall validation report. Merely passing a short execution test does not prove that every lesson has converged or that a weather model has predictive skill.

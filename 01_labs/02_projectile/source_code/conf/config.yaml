@@ -2,5 +2,6 @@
 steps: 5000
 batch_size: 128
 learning_rate: 0.001
+# Adam cosine schedule ends at learning_rate * 0.001; all training is FP32.
 layer_size: 64
 num_layers: 3

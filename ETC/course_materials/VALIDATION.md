@@ -1,5 +1,13 @@
 # Validation record: PhysicsNeMo 2.2.2
 
+## 2026-09-25: FP32 Lab accuracy
+
+The current Lab settings and measured CPU/L4 results are recorded in
+[Labs 1–4 FP32 validation](LABS_FP32_VALIDATION.md). This adds absolute solution,
+initial/boundary/interface and PDE checks to the historical execution and
+relative-improvement checks below. It does not certify weather forecasting or
+classroom capacity. Historical counts and settings below retain their dates.
+
 ## 2026-09-23: publication checks
 
 - **339 tests and 22 subtests passed** on CPU. Fifteen existing dependency/test warnings remain. Reproduce with `python -m pytest ETC/tests ETC/course_materials/wave/test_reference.py -q`.

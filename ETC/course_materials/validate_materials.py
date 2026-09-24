@@ -34,6 +34,11 @@ def is_active(path):
     return not any(part in EXCLUDE or part.startswith("._") for part in path.relative_to(ROOT).parts)
 
 
+def requires_english_content(path):
+    # Python tests include Unicode nicknames to verify participant input handling.
+    return not (path.relative_to(ROOT).parts[:2] == ("ETC", "tests") and path.suffix == ".py")
+
+
 def markdown_text(path):
     if path.suffix == ".ipynb":
         d = json.loads(path.read_text(encoding="utf-8"))
@@ -135,9 +140,10 @@ def main():
         if path.suffix in {".json", ".ipynb"}:
             text = json.dumps(json.loads(text), ensure_ascii=False)
         relative = str(path.relative_to(ROOT))
-        check(not hangul.search(text) and not hangul.search(relative), "English-only course: Hangul found in " + relative)
+        check(not hangul.search(relative) and (not requires_english_content(path) or not hangul.search(text)),
+              "English-only course: Hangul found in " + relative)
         language_files.append(relative)
-    report["english_only_scan"] = {"files": len(language_files), "scope": "text, decoded JSON and filenames; mathematical symbols are allowed"}
+    report["english_only_scan"] = {"files": len(language_files), "scope": "course text, decoded JSON and all filenames; Python test content permits Unicode fixtures; mathematical symbols are allowed"}
     documents = []
     for path in sorted(p for p in ROOT.rglob("*.py") if is_active(p)):
         relative = str(path.relative_to(ROOT))

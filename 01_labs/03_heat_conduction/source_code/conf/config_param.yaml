@@ -1,5 +1,5 @@
 # PhysicsNeMo 2.2.2 / explicit PyTorch loop. CLI --steps overrides steps.
-steps: 5000
+steps: 300
 batch_size: 128
 learning_rate: 0.001
 layer_size: 64
