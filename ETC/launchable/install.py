@@ -2,6 +2,7 @@
 """Install a course kernel for Brev-managed Jupyter, without starting a server."""
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -133,6 +134,7 @@ def connect_kernel(prefix):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--course-dir", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--configure-jupyter", action="store_true", help="Configure the existing Brev Jupyter service for this course")
     args = parser.parse_args()
     if sys.platform != "linux" or os.geteuid() == 0:
         parser.error("Use a Linux NVIDIA GPU VM as the same non-root user as Brev Jupyter.")
@@ -141,6 +143,14 @@ def main():
     course = args.course_dir.resolve()
     prefix = ensure_environment(course, Path.home())
     connect_kernel(prefix)
+    if args.configure_jupyter:
+        # Loading the sibling by path also works when this installer is invoked
+        # from outside the checkout or the root package is absent from sys.path.
+        spec = importlib.util.spec_from_file_location("ai4sci_jupyter_setup", Path(__file__).with_name("jupyter.py"))
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        module.configure_jupyter(course, prefix, Path.home())
     # No judge credentials are embedded in this public template. Personal
     # provisioning remains separate and local practice works without a judge.
     print("Course kernel ready. Use Brev's managed Jupyter; no second server was started.")

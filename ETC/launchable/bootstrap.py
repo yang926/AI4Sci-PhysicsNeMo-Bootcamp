@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 from urllib.parse import urlsplit
 
 
@@ -26,6 +27,48 @@ def validate_source(repo, ref):
 
 def git(directory, *args):
     return subprocess.check_output(["git", "-C", str(directory), *args], text=True).strip()
+
+
+def prepare_launchable_checkout(repo, ref, destination):
+    """Use one course folder; only advance a clean, upstream-owned checkout."""
+    validate_source(repo, ref)
+    destination = Path(destination).expanduser().absolute()
+    if destination.is_symlink():
+        raise ValueError("The course destination must not be a symlink.")
+    if not destination.exists():
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".ai4sci-source-", dir=destination.parent) as temporary:
+            staged = Path(temporary) / "course"
+            prepare_checkout(repo, ref, staged)
+            if destination.exists() or destination.is_symlink():
+                raise ValueError("The course destination appeared during setup; it was not overwritten.")
+            staged.rename(destination)
+        return destination
+    if not (destination / ".git").is_dir():
+        raise ValueError("Destination already exists but is not a course checkout; it was not changed.")
+    origin = git(destination, "remote", "get-url", "origin")
+    if origin.removesuffix(".git") != repo.removesuffix(".git"):
+        raise ValueError("Destination belongs to another repository; it was not changed.")
+    before = git(destination, "rev-parse", "HEAD")
+    subprocess.run(["git", "-C", str(destination), "fetch", "origin", ref], check=True)
+    target = git(destination, "rev-parse", "FETCH_HEAD^{commit}")
+    for required in ("Start_Here.ipynb", "ETC/launchable/install.py"):
+        git(destination, "cat-file", "-e", target + ":" + required)
+    if before != target:
+        if git(destination, "status", "--porcelain", "--untracked-files=all"):
+            raise ValueError("This course has learner changes. They were preserved; an organizer must review before upgrading this workspace.")
+        if git(destination, "rev-parse", "--is-shallow-repository") == "true":
+            subprocess.run(["git", "-C", str(destination), "fetch", "--unshallow", "origin", ref], check=True)
+        ancestor = subprocess.run(["git", "-C", str(destination), "merge-base", "--is-ancestor", before, target], check=False)
+        if ancestor.returncode != 0:
+            raise ValueError("Existing course commits are not an ancestor of the requested release. They were preserved; no checkout was replaced.")
+        # Git rejects untracked/ignored collisions; never use reset, force, or clean.
+        subprocess.run(["git", "-C", str(destination), "checkout", "--detach", "--no-overwrite-ignore", target], check=True)
+    if not (destination / "Start_Here.ipynb").is_file() or not (destination / "ETC/launchable/install.py").is_file():
+        raise ValueError("The selected source does not contain the course installer.")
+    print("Course folder:", destination, flush=True)
+    print("Course revision:", git(destination, "rev-parse", "HEAD"), flush=True)
+    return destination
 
 
 def prepare_checkout(repo, ref, destination, update=False):
@@ -61,15 +104,22 @@ def main():
     parser.add_argument("--ref", default=os.environ.get("AI4SCI_COURSE_REF", "main"))
     parser.add_argument("--destination", type=Path, default=Path.home() / "AI4Sci-PhysicsNeMo-Bootcamp")
     parser.add_argument("--update", action="store_true", help="Create a separate updated checkout; retain all earlier student work")
+    parser.add_argument("--launchable", action="store_true", help="Use the canonical course folder and configure managed Jupyter for students")
     args = parser.parse_args()
     if os.geteuid() == 0:
         parser.error("Run as the Brev/Jupyter user, not root or sudo.")
-    # Brev's Source clone normally follows main. An explicit release/tag must
-    # get its own checkout instead of silently reusing that clone.
-    course = prepare_checkout(args.repo, args.ref, args.destination, args.update or args.ref != "main")
-    subprocess.run([sys.executable, str(course / "ETC/launchable/install.py"), "--course-dir", str(course)], check=True)
+    if args.launchable and args.update:
+        parser.error("--launchable and --update are separate workflows; choose one.")
+    if args.launchable:
+        course = prepare_launchable_checkout(args.repo, args.ref, args.destination)
+    else:
+        course = prepare_checkout(args.repo, args.ref, args.destination, args.update or args.ref != "main")
+    command = [sys.executable, str(course / "ETC/launchable/install.py"), "--course-dir", str(course)]
+    if args.launchable:
+        command.append("--configure-jupyter")
+    subprocess.run(command, check=True)
     print("Open Jupyter in Brev, then open:", course / "Start_Here.ipynb")
-    print("No existing notebook, answer file, output, Jupyter server or authentication setting was replaced.")
+    print("Learner changes, outputs and Jupyter authentication settings are preserved.")
 
 
 if __name__ == "__main__":

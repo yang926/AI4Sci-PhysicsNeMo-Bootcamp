@@ -55,7 +55,7 @@ def test_shared_launchable_fetches_fresh_course_without_student_repair(tmp_path,
     else:
         assert result.returncode == 0, result.stderr
         assert len(calls) == 2
-        assert calls[1][0] == "python3" and calls[1][-1] == "--update"
+        assert calls[1][0] == "python3" and calls[1][-1] == "--launchable"
         assert calls[1][1] == calls[0][calls[0].index("--output") + 1]
 
 

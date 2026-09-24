@@ -1,8 +1,9 @@
 # Student Brev Launchable
 
 Use the existing course repository. Brev provides the VM and managed Jupyter;
-the setup below installs an isolated course kernel. It does not start another
-Jupyter server, disable authentication, create GPU instances or create judge accounts.
+the setup below installs an isolated course kernel and configures the existing
+managed Jupyter service to open the course. It does not start a second server,
+change authentication, create GPU instances or create judge accounts.
 
 ## Brev builder settings
 
@@ -39,29 +40,39 @@ bootstrap_file="$(mktemp -t ai4sci-bootstrap.XXXXXX)"
 curl --fail --silent --show-error --location --retry 3 \
   https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/main/ETC/launchable/bootstrap.py \
   --output "$bootstrap_file"
-python3 "$bootstrap_file" --update
+python3 "$bootstrap_file" --launchable
 ```
 
 The same script is available as [setup.sh](setup.sh) for the builder's File Upload
-option. Keep the `--update` argument: lifecycle setup automatically fetches a
-fresh course checkout and its installer instead of reusing a potentially stale
-checkout left by an image, the Source step, or a failed earlier setup.
+option. Use `--launchable`, not the earlier `--update` flag. It uses the existing
+Source checkout at `~/AI4Sci-PhysicsNeMo-Bootcamp` and checks the requested GitHub
+revision. A clean upstream checkout can advance in place; local edits or private
+commits block an upgrade rather than being overwritten. A fresh clone is staged
+until complete so a failed download can be retried without a partial course folder.
 
 The script runs as Brev's default non-root user, which must also own the Jupyter
-session. It handles a setup working directory outside the checkout. Each setup
-run creates `~/AI4Sci-PhysicsNeMo-Bootcamp-updates/<timestamp>/` and prints the
-new Start Here path. Previous folders, answers and outputs are not changed or
-merged; a deliberate setup retry creates another folder. This is not a background
-update process and does not run when a student merely opens a notebook.
+session. It handles a setup working directory outside the checkout. Repeated
+setup uses the same canonical folder and does not create timestamped copies.
+Previous `*-updates` folders are left intact outside the new course browser root;
+they are not silently deleted, merged or selected as the active course.
 
-After setup finishes, open **Jupyter** in Brev and open the course folder's
-**Start_Here.ipynb**. Course notebooks select **AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)**.
-If Jupyter opened before installation completed, reload the page. Do not start
-`jupyter lab` again in a terminal; the managed server already owns its port.
+After setup finishes, open **Jupyter** in Brev. The file browser starts at the
+course root, **Start_Here.ipynb** is the landing page, and the available/default
+kernel is **AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)**. Reload a browser that was open
+before setup completed. Do not start `jupyter lab` again in a terminal.
+
+Setup configures the normal per-user Jupyter server configuration, preserving
+existing authentication and network settings. It identifies only Brev's existing
+`jupyter.service`, checks that it belongs to the same user and has no active
+notebook sessions or kernels, then restarts that unit and verifies the effective
+root, notebook URL and kernel list. Unknown service wrappers, conflicting startup
+arguments or active notebooks stop setup with an organizer-facing error. No other
+Jupyter service is stopped. This is an installation step, not a recurring restart.
 
 The kernel is installed in the user's Jupyter data directory under the unique
 name `ai4sci-physicsnemo-uv`; the host's `python3` kernel is not overwritten.
-This GPU kernel supplies `AI4SCI_DEVICE=cuda`, including for the morning Labs.
+The native kernel is retained on disk but hidden from this course server's kernel
+list. This GPU kernel supplies `AI4SCI_DEVICE=cuda`, including for the morning Labs.
 The prebuilt widgets frontend is made available in the user data directory
 without installing Python packages into Brev's managed Jupyter environment.
 A conflicting frontend/kernel is reported, never silently replaced.
@@ -85,19 +96,19 @@ An interrupted package download can be retried in the matching installer-owned
 environment. Unrecognized existing environments are never repaired by replacement.
 
 - **New deployments:** the source/bootstrap uses GitHub `main` by default.
-- **Existing learners:** their running workspace does not change. A deliberate
-  rerun of the Launchable setup creates another checkout, without pull, reset,
-  stash, notebook rewriting or answer-file replacement in any earlier folder.
+- **Existing learners:** their running workspace does not change when GitHub
+  changes. A deliberate setup rerun uses the canonical folder. Uncommitted work
+  or private commits prevent source upgrades; ignored training outputs remain.
 - **Manual bootstrap without `--update`:** retains its original behavior of
   reusing the existing checkout. This is not the shared Launchable's setup command.
-- **Explicit update:** save notebooks and stop their kernels first. In the old
-  course directory run `python3 ETC/launchable/bootstrap.py --update`. It creates
-  a separate dated folder and prints the new Start Here path. Old answers,
-  datasets and outputs stay in the old folder; they are not merged automatically.
+- **Instructor copies:** the manual `--update` option still creates a dated copy
+  without changing earlier work. It is not used by the student Launchable and
+  does not switch the active Jupyter root to that copy.
 - **Event freeze:** set an optional Launch parameter `AI4SCI_COURSE_REF` to a
-  tested commit SHA or tag. It gets a separate checkout even if Brev also clones
-  main. To freeze the bootstrap as well, replace `main` in its raw URL with that
-  commit SHA. A tag should not be moved during the event.
+  tested commit SHA or tag before deployment. It must include this Launchable
+  installer. An existing checkout is never silently downgraded or moved off local
+  commits; use a fresh destination for a different release. To freeze the bootstrap
+  as well, replace `main` in its raw URL with that commit SHA. Do not move the tag.
 - **Different repository:** change both Brev Source and optional
   `AI4SCI_COURSE_REPO`. Use a public GitHub repository with this same installer
   layout and an unused destination. Do not reuse a working folder from another repo.
@@ -122,19 +133,20 @@ kernel's judge API login. See [judge connection](../environment/JUDGE_CONNECTION
 Deploy **one** rehearsal GPU VM after approving its cost, then check:
 
 1. Setup completes on the selected GPU, with sufficient disk and no dependency conflict.
-2. The managed Jupyter Secure Link opens. Start Here and its relative links work.
+2. The managed Jupyter Secure Link opens Start Here at the course root. No source
+   or timestamp-folder choice is needed, and only the course kernel is offered.
 3. Run **00_Setup** in the course kernel; confirm CUDA and the selected GPU.
 4. In each Challenge, run only its setup and submission-control cells first.
    The nickname input/buttons must render as widgets, not plain text. With no
    judge provisioned, registration/submission must remain disabled and practice
    must still work. Do not enable Run All against reference solutions.
-5. Re-run setup: student changes and outputs remain. Test `--update` with a small
-   edit and confirm it survives in the old folder.
+5. Re-run setup before student work: no duplicate folder is created. Confirm
+   learner edits block an attempted source upgrade and remain unchanged.
 6. Stop/start that same VM and verify managed Jupyter, storage and course kernel
    persist. Measure cold-start time before issuing 110 deployment links.
 
 Do not present static tests or this checklist as a completed Brev deployment.
-No live Launchable configuration or cloud GPU was changed during local preparation.
+Record the actual template revision and rehearsal results before event distribution.
 
 Official references: [Launchables](https://docs.nvidia.com/brev/concepts/launchables),
 [setup scripts](https://docs.nvidia.com/brev/cli/instance-management),
