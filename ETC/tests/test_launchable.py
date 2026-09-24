@@ -15,6 +15,13 @@ from ETC.launchable import bootstrap, install
 REPOSITORY_URL = "https://github.com/example/physicsnemo-course.git"
 
 
+def test_documented_paste_script_matches_brev_form_and_valid_shell_syntax():
+    readme = Path(install.__file__).with_name("README.md").read_text()
+    script = readme.split("```bash\n", 1)[1].split("```", 1)[0]
+    assert script.splitlines()[0] == "#!/bin/bash"
+    subprocess.run(["bash", "-n"], input=script, text=True, check=True)
+
+
 @pytest.fixture
 def course_remote(tmp_path, monkeypatch):
     """Serve a public-looking GitHub URL from a private, temporary Git fixture."""

@@ -23,9 +23,11 @@ In **Setup script → Paste Script**, use this small bootstrap. Its URL stays th
 same when the implementation in GitHub changes. If the builder offers a URL
 field, do not give it an HTML `github.com/.../blob/...` page as executable code.
 The pasted bootstrap works without relying on that optional field.
+The first line must be exactly `#!/bin/bash`, with no blank line before it.
+Brev's form rejects `#!/usr/bin/env bash` even though it is a valid shell shebang.
 
 ```bash
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 bootstrap_file="$(mktemp -t ai4sci-bootstrap.XXXXXX)"
 curl --fail --silent --show-error --location --retry 3 \
