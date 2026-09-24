@@ -4,7 +4,13 @@ import json
 import os
 from pathlib import Path
 import pwd
+import secrets
 import stat
+import subprocess
+import sys
+import tempfile
+import time
+from urllib.error import HTTPError
 
 import pytest
 
@@ -21,12 +27,13 @@ def test_course_config_preserves_auth_network_and_unrelated_settings(tmp_path):
         "KernelSpecManager": {"kernel_dirs": ["/existing/kernels"]},
     }
     merged = json.loads(jupyter.course_config(json.dumps(original).encode(), tmp_path))
-    for key in ("IdentityProvider", "PasswordIdentityProvider", "LabApp"):
+    for key in ("IdentityProvider", "PasswordIdentityProvider"):
         assert merged[key] == original[key]
     for key in ("ip", "port", "base_url", "allow_remote_access"):
         assert merged["ServerApp"][key] == original["ServerApp"][key]
     assert merged["ServerApp"]["root_dir"] == str(tmp_path)
     assert merged["ServerApp"]["default_url"] == "/lab/workspaces/ai4sci/tree/Start_Here.ipynb"
+    assert merged["LabApp"] == {"custom_css": True, "default_url": jupyter.LANDING_PATH}
     assert merged["KernelSpecManager"]["kernel_dirs"] == ["/existing/kernels"]
     assert merged["KernelSpecManager"]["allowed_kernelspecs"] == [jupyter.KERNEL_NAME]
     assert merged["KernelSpecManager"]["ensure_native_kernel"] is False
@@ -158,6 +165,7 @@ def managed_server(tmp_path, monkeypatch):
         return ""
 
     monkeypatch.setattr(jupyter, "_api", api)
+    monkeypatch.setattr(jupyter, "_verify_landing", lambda _: state.update(landing_verified=True))
     monkeypatch.setattr(jupyter, "_command", command)
     monkeypatch.setattr(jupyter.time, "sleep", lambda _: None)
     return home, course, prefix, state
@@ -182,6 +190,7 @@ def test_configuration_is_private_backed_up_and_only_managed_unit_restarts(manag
     assert merged["Other"] == {"x": 2}
     assert state["commands"] == [("sudo", "-n", "systemctl", "restart", "jupyter.service")]
     assert "contents/Start_Here.ipynb?content=0" in state["resources"]
+    assert state["landing_verified"]
     assert not (home / ".jupyter/jupyter_server_config.d").exists()
 
 
@@ -262,3 +271,80 @@ def test_invalid_runtime_record_is_rejected_before_request(monkeypatch, settings
     monkeypatch.setattr(jupyter, "build_opener", lambda *_: pytest.fail("No remote request is permitted."))
     with pytest.raises(ValueError, match="invalid local API"):
         jupyter._api(dict(settings, token="private"), "sessions")
+
+
+@pytest.mark.parametrize("location,accepted", [
+    ("/proxy/lab/workspaces/ai4sci/tree/Start_Here.ipynb", True),
+    ("/proxy/lab", False),
+    ("/login", False),
+    ("https://unrelated.example/proxy/lab/workspaces/ai4sci/tree/Start_Here.ipynb", False),
+])
+def test_actual_root_redirect_must_point_to_course_workspace(monkeypatch, location, accepted):
+    class Opener:
+        def open(self, request, timeout):
+            assert request.full_url == "http://127.0.0.1:8888/proxy/"
+            assert request.get_header("Authorization") == "token existing"
+            raise HTTPError(request.full_url, 302, "Found", {"Location": location}, io.BytesIO())
+
+    monkeypatch.setattr(jupyter, "build_opener", lambda *_: Opener())
+    info = {"url": "http://vm:8888/proxy/", "token": "existing"}
+    if accepted:
+        jupyter._verify_landing(info)
+    else:
+        with pytest.raises(ValueError, match="does not redirect"):
+            jupyter._verify_landing(info)
+
+
+def test_real_jupyter_lab_loads_normal_config_and_course_landing(tmp_path):
+    """Exercise JupyterLab's real default-url precedence on an isolated local server."""
+    pytest.importorskip("jupyterlab")
+    course, config, runtime, data = (tmp_path / name for name in ("course", "config", "runtime", "data"))
+    for directory in (course, config, runtime, data):
+        directory.mkdir(mode=0o700)
+    (course / "Start_Here.ipynb").write_text(json.dumps({
+        "cells": [], "metadata": {}, "nbformat": 4, "nbformat_minor": 5}))
+    secret = secrets.token_urlsafe(32)
+    existing = {"IdentityProvider": {"token": secret},
+                "LabApp": {"workspaces_dir": str(tmp_path / "workspaces"),
+                           "user_settings_dir": str(tmp_path / "settings")}}
+    jupyter._private_write(config / "jupyter_server_config.json",
+                           jupyter.course_config(json.dumps(existing).encode(), course))
+    kernel = data / "kernels" / jupyter.KERNEL_NAME
+    kernel.mkdir(parents=True)
+    (kernel / "kernel.json").write_text(json.dumps({
+        "argv": [sys.executable, "-m", "ipykernel_launcher", "-f", "{connection_file}"],
+        "display_name": "Isolated course test", "language": "python"}))
+    environment = dict(os.environ, JUPYTER_CONFIG_DIR=str(config), JUPYTER_DATA_DIR=str(data),
+                       JUPYTER_RUNTIME_DIR=str(runtime), JUPYTER_CONFIG_PATH="",
+                       JUPYTER_PREFER_ENV_PATH="0")
+    environment.pop("JUPYTER_TOKEN", None)
+    environment.pop("JUPYTER_TOKEN_FILE", None)
+    with tempfile.TemporaryFile() as log:
+        process = subprocess.Popen([
+            sys.executable, "-m", "jupyterlab", "--no-browser", "--ServerApp.ip=127.0.0.1",
+            "--ServerApp.port=0", "--ServerApp.port_retries=0"], cwd=course,
+            env=environment, stdout=log, stderr=subprocess.STDOUT)
+        try:
+            service = jupyter.Service(process.pid, [], runtime)
+            for _ in range(200):
+                assert process.poll() is None, "The isolated JupyterLab server exited during startup."
+                try:
+                    info = jupyter._server_info(service)
+                    break
+                except ValueError:
+                    time.sleep(0.1)
+            else:
+                pytest.fail("The isolated JupyterLab server did not start within 20 seconds.")
+            assert info["token"] == secret and info["port"] > 0
+            assert Path(info["root_dir"]) == course
+            jupyter._check_kernel(info, Path(sys.prefix), exclusive=True)
+            assert jupyter._api(info, "contents/Start_Here.ipynb?content=0")["type"] == "notebook"
+            jupyter._verify_landing(info)
+        finally:
+            # Only the temporary child created by this test is terminated.
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)

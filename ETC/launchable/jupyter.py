@@ -12,7 +12,8 @@ import re
 import subprocess
 import tempfile
 import time
-from urllib.parse import urlsplit, urlunsplit
+from urllib.error import HTTPError
+from urllib.parse import urljoin, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 
@@ -118,7 +119,7 @@ class _NoRedirect(HTTPRedirectHandler):
         raise ValueError("Managed Jupyter redirected its local API; authentication could not be verified.")
 
 
-def _api(info, resource):
+def _local_request(info, resource):
     url = urlsplit(info["url"])
     port = info.get("port", url.port)
     base_url = info.get("base_url", url.path or "/")
@@ -132,15 +133,42 @@ def _api(info, resource):
     # or send its authentication token to that advertised network destination.
     host = "[::1]" if ":" in url.hostname else "127.0.0.1"
     netloc = host + ":" + str(port)
-    endpoint = urlunsplit((url.scheme, netloc, base_url.rstrip("/") + "/api/" + resource, "", ""))
+    endpoint = urlunsplit((url.scheme, netloc, base_url.rstrip("/") + "/" + resource, "", ""))
     headers = {"Authorization": "token " + info["token"]} if info.get("token") else {}
+    return Request(endpoint, headers=headers)
+
+
+def _api(info, resource):
+    request = _local_request(info, "api/" + resource)
     # Neither environment proxies nor login redirects may forward the existing token.
     try:
         with build_opener(ProxyHandler({}), _NoRedirect()).open(
-                Request(endpoint, headers=headers), timeout=5) as response:
+                request, timeout=5) as response:
             return json.load(response)
     except (OSError, ValueError) as exc:
         raise ValueError("Cannot authenticate to the managed Jupyter API; no safe restart is possible.") from exc
+
+
+class _InspectRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        # urllib exposes the redirect as HTTPError; its destination is never opened.
+        return None
+
+
+def _verify_landing(info):
+    request = _local_request(info, "")
+    expected = urlsplit(request.full_url.rstrip("/") + LANDING_PATH)
+    try:
+        with build_opener(ProxyHandler({}), _InspectRedirect()).open(request, timeout=5):
+            pass
+    except HTTPError as response:
+        try:
+            location = urlsplit(urljoin(request.full_url, response.headers.get("Location", "")))
+            if response.code in {301, 302, 303, 307, 308} and location == expected:
+                return
+        finally:
+            response.close()
+    raise ValueError("The managed server root does not redirect to the course start notebook workspace.")
 
 
 def _require_idle(info):
@@ -167,6 +195,7 @@ def course_config(existing, course):
         raise ValueError("Existing Jupyter configuration is not a JSON object.")
     changes = {
         "ServerApp": {"root_dir": str(course), "default_url": LANDING_PATH},
+        "LabApp": {"default_url": LANDING_PATH},
         "KernelSpecManager": {"allowed_kernelspecs": [KERNEL_NAME], "ensure_native_kernel": False},
         "MultiKernelManager": {"default_kernel_name": KERNEL_NAME},
     }
@@ -244,6 +273,7 @@ def configure_jupyter(course, prefix, home, *, allow_active_restart=False):
             notebook = _api(running, "contents/Start_Here.ipynb?content=0")
             if notebook.get("path") != "Start_Here.ipynb" or notebook.get("type") != "notebook":
                 raise ValueError("The course start notebook is not available at the managed server root.")
+            _verify_landing(running)
             return {"config": config_file, "backup": stage, "service": UNIT}
         except (OSError, ValueError, subprocess.CalledProcessError) as exc:
             last_error = exc
