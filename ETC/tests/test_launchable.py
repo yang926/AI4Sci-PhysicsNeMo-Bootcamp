@@ -5,7 +5,9 @@ they never download packages, allocate a GPU, or start a notebook server.
 """
 from pathlib import Path
 import json
+import os
 import subprocess
+import sys
 
 import pytest
 
@@ -19,7 +21,42 @@ def test_documented_paste_script_matches_brev_form_and_valid_shell_syntax():
     readme = Path(install.__file__).with_name("README.md").read_text()
     script = readme.split("```bash\n", 1)[1].split("```", 1)[0]
     assert script.splitlines()[0] == "#!/bin/bash"
+    assert script == Path(install.__file__).with_name("setup.sh").read_text()
     subprocess.run(["bash", "-n"], input=script, text=True, check=True)
+
+
+@pytest.mark.parametrize("download_exit", [0, 22])
+def test_shared_launchable_fetches_fresh_course_without_student_repair(tmp_path, download_exit):
+    """Execute the actual shell template with fake network/Python commands."""
+    binaries = tmp_path / "bin"
+    binaries.mkdir()
+    calls_file = tmp_path / "calls.jsonl"
+    for name in ("curl", "python3"):
+        command = binaries / name
+        command.write_text(
+            f"#!{sys.executable}\n"
+            "import json, os, pathlib, sys\n"
+            "with open(os.environ['AI4SCI_TEST_CALLS'], 'a') as stream:\n"
+            "    stream.write(json.dumps([pathlib.Path(sys.argv[0]).name, *sys.argv[1:]]) + '\\n')\n"
+            "if pathlib.Path(sys.argv[0]).name == 'curl':\n"
+            "    sys.exit(int(os.environ['AI4SCI_TEST_DOWNLOAD_EXIT']))\n"
+        )
+        command.chmod(0o755)
+    script = Path(install.__file__).with_name("setup.sh")
+    environment = dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ["PATH"],
+                       TMPDIR=str(tmp_path), AI4SCI_TEST_CALLS=str(calls_file),
+                       AI4SCI_TEST_DOWNLOAD_EXIT=str(download_exit))
+    result = subprocess.run(["bash", str(script)], env=environment, capture_output=True, text=True)
+    calls = [json.loads(line) for line in calls_file.read_text().splitlines()]
+    assert calls[0][0] == "curl"
+    assert "https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/main/ETC/launchable/bootstrap.py" in calls[0]
+    if download_exit:
+        assert result.returncode != 0 and len(calls) == 1
+    else:
+        assert result.returncode == 0, result.stderr
+        assert len(calls) == 2
+        assert calls[1][0] == "python3" and calls[1][-1] == "--update"
+        assert calls[1][1] == calls[0][calls[0].index("--output") + 1]
 
 
 @pytest.fixture

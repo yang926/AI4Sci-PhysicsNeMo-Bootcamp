@@ -19,6 +19,12 @@ Jupyter server, disable authentication, create GPU instances or create judge acc
 Hardware and disk values are rehearsal recommendations, not measured capacity
 or a confirmed allocation. This repository does not change the existing Launchable.
 
+The organizer configures this once in the shared Launchable. Students deploy
+that template and open Jupyter; they do not install pip or run recovery commands.
+Use the script below for a new Launchable, or replace the earlier script in the
+existing Launchable before sharing it. GitHub changes do not edit a saved Brev
+form automatically. This repository cannot save the Brev console form for you.
+
 In **Setup script → Paste Script**, use this small bootstrap. Its URL stays the
 same when the implementation in GitHub changes. If the builder offers a URL
 field, do not give it an HTML `github.com/.../blob/...` page as executable code.
@@ -33,13 +39,20 @@ bootstrap_file="$(mktemp -t ai4sci-bootstrap.XXXXXX)"
 curl --fail --silent --show-error --location --retry 3 \
   https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/main/ETC/launchable/bootstrap.py \
   --output "$bootstrap_file"
-python3 "$bootstrap_file"
+python3 "$bootstrap_file" --update
 ```
 
+The same script is available as [setup.sh](setup.sh) for the builder's File Upload
+option. Keep the `--update` argument: lifecycle setup automatically fetches a
+fresh course checkout and its installer instead of reusing a potentially stale
+checkout left by an image, the Source step, or a failed earlier setup.
+
 The script runs as Brev's default non-root user, which must also own the Jupyter
-session. It handles a setup working directory outside the checkout. It reuses
-the matching `~/AI4Sci-PhysicsNeMo-Bootcamp` clone when present or clones there.
-An unrelated directory at that path is left unchanged and setup stops.
+session. It handles a setup working directory outside the checkout. Each setup
+run creates `~/AI4Sci-PhysicsNeMo-Bootcamp-updates/<timestamp>/` and prints the
+new Start Here path. Previous folders, answers and outputs are not changed or
+merged; a deliberate setup retry creates another folder. This is not a background
+update process and does not run when a student merely opens a notebook.
 
 After setup finishes, open **Jupyter** in Brev and open the course folder's
 **Start_Here.ipynb**. Course notebooks select **AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)**.
@@ -57,21 +70,10 @@ The host needs Python 3, Git, curl and NVIDIA drivers, but does not need pip,
 ensurepip or a preinstalled uv. The pinned uv 0.8.17 standalone installer uses
 a private directory without modifying shell profiles or the host Python.
 
-### Recovering an earlier `No module named pip` failure
-
-The earlier installer at revision `b9e4b48` assumed the host had pip. It failed
-before creating the course environment on a minimal Brev VM. Keep the existing
-instance. In **that instance's terminal**, as the default user (not sudo), run:
-
-```bash
-python3 "$HOME/AI4Sci-PhysicsNeMo-Bootcamp/ETC/launchable/bootstrap.py" --update --ref main
-```
-
-This fetches the corrected installer and course into a separate dated folder.
-The earlier checkout and any student edits remain unchanged. Open the new
-`Start_Here.ipynb` path printed after a successful install. Simply rerunning the
-original setup without `--update` would reuse its old checkout and old installer.
-No `apt install`, global pip installation or new GPU instance is needed for this fix.
+The earlier installer at revision `b9e4b48` assumed the host had pip. The corrected
+shared setup above is the student deployment path, not per-student terminal repair.
+After changing the template, the organizer rehearses a fresh deployment before
+distributing it. Existing failed VMs are not changed merely by editing the template.
 
 ## Updating the course
 
@@ -83,8 +85,11 @@ An interrupted package download can be retried in the matching installer-owned
 environment. Unrecognized existing environments are never repaired by replacement.
 
 - **New deployments:** the source/bootstrap uses GitHub `main` by default.
-- **Existing learners:** rerunning setup reuses their checkout without pull,
-  reset, stash, notebook rewriting or answer-file replacement.
+- **Existing learners:** their running workspace does not change. A deliberate
+  rerun of the Launchable setup creates another checkout, without pull, reset,
+  stash, notebook rewriting or answer-file replacement in any earlier folder.
+- **Manual bootstrap without `--update`:** retains its original behavior of
+  reusing the existing checkout. This is not the shared Launchable's setup command.
 - **Explicit update:** save notebooks and stop their kernels first. In the old
   course directory run `python3 ETC/launchable/bootstrap.py --update`. It creates
   a separate dated folder and prints the new Start Here path. Old answers,
