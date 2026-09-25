@@ -1,5 +1,10 @@
 # Labs 1–4: FP32 accuracy checks
 
+This report records the earlier Adam/L-BFGS recipes tested below. Lab 1 now
+uses 1,000 L-BFGS calls without Adam; its separate results are recorded in
+[LAB1_LBFGS_VALIDATION.md](LAB1_LBFGS_VALIDATION.md). The older Lab 1 L4 results
+below do not validate the new recipe. Labs 2–4 retain their training settings.
+
 Date: 2026-09-25. PhysicsNeMo 2.2.2, PyTorch 2.10.0+cu128, Python 3.12.
 Training models and coordinates use FP32, not FP64 or automatic mixed precision.
 The earlier FP64 Lab 1 experiment is retained in `LAB1_VALIDATION.md`; it does
@@ -7,7 +12,7 @@ not describe the current student configuration.
 
 ## Settings and problems corrected
 
-| Lesson | Finding | Current recipe |
+| Lesson | Finding | Recipe tested in this report |
 |---|---|---|
 | Lab 1, three modes | FP64 was not established as necessary for accurate inverse recovery. | FP32; 1,000 Adam + 2,000 L-BFGS calls. The previous accuracy limits are unchanged. |
 | Lab 2 | At 5,000 fixed-rate Adam updates, all three seeds failed at least one initial-condition check. The notebook only requested 200 updates. | Same model, equations and losses; 5,000 Adam updates with cosine learning rate from 0.001 toward 0.000001. |

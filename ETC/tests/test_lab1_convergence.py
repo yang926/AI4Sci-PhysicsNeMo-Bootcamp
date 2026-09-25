@@ -99,12 +99,13 @@ def test_optimizer_has_no_reference_access_and_records_real_closures(mode, monke
     initial = [parameter.detach().clone() for parameter in model.parameters()]
     history = basic.optimize_lab(model, physics, SMALL_CONFIG, "cpu", observations)
     assert [row["step"] for row in history] == [1, 2, 3, 4]
-    assert [row["phase"] for row in history] == ["adam", "lbfgs", "lbfgs", "lbfgs"]
-    assert history[0]["closure_evaluations"] == 1
+    assert [row["phase"] for row in history] == ["lbfgs"] * 4
     assert all(type(row["closure_evaluations"]) is int and row["closure_evaluations"] >= 1
                for row in history)
     assert sum(row["closure_evaluations"] for row in history) == len(calls)
-    assert calls[0] is None and all(points is calls[1] for points in calls[1:])
+    assert calls[0] is not None and all(points is calls[0] for points in calls)
+    x, lengths = calls[0]
+    assert x.shape == lengths.shape == (SMALL_CONFIG["batch_size"] * (17 if mode == "parameterized" else 1), 1)
     assert all(row.keys() == history[0].keys() for row in history)
     assert all(math.isfinite(value) for row in history for key, value in row.items()
                if key != "phase")
@@ -159,7 +160,8 @@ def test_partial_yaml_keeps_lab1_defaults_and_cli_step_precedence(mode, cli_step
         basic.main()
     cfg = recorded["config"]
     assert cfg["learning_rate"] == .002
-    assert cfg["steps"] == (3000 if cli_steps is None else cli_steps)
+    assert cfg["steps"] == (1000 if cli_steps is None else cli_steps)
+    assert cfg["batch_size"] == (32 if mode == "parameterized" else 256)
     assert (cfg["num_layers"], cfg["layer_size"]) == ((2, 32) if mode == "inverse" else (3, 64))
     assert not output.exists()
 
@@ -193,22 +195,25 @@ def assert_reloaded_predictions(output):
     checkpoint = torch.load(output / "model.pt", map_location="cpu", weights_only=True)
     cfg = checkpoint["config"]
     dtype = getattr(torch, cfg["lab1_dtype"])
-    model = basic.BasicPINN(cfg, cfg["lab1_mode"], dtype=dtype)
+    # Check checkpoint reproduction on the execution device. CPU and CUDA FP32
+    # reductions can differ even when both satisfy the lesson accuracy limits.
+    device = torch.device(checkpoint["device"])
+    model = basic.BasicPINN(cfg, cfg["lab1_mode"], dtype=dtype).to(device)
     model.load_state_dict(checkpoint["model_state_dict"], strict=True)
     metrics = json.loads((output / "metrics.json").read_text())
     assert cfg["lab1_mode"] == metrics["mode"]
     assert dtype == torch.float32
-    assert cfg["lab1_recipe"] == "adam_lbfgs_fp32_v2"
+    assert cfg["lab1_recipe"] == "lbfgs_fp32_v3"
     assert all(value.dtype == torch.float32 for value in checkpoint["model_state_dict"].values()
                if torch.is_tensor(value) and value.is_floating_point())
     with np.load(output / "predictions.npz", allow_pickle=False) as saved:
-        x = torch.as_tensor(saved["x"], dtype=dtype)
+        x = torch.as_tensor(saved["x"], dtype=dtype, device=device)
         length = torch.full_like(x, metrics["validation_length"])
         with torch.no_grad():
-            prediction = model(x, length).numpy()
+            prediction = model(x, length).cpu().numpy()
             np.testing.assert_allclose(prediction, saved["prediction"], rtol=1e-5, atol=1e-7)
             if model.mode == "inverse":
-                np.testing.assert_allclose(model.source(x).numpy(), saved["source_prediction"],
+                np.testing.assert_allclose(model.source(x).cpu().numpy(), saved["source_prediction"],
                                            rtol=1e-5, atol=1e-6)
 
 
@@ -228,7 +233,10 @@ def test_short_cli_publishes_reloadable_model_and_honest_step_metadata(mode, tmp
     metrics = result["metrics"]
     assert not metrics["accuracy"]["passed"]  # Four steps are an execution test only.
     recipe = metrics["training_recipe"]
-    assert recipe["adam_step_calls"] == 1 and recipe["lbfgs_step_calls"] == 3
+    assert recipe["optimizer"] == "full-batch L-BFGS"
+    assert recipe["learning_rate"] == SMALL_CONFIG["learning_rate"]
+    assert recipe["fixed_training_points"] == SMALL_CONFIG["batch_size"] * (17 if mode == "parameterized" else 1)
+    assert recipe["adam_step_calls"] == 0 and recipe["lbfgs_step_calls"] == 4
     assert recipe["source_targets_used_for_training"] is False
     with (output / "loss.csv").open(newline="") as stream:
         rows = list(csv.DictReader(stream))
@@ -248,13 +256,13 @@ def test_measured_lesson_convergence_at_published_budget(mode, seed, tmp_path):
     output = tmp_path / f"{mode}-{seed}"
     completed = subprocess.run(
         [sys.executable, str(ROOT / "01_labs/01_pinn/source_code/pinn_basics.py"),
-         "--mode", mode, "--device", device, "--steps", "3000", "--seed", str(seed),
+         "--mode", mode, "--device", device, "--steps", "1000", "--seed", str(seed),
          "--output-dir", str(output)],
         cwd=ROOT, capture_output=True, text=True, timeout=1200,
         env=dict(os.environ, OMP_NUM_THREADS="2", MKL_NUM_THREADS="2", MPLBACKEND="Agg"),
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
-    result = validate_artifacts(output, steps=3000, device=device,
+    result = validate_artifacts(output, steps=1000, device=device,
                                 expected_version="2.2.2", seed=seed)
     assert result["passed"]
     metrics = result["metrics"]

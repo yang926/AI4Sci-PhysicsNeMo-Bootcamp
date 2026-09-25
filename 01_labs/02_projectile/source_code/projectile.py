@@ -142,7 +142,8 @@ def main():
     cfg, device = setup(args, defaults={"steps": 5000})
     cfg.update(lab2_dtype="float32", lab2_recipe="adam_cosine_fp32_v1")
     model = ProjectileModel(cfg).to(device=device, dtype=torch.float32)
-    physics = informer(ProjectileEquation(), device)
+    physics = informer(ProjectileEquation(), device,
+                       supplied_derivatives=("x__t__t", "y__t__t"))
     heldout_before = evaluate(model, physics, device)
     history = optimize_projectile(model, physics, cfg, device)
     t = torch.linspace(0, 8, 401, device=device, dtype=torch.float32)[:, None]

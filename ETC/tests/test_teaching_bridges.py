@@ -51,7 +51,7 @@ def test_lab1_bridge_precedes_training_and_names_real_program_functions():
     assert bridge_index < first_training_index
     text = source(cells[bridge_index])
     for concept in ("BasicPINN.forward", "loss_terms", "PhysicsInformer", "optimize",
-                    "loss.backward()", "optimizer.step()"):
+                    "loss.backward()", "optimizer.step(closure)"):
         assert concept in text
     assert re.search(r"\bsoft\b", text, re.IGNORECASE)
     assert re.search(r"parameter gradients", text, re.IGNORECASE)

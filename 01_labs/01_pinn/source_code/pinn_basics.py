@@ -142,34 +142,28 @@ def loss_terms(model, physics, batch_size, device, observations=None, *, points=
 
 
 def optimize_lab(model, physics, cfg, device, observations=None):
-    """Joint PINN learning: Adam, then L-BFGS on a fixed training set.
+    """Joint PINN learning with L-BFGS on a fixed training set.
 
     Each history row describes the loss before one optimizer step. L-BFGS may
     evaluate several trial points within a step; those are counted separately.
     Neither analytical evaluation errors nor source targets select the model.
     """
     dtype = model_dtype(model)
-    warmup = min(1000, cfg["steps"] // 3)
-    adam = torch.optim.Adam(model.parameters(), lr=cfg["learning_rate"])
-    lbfgs = torch.optim.LBFGS(model.parameters(), lr=1.0, max_iter=1, max_eval=20,
-                            history_size=100, line_search_fn="strong_wolfe",
-                            tolerance_grad=1e-10, tolerance_change=1e-14)
-    fixed = None
+    optimizer = torch.optim.LBFGS(model.parameters(), lr=cfg["learning_rate"], max_iter=1, max_eval=20,
+                                 history_size=100, line_search_fn="strong_wolfe",
+                                 tolerance_grad=1e-10, tolerance_change=1e-14)
+    if model.mode == "parameterized":
+        # Include endpoint lengths so the family is learned at l=1 and 2 too.
+        lengths = torch.linspace(1, 2, 17, device=device, dtype=dtype)[:, None]
+        positions = (torch.arange(cfg["batch_size"], device=device, dtype=dtype) + .5) / cfg["batch_size"]
+        length = lengths.repeat_interleave(cfg["batch_size"], dim=0)
+        x = (lengths * positions[None, :]).reshape(-1, 1)
+    else:
+        x = torch.linspace(0, 1, cfg["batch_size"], device=device, dtype=dtype)[:, None]
+        length = torch.ones_like(x)
+    fixed = (x, length)
     history = []
     for step in range(1, cfg["steps"] + 1):
-        phase = "adam" if step <= warmup else "lbfgs"
-        optimizer = adam if phase == "adam" else lbfgs
-        if phase == "lbfgs" and fixed is None:
-            if model.mode == "parameterized":
-                # Include endpoint lengths so the family is learned at l=1 and 2 too.
-                lengths = torch.linspace(1, 2, 17, device=device, dtype=dtype)[:, None]
-                positions = (torch.arange(32, device=device, dtype=dtype) + .5) / 32
-                length = lengths.repeat_interleave(32, dim=0)
-                x = (lengths * positions[None, :]).reshape(-1, 1)
-            else:
-                x = torch.linspace(0, 1, 256, device=device, dtype=dtype)[:, None]
-                length = torch.ones_like(x)
-            fixed = (x, length)
         evaluations = 0
         first_terms = None
 
@@ -177,29 +171,25 @@ def optimize_lab(model, physics, cfg, device, observations=None):
             nonlocal evaluations, first_terms
             optimizer.zero_grad(set_to_none=True)
             terms = loss_terms(model, physics, cfg["batch_size"], device, observations,
-                               points=fixed if phase == "lbfgs" else None)
+                               points=fixed)
             loss = sum(terms.values())
             if not torch.isfinite(loss):
-                raise FloatingPointError(f"Nonfinite {phase} loss at step {step}")
+                raise FloatingPointError(f"Nonfinite L-BFGS loss at step {step}")
             loss.backward()
             gradients = [p.grad for p in model.parameters() if p.grad is not None]
             # One host/device check rather than synchronizing for every tensor.
             if not gradients or not torch.isfinite(torch.cat([g.detach().reshape(-1) for g in gradients])).all():
-                raise FloatingPointError(f"Missing or nonfinite {phase} gradients at step {step}")
+                raise FloatingPointError(f"Missing or nonfinite L-BFGS gradients at step {step}")
             if first_terms is None:
                 first_terms = {"loss": loss.detach().item(),
                                **{key: value.detach().item() for key, value in terms.items()}}
             evaluations += 1
             return loss
 
-        if phase == "adam":
-            closure()
-            optimizer.step()
-        else:
-            optimizer.step(closure)
+        optimizer.step(closure)
         if not torch.isfinite(torch.cat([p.detach().reshape(-1) for p in model.parameters()])).all():
             raise FloatingPointError(f"Nonfinite parameters at step {step}")
-        row = {"step": step, "phase": phase, "closure_evaluations": evaluations, **first_terms}
+        row = {"step": step, "phase": "lbfgs", "closure_evaluations": evaluations, **first_terms}
         history.append(row)
         if step == 1 or step == cfg["steps"] or step % 500 == 0:
             print(json.dumps(row), flush=True)
@@ -270,11 +260,13 @@ def main():
     p.add_argument("--mode", choices=("forward", "parameterized", "inverse"), default="forward")
     p.set_defaults(output_dir=Path("outputs/pinn_basics"))
     args = p.parse_args()
-    defaults = {"steps": 3000}
+    # A fixed batch per length: 32 x 17 lengths, or 256 points at one length.
+    defaults = {"steps": 1000, "learning_rate": 1.0,
+                "batch_size": 32 if args.mode == "parameterized" else 256}
     if args.mode == "inverse":
         defaults.update(layer_size=32, num_layers=2)
     cfg, device = setup(args, defaults=defaults)
-    cfg.update(lab1_mode=args.mode, lab1_dtype="float32", lab1_recipe="adam_lbfgs_fp32_v2")
+    cfg.update(lab1_mode=args.mode, lab1_dtype="float32", lab1_recipe="lbfgs_fp32_v3")
     if device.type == "cuda":
         probe = torch.ones(1, device=device, requires_grad=True)
         probe.square().sum().backward()
@@ -299,9 +291,11 @@ def main():
             metrics["source_rmse"] = float((arrays["source_prediction"] - arrays["source_reference"]).square().mean().sqrt())
     metrics["heldout_after"] = evaluate(model, physics, device)
     metrics["accuracy"] = accuracy_checks(metrics["heldout_after"], args.mode)
-    metrics["training_recipe"] = {"optimizer": "Adam then full-batch L-BFGS", "dtype": "float32",
-                                  "adam_step_calls": min(1000, cfg["steps"] // 3),
-                                  "lbfgs_step_calls": cfg["steps"] - min(1000, cfg["steps"] // 3),
+    metrics["training_recipe"] = {"optimizer": "full-batch L-BFGS", "dtype": "float32",
+                                  "learning_rate": cfg["learning_rate"],
+                                  "fixed_training_points": cfg["batch_size"] * (17 if args.mode == "parameterized" else 1),
+                                  "adam_step_calls": 0,
+                                  "lbfgs_step_calls": cfg["steps"],
                                   "closure_evaluations": sum(row["closure_evaluations"] for row in history),
                                   "loss_history": "before each optimizer step; L-BFGS trial evaluations counted separately",
                                   "inverse_data_weight": INVERSE_DATA_WEIGHT,

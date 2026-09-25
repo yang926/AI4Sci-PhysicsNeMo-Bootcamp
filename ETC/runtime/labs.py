@@ -105,9 +105,46 @@ def derivative(value, coordinate):
     return coordinate * 0.0 if result is None else result
 
 
-def informer(pde, device):
-    return PhysicsInformer(required_outputs=list(pde.equations), equations=pde,
-                           grad_method="autodiff", device=device)
+class _SuppliedDerivativeInformer(PhysicsInformer):
+    """Register explicitly supplied non-spatial derivatives without a reminder.
+
+    PhysicsNeMo 2.2.2 warns whenever it encounters a time derivative, including
+    when the caller already supplies it. Keep every undeclared derivative on
+    the original path, and require the declared tensors on every forward call.
+    """
+    def __init__(self, *, supplied_derivatives, **kwargs):
+        self.supplied_derivatives = frozenset(supplied_derivatives)
+        for name in self.supplied_derivatives:
+            parts = name.split("__")
+            if (len(parts) not in (2, 3) or not all(parts)
+                    or all(var in {"x", "y", "z"} for var in parts[1:])):
+                raise ValueError(f"Expected a first- or second-order non-spatial derivative: {name}")
+        super().__init__(**kwargs)
+        used = {name for comp in self.computations
+                if comp.outputs[0] in self.required_outputs for name in comp.derivatives}
+        unused = self.supplied_derivatives - used
+        if unused:
+            raise ValueError(f"Declared derivatives are absent from the equations: {sorted(unused)}")
+
+    def _process_derivative(self, name, first_deriv, second_deriv, other_derivs):
+        if name in self.supplied_derivatives:
+            other_derivs.add(name)
+            return
+        super()._process_derivative(name, first_deriv, second_deriv, other_derivs)
+
+    def forward(self, inputs):
+        missing = self.supplied_derivatives - inputs.keys()
+        if missing:
+            raise KeyError(f"Missing supplied derivative tensors: {sorted(missing)}")
+        return super().forward(inputs)
+
+
+def informer(pde, device, *, supplied_derivatives=()):
+    kwargs = {"required_outputs": list(pde.equations), "equations": pde,
+              "grad_method": "autodiff", "device": device}
+    if supplied_derivatives:
+        return _SuppliedDerivativeInformer(supplied_derivatives=supplied_derivatives, **kwargs)
+    return PhysicsInformer(**kwargs)
 
 
 def optimize(model, loss_fn, cfg):
