@@ -37,9 +37,15 @@ Keep the notebook and `.py` file open side by side, with JupyterLab's table of c
 | Fluid | Obstacles are fixed. Level 3 returns to one block, uses viscosity 0.01, and starts inlet velocity and section flux with the same smooth ramp from rest. |
 | Climate | These are educational temperature PDEs. Level 2 defaults to `gamma0=0.5`; its coupled sine-mode analytical solution remains valid with heat exchange. Nonzero advection, sources or relaxation still require a different reference. |
 | Neural Operators | Compare FNO, AFNO and PINO on the same periodic reaction–diffusion problem; generate fresh data rather than using the historical Poisson HDF5 files. |
-| Navier–Stokes | Distinguish the Taylor–Green fixture from the original array. Review unresolved source and pressure-unit questions in [data provenance](../../01_labs/04_navier_stokes/DATA_PROVENANCE.md). |
+| Navier–Stokes | Use the original ERA5-derived array as the initial field. Show input wind, predicted evolution and ParaView playback. Review the source and pressure-unit limitations in [data provenance](../../01_labs/04_navier_stokes/DATA_PROVENANCE.md). |
 
-The Navier–Stokes loss does not fix the spatially constant, time-dependent pressure offset after the initial instant. Read velocity RMSE, raw pressure RMSE and gauge-aligned pressure RMSE separately. The latter removes one spatially constant pressure offset per evaluated time, not spatial errors. The legacy combined RMSE remains available but should not be the sole explanation of accuracy.
+For Lab 4, first show the original input wind and the embedded original ParaView recording. Label the recording as historical, not the current run's output. Prepare the original 50,000-update FP32 training run before the live demonstration and measure its duration on the event GPU. The source settings use six 256-unit hidden layers, SiLU, weight normalization and Adam with learning-rate decay. No pretrained checkpoint is bundled. A short override is an execution check, not evidence that the detailed wind field has converged.
+
+Compare the original input and prediction at time zero, then play the 11 frames from 0 to 60 hours. The initial-data fit and held-out PDE/periodicity residuals describe model consistency; no future weather observations are bundled. Do not call a low PDE residual a verified forecast. Pressure gradients drive the flow, and the equations do not fix a spatially constant pressure offset at later times.
+
+For the ParaView demonstration, run the export cell, download and extract its ZIP on the presentation Mac, then open `flow.pvd` and press **Apply**. Select **Surface**, color by **speed**, reset the camera and look along **+Z**. Rescale over all timesteps once, then press **Play**. The included README describes velocity glyphs and a prepared-view script. Rehearse the local ParaView view before class; exporting and replaying an existing result does not need another training run.
+
+Taylor–Green remains an internal analytical regression fixture under `ETC`, not an alternative student lesson. Its accuracy gates do not validate the original-data experiment. The student notebook rejects stale fixture results rather than silently relabeling them.
 
 The [migration notes](MIGRATION.md) record the API, equation and data changes, including Wave Level 3's initial displacement, Fluid Level 3's inlet/flux schedule and Climate Level 2's default coupling. Teach the conditions shown in the current notebooks and distinguish synthetic analytical checks from real-world validation.
 

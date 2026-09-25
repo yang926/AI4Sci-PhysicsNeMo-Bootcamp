@@ -98,9 +98,7 @@
       "id": "navier_stokes",
       "course": "lab4",
       "script": "01_labs/04_navier_stokes/source_code/navier_stokes.py",
-      "args": [
-        "--smoke-data"
-      ]
+      "args": []
     },
     {
       "id": "wave_l1",
@@ -203,7 +201,7 @@
     }
   ],
   "notes": {
-    "navier_stokes": "Smoke ETC/tests use explicitly identified synthetic analytic data; production data run is checked separately.",
+    "navier_stokes": "Student notebook and smoke run use the original data_lat.npy. Only the separate convergence regression explicitly selects the Taylor-Green fixture; it does not certify the original-data flow.",
     "challenges": "--reference selects instructor answers; default is the participant exercise.",
     "operators": "Smoke ETC/tests generate a fresh small reaction-diffusion dataset in the output directory."
   }

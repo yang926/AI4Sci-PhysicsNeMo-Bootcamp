@@ -22,7 +22,7 @@ Under [Forward PINN execution](../../01_labs/01_pinn/Lab_1_PINN_Fundamentals.ipy
 | Lab 1 | PINN fundamentals | [Open notebook](../../01_labs/01_pinn/Lab_1_PINN_Fundamentals.ipynb) | First executable lesson: 1.1 forward, 1.2 parameterized, 1.3 inverse PINNs. |
 | Lab 2 | Projectile ODEs | [Open notebook](../../01_labs/02_projectile/Lab_2_Projectile_Motion.ipynb) | Connect initial conditions and ODE residuals; compare with the analytical trajectory. |
 | Lab 3 | Steady heat conduction | [Open notebook](../../01_labs/03_heat_conduction/Lab_3_Heat_Conduction.ipynb) | Solve a two-material bar and verify interface temperature and heat flux. |
-| Lab 4 | Incompressible Navier–Stokes | [Open notebook](../../01_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb) | Check synthetic Taylor–Green flow; distinguish the optional original-data path from validated weather forecasting. |
+| Lab 4 | Incompressible Navier–Stokes | [Open notebook](../../01_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb) | Start from the original ERA5-derived array, inspect predicted flow over 60 hours, and play the sequence in ParaView. |
 | Challenge 1 | Wave dynamics | [Open notebook](../../02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb) | Level 1–3: constant speed, variable speed, circular Robin boundary. |
 | Challenge 2 | Fluid flow | [Open notebook](../../02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb) | Level 1–3: one fixed obstacle, multiple fixed obstacles, time-dependent flow. |
 | Challenge 3 | Educational climate PDEs | [Open notebook](../../02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb) | Level 1–2: temperature transport and active atmosphere–ocean exchange, with analytical comparisons for the default cases. |
@@ -60,7 +60,7 @@ The notebook normally starts in its own directory. Use `%pwd` if a file cannot b
 | 1 | [pinn_basics.py](../../01_labs/01_pinn/source_code/pinn_basics.py): `forward`, `parameterized`, `inverse` | Learned solution, parameter dependence and inferred source. |
 | 2 | [projectile.py](../../01_labs/02_projectile/source_code/projectile.py), [projectile_eqn.py](../../01_labs/02_projectile/source_code/projectile_eqn.py) | Predicted and analytical trajectories; CSV export for ParaView. |
 | 3 | [diffusion_bar.py](../../01_labs/03_heat_conduction/source_code/diffusion_bar.py), [diffusion_bar_parameterized.py](../../01_labs/03_heat_conduction/source_code/diffusion_bar_parameterized.py) | Piecewise solution, interface conditions and parameterized predictions. |
-| 4 | [navier_stokes.py](../../01_labs/04_navier_stokes/source_code/navier_stokes.py) | Data preparation and time-dependent flow predictions. |
+| 4 | [navier_stokes.py](../../01_labs/04_navier_stokes/source_code/navier_stokes.py) | Original initial wind, 11-frame flow playback, and a downloadable ParaView time series. |
 
 ## Challenge programs
 

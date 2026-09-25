@@ -140,7 +140,7 @@ def test_original_data_loader_path_and_normalization(tmp_path):
 
 
 def test_missing_weather_data_fails_explicitly(tmp_path):
-    with pytest.raises(FileNotFoundError, match="--smoke-data"):
+    with pytest.raises(FileNotFoundError, match="Restore data_lat.npy"):
         navier.read_wf_data(data_path=tmp_path / "absent.npy")
 
 

@@ -8,7 +8,9 @@ A smoke pass never certifies convergence. These checks establish only their
 recorded criteria, not full physical or numerical convergence.
 Request each lesson's full training budget explicitly; the default 500-step
 budget is not silently increased for any case. Navier-Stokes checks cover only
-the synthetic Taylor-Green fixture, not weather forecast accuracy.
+the synthetic Taylor-Green fixture, not weather forecast accuracy. The smoke
+suite runs Lab 4 with the original data_lat.npy, just like the student notebook;
+only the convergence regression explicitly selects --smoke-data.
 """
 from __future__ import annotations
 
@@ -481,11 +483,17 @@ def main(argv=None):
                 command = [sys.executable, str(ROOT / case["script"]), *case.get("args", []),
                            "--device", args.device, "--steps", str(steps), "--seed", str(args.seed),
                            "--output-dir", str(destination)]
+                if case_id == "navier_stokes" and suite == "convergence":
+                    # A separate analytic regression, never the student lesson default.
+                    command.append("--smoke-data")
                 if case_id.startswith("operators_"):
                     command.extend(["--data-dir", str(data_dir), "--config", str(configs[case["level"]])])
                 record = execute(command, output, label, args.timeout)
                 record.update(case=case_id, suite=suite, steps=steps,
                               script_sha256=sha256(ROOT / case["script"]))
+                if case_id == "navier_stokes":
+                    record["data_scope"] = ("separate synthetic Taylor-Green regression" if suite == "convergence"
+                                             else "original data_lat.npy student lesson; no future ground truth")
                 if record["passed"]:
                     try:
                         artifacts = validate_artifacts(destination, steps=steps, device=args.device,

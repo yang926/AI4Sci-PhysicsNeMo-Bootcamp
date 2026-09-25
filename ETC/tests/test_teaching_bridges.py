@@ -73,18 +73,22 @@ def test_heat_reduction_keeps_conductivity_and_diffusivity_distinct():
     assert re.search(r"`D1`[^.\n]*`D2`[^.\n]*conductivity", text)
 
 
-def test_lab4_data_choice_and_result_scope_are_immediately_before_training():
+def test_lab4_original_data_and_result_scope_are_immediately_before_training():
     cells = notebook(LAB4)["cells"]
     training_index = next(i for i, cell in enumerate(cells)
                           if cell["cell_type"] == "code" and "subprocess.run" in source(cell))
     explanation = cells[training_index - 1]
     assert explanation["cell_type"] == "markdown"
     text = source(explanation)
-    for concept in ("SMOKE_DATA=True", "SMOKE_DATA=False", "Taylor–Green", "synthetic_velocity_rmse",
-                    "synthetic_pressure_gauge_aligned_rmse",
+    for concept in ("upstream_data_lat_legacy_normalization", "heldout_after.initial_data_rmse",
                     "heldout_after.pde_rmse", "initial_data", "loss.csv",
                     "weather_forecast_validated", "DATA_PROVENANCE.md"):
         assert concept in text
+    full_text = "\n".join(source(cell) for cell in cells)
+    assert "SMOKE_DATA" not in full_text
+    assert "--smoke-data" not in full_text
+    assert "Taylor" not in full_text
+    assert "load_original_flow(OUTPUT)" in source(cells[training_index])
     assert re.search(r"no[^.\n]*future[- ]weather targets", text, re.IGNORECASE)
     assert re.search(r"weather_forecast_validated[^.\n]*false", text, re.IGNORECASE)
     code_strings = {node.value for node in ast.walk(syntax("01_labs/04_navier_stokes/source_code/navier_stokes.py"))

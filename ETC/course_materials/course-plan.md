@@ -10,7 +10,7 @@ Follow [Start Here](../../Start_Here.ipynb) and the [course guide](README.md). T
 | Lab 1 | PINN fundamentals | [Open notebook](../../01_labs/01_pinn/Lab_1_PINN_Fundamentals.ipynb) | Run forward, parameterized and inverse PINNs. |
 | Lab 2 | Projectile ODEs | [Open notebook](../../01_labs/02_projectile/Lab_2_Projectile_Motion.ipynb) | Connect initial conditions and ODE residuals; compare with the analytical trajectory. |
 | Lab 3 | Steady heat conduction | [Open notebook](../../01_labs/03_heat_conduction/Lab_3_Heat_Conduction.ipynb) | Solve a two-material bar and verify interface temperature and heat flux. |
-| Lab 4 | Incompressible Navier–Stokes | [Open notebook](../../01_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb) | Check synthetic Taylor–Green flow; distinguish the optional original-data path from validated weather forecasting. |
+| Lab 4 | Incompressible Navier–Stokes | [Open notebook](../../01_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb) | Start from the original ERA5-derived array, inspect predicted flow over 60 hours, and play the sequence in ParaView. |
 | Challenge 1 | Wave dynamics | [Open notebook](../../02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb) | Level 1–3: constant speed, variable speed, circular Robin boundary. |
 | Challenge 2 | Fluid flow | [Open notebook](../../02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb) | Level 1–3: one fixed obstacle, multiple fixed obstacles, time-dependent flow. |
 | Challenge 3 | Educational climate PDEs | [Open notebook](../../02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb) | Level 1–2: temperature transport and active atmosphere–ocean exchange, with analytical comparisons for the default cases. |
@@ -55,7 +55,7 @@ Use the Introduction to establish coordinates, predictions, derivatives and loss
 | Introduction | Trace coordinates → predicted solution → derivatives → equation/condition losses → parameter update. |
 | Lab 1 | Distinguish forward, parameterized and inverse problems; explain the first problem's boundary conditions and analytical curve. |
 | Labs 2–3 | Identify initial versus interface conditions, and compare predictions with the applicable analytical solution. |
-| Lab 4 | Identify the selected dataset and explain why synthetic-flow accuracy is not weather-forecast accuracy. |
+| Lab 4 | Identify the original wind at time zero, inspect evolving predicted flow, and distinguish initial-data/PDE errors from unavailable future-weather errors. |
 | Challenges 1–3 | Select student mode, edit and save the linked function, rerun safely, and interpret individual condition errors. |
 | Challenge 4 | Explain input-field → solution-field learning and compare FNO/AFNO/PINO using the same held-out data. |
 
