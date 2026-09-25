@@ -363,7 +363,8 @@ def test_uv_existing_wrong_version_is_rejected(tmp_path, monkeypatch):
     assert binary.read_text() == "# Existing tool\n"
 
 
-def test_new_environment_uses_private_prefix_pinned_cuda_and_import_check(installer_workspace, monkeypatch):
+@pytest.mark.parametrize("refresh", [False, True])
+def test_new_environment_uses_private_prefix_pinned_cuda_and_import_check(installer_workspace, monkeypatch, refresh):
     course, home, lock = installer_workspace
     private_uv = home / ".local/share/ai4sci-tools/uv-test/bin/uv"
     monkeypatch.setattr(install, "ensure_uv", lambda actual_home: private_uv)
@@ -379,7 +380,7 @@ def test_new_environment_uses_private_prefix_pinned_cuda_and_import_check(instal
             python.write_text("# Mock Python; never executed\n")
 
     monkeypatch.setattr(install, "run", record_run)
-    prefix = install.ensure_environment(course, home)
+    prefix = install.ensure_environment(course, home, refresh=refresh)
     python = prefix / "bin/python"
     assert prefix.parent == home / ".venvs"
     assert prefix.name == "ai4sci-brev-" + install.environment_key(lock)
@@ -466,6 +467,43 @@ def test_verified_environment_reused_without_installs(installer_workspace, monke
     assert commands == [[str(prefix / "bin/python"), str(course / "ETC/launchable/verify.py")]]
 
 
+def test_refresh_uses_metadata_only_and_does_not_rewrite_ready_environment(installer_workspace, monkeypatch):
+    course, home, lock = installer_workspace
+    prefix = home / ".venvs" / ("ai4sci-brev-" + install.environment_key(lock))
+    (prefix / "bin").mkdir(parents=True)
+    (prefix / "bin/python").write_text("# Fixture\n")
+    marker = prefix / ".ai4sci-environment.json"
+    marker.write_text(json.dumps({"key": install.environment_key(lock), "python": install.PYTHON_VERSION,
+                                  "status": "ready"}))
+    before = marker.read_bytes(), marker.stat().st_mtime_ns
+    commands = []
+    monkeypatch.setattr(install, "run", lambda *args, **kwargs: commands.append([str(arg) for arg in args]))
+    monkeypatch.setattr(install, "ensure_uv", lambda _: pytest.fail("Refresh must not reinstall uv."))
+    assert install.ensure_environment(course, home, refresh=True) == prefix
+    assert len(commands) == 1
+    assert commands[0][:3] == [str(prefix / "bin/python"), "-I", "-c"]
+    assert commands[0][-3:] == [str(prefix), install.PYTHON_VERSION, str(lock)]
+    assert "importlib.metadata" in commands[0][3]
+    assert "import torch" not in commands[0][3]
+    assert (marker.read_bytes(), marker.stat().st_mtime_ns) == before
+
+
+@pytest.mark.parametrize("mismatch", [None, "package", "prefix", "python"])
+def test_metadata_check_detects_corruption_without_importing_scientific_packages(tmp_path, monkeypatch, mismatch):
+    import importlib.metadata
+    lock = tmp_path / "requirements.txt"
+    version = importlib.metadata.version("pytest")
+    lock.write_text("pytest==" + ("0.0.0" if mismatch == "package" else version) + "\n")
+    prefix = Path(sys.prefix) if mismatch != "prefix" else tmp_path / "wrong-prefix"
+    python_version = ".".join(map(str, sys.version_info[:3])) if mismatch != "python" else "0.0.0"
+    monkeypatch.setattr(install, "PYTHON_VERSION", python_version)
+    if mismatch:
+        with pytest.raises(subprocess.CalledProcessError):
+            install.verify_environment_metadata(Path(sys.executable), prefix, lock)
+    else:
+        install.verify_environment_metadata(Path(sys.executable), prefix, lock)
+
+
 @pytest.mark.parametrize("marker", [None, {"key": "wrong"}])
 def test_incomplete_environment_not_overwritten(installer_workspace, monkeypatch, marker):
     course, home, lock = installer_workspace
@@ -506,6 +544,84 @@ def test_kernel_has_unique_name_and_preserves_managed_python_kernel(tmp_path, mo
     assert managed.read_text() == original_managed
     target = data / "labextensions/@jupyter-widgets/jupyterlab-manager"
     assert target.is_symlink() and target.resolve() == extension
+
+
+@pytest.fixture
+def matching_kernel(tmp_path, monkeypatch):
+    data = tmp_path / "jupyter-data"
+    prefix = tmp_path / ".venvs/ai4sci-brev-fixture"
+    spec = data / "kernels" / install.KERNEL_NAME / "kernel.json"
+    spec.parent.mkdir(parents=True)
+    spec.write_text(json.dumps({
+        "argv": [str(prefix / "bin/python"), "-Xfrozen_modules=off", "-m", "ipykernel_launcher", "-f", "{connection_file}"],
+        "display_name": install.KERNEL_DISPLAY_NAME, "language": "python", "env": {"AI4SCI_DEVICE": "cuda"},
+    }))
+    extension = prefix / "share/jupyter/labextensions/@jupyter-widgets/jupyterlab-manager"
+    extension.mkdir(parents=True)
+    (extension / "package.json").write_text('{"version":"5.0.15"}')
+    target = data / "labextensions/@jupyter-widgets/jupyterlab-manager"
+    target.parent.mkdir(parents=True)
+    target.symlink_to(extension, target_is_directory=True)
+    monkeypatch.setattr(subprocess, "check_output", lambda *args, **kwargs: str(data) + "\n")
+    return prefix, spec, target
+
+
+def test_matching_kernel_and_widgets_are_not_reinstalled_or_rewritten(matching_kernel, monkeypatch):
+    prefix, spec, target = matching_kernel
+    before = spec.read_bytes(), spec.stat().st_mtime_ns, target.lstat().st_mtime_ns
+    monkeypatch.setattr(install, "run", lambda *_args, **_kwargs: pytest.fail("Matching integrations must not be reinstalled."))
+    assert install.connect_kernel(prefix, check_only=True) is False
+    assert install.connect_kernel(prefix) is False
+    assert (spec.read_bytes(), spec.stat().st_mtime_ns, target.lstat().st_mtime_ns) == before
+
+
+def test_kernel_drift_preflight_reports_changes_without_writing(matching_kernel, monkeypatch):
+    prefix, spec, target = matching_kernel
+    original = json.loads(spec.read_bytes())
+    original["env"]["AI4SCI_DEVICE"] = "cpu"
+    spec.write_text(json.dumps(original))
+    before = spec.read_bytes(), spec.stat().st_mtime_ns, target.lstat().st_mtime_ns
+    monkeypatch.setattr(install, "run", lambda *_args, **_kwargs: pytest.fail("Preflight must not install a kernel."))
+    assert install.connect_kernel(prefix, check_only=True) is True
+    assert (spec.read_bytes(), spec.stat().st_mtime_ns, target.lstat().st_mtime_ns) == before
+
+
+@pytest.mark.parametrize("drift", [False, True])
+def test_refresh_installer_preflights_only_actual_integration_changes(installer_workspace, monkeypatch, drift):
+    from types import SimpleNamespace
+    course, home, _ = installer_workspace
+    prefix = home / ".venvs/ai4sci-brev-fixture"
+    events = []
+
+    def environment(actual_course, actual_home, *, refresh):
+        assert (actual_course, actual_home, refresh) == (course, home, True)
+        events.append("reuse")
+        return prefix
+
+    def connect(actual_prefix, *, check_only=False):
+        assert actual_prefix == prefix
+        events.append("check-kernel" if check_only else "connect-kernel")
+        return drift
+
+    def idle(actual_home):
+        assert actual_home == home
+        events.append("idle")
+
+    def configure(*args):
+        assert args == (course, prefix, home)
+        events.append("configure")
+        return {"status": "unchanged"}
+
+    monkeypatch.setattr(install, "ensure_environment", environment)
+    monkeypatch.setattr(install, "connect_kernel", connect)
+    monkeypatch.setattr(install, "load_jupyter_setup", lambda: SimpleNamespace(
+        require_managed_idle=idle, configure_jupyter=configure))
+    monkeypatch.setattr(install.Path, "home", lambda: home)
+    monkeypatch.setattr(install.os, "geteuid", lambda: 1000)
+    monkeypatch.setattr(install.shutil, "which", lambda _: "/usr/bin/nvidia-smi")
+    monkeypatch.setattr(install.sys, "argv", ["install.py", "--refresh", "--configure-jupyter", "--course-dir", str(course)])
+    install.main()
+    assert events == ["reuse", "check-kernel", *(["idle", "connect-kernel"] if drift else []), "configure"]
 
 
 def test_unrelated_kernel_with_same_name_is_not_replaced(tmp_path, monkeypatch):

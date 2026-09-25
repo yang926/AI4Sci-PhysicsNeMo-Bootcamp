@@ -4,15 +4,50 @@ All Git traffic is redirected to a temporary local repository. These tests never
 download packages, allocate a GPU, or start a notebook server.
 """
 from pathlib import Path
+import json
 import subprocess
 
 import pytest
 
 from ETC.launchable import bootstrap
+from ETC.launchable import update as course_update
 
 
 REPOSITORY_URL = "https://github.com/example/physicsnemo-course.git"
 CHECKOUT_ERRORS = (ValueError, RuntimeError, subprocess.CalledProcessError)
+
+
+def test_existing_setup_loads_safe_updater_from_fetched_release(launchable_remote, tmp_path, monkeypatch):
+    remote, git, _ = launchable_remote
+    destination = tmp_path / "workspace/PhysicsNeMo"
+    notebook = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": [
+        {"cell_type": "code", "metadata": {}, "id": "c1", "source": ["print(1)\n"],
+         "outputs": [], "execution_count": None}]}
+    (remote / "Start_Here.ipynb").write_text(json.dumps(notebook))
+    git("add", "Start_Here.ipynb")
+    git("commit", "-m", "Real notebook fixture")
+    bootstrap.prepare_launchable_checkout(REPOSITORY_URL, "main", destination)
+    saved = json.loads(json.dumps(notebook))
+    saved["cells"][0]["execution_count"] = 1
+    saved["cells"][0]["outputs"] = [{"output_type": "stream", "name": "stdout", "text": "1\n"}]
+    saved_bytes = json.dumps(saved).encode()
+    (destination / "Start_Here.ipynb").write_bytes(saved_bytes)
+    (destination / "my_answers.py").write_text("answer = 42\n")
+    (remote / "ETC/launchable/update.py").write_bytes(Path(course_update.__file__).read_bytes())
+    notebook["cells"][0]["source"] = ["print(2)\n"]
+    (remote / "Start_Here.ipynb").write_text(json.dumps(notebook))
+    git("add", ".")
+    git("commit", "-m", "Release with safe updater")
+    target = git("rev-parse", "HEAD").stdout.strip()
+    monkeypatch.setattr(bootstrap, "preflight_managed_update", lambda *args: None)
+
+    bootstrap.prepare_launchable_checkout(REPOSITORY_URL, "main", destination)
+
+    assert bootstrap.git(destination, "rev-parse", "HEAD") == target
+    assert json.loads((destination / "Start_Here.ipynb").read_text()) == notebook
+    assert (destination / "my_answers.py").read_text() == "answer = 42\n"
+    backups = list((destination.parent / ".ai4sci-course-backups").glob("*/files/Start_Here.ipynb"))
+    assert len(backups) == 1 and backups[0].read_bytes() == saved_bytes
 
 
 @pytest.fixture

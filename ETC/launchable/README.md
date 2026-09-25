@@ -46,8 +46,8 @@ python3 "$bootstrap_file" --launchable
 The same script is available as [setup.sh](setup.sh) for the builder's File Upload
 option. Use `--launchable`, not the earlier `--update` flag. It uses the existing
 Source checkout at `~/AI4Sci-PhysicsNeMo-Bootcamp` and checks the requested GitHub
-revision. A clean upstream checkout can advance in place; local edits or private
-commits block an upgrade rather than being overwritten. A fresh clone is staged
+revision. Existing checkouts use the safe update path described below; private
+commits and overlapping source edits are never overwritten. A fresh clone is staged
 until complete so a failed download can be retried without a partial course folder.
 
 The script runs as Brev's default non-root user, which must also own the Jupyter
@@ -63,11 +63,11 @@ before setup completed. Do not start `jupyter lab` again in a terminal.
 
 Setup configures the normal per-user Jupyter server configuration, preserving
 existing authentication and network settings. It identifies only Brev's existing
-`jupyter.service`, checks that it belongs to the same user and has no active
-notebook sessions or kernels, then restarts that unit and verifies the effective
-root, notebook URL and kernel list. Unknown service wrappers, conflicting startup
-arguments or active notebooks stop setup with an organizer-facing error. No other
-Jupyter service is stopped. This is an installation step, not a recurring restart.
+`jupyter.service` and checks its owner, effective root, notebook URL and kernel
+list. If the configuration already matches, it does not rewrite it or restart
+the server, even with idle notebook kernels. A configuration change requires an
+idle server before that unit is restarted. Unknown service wrappers and conflicting
+startup arguments stop setup. No other Jupyter service is stopped.
 
 The kernel is installed in the user's Jupyter data directory under the unique
 name `ai4sci-physicsnemo-uv`; the host's `python3` kernel is not overwritten.
@@ -88,6 +88,56 @@ distributing it. Existing failed VMs are not changed merely by editing the templ
 
 ## Updating the course
 
+Save your work, let training finish, and close notebook/text-editor tabs that
+you are editing. Keep idle kernels and the Jupyter server running. In the
+instance terminal, run:
+
+```bash
+bash ~/AI4Sci-PhysicsNeMo-Bootcamp/ETC/launchable/update.sh
+```
+
+On an older instance that does not have `update.sh` yet, the existing command
+downloads the new bootstrap and uses the same safe update path:
+
+```bash
+bash ~/AI4Sci-PhysicsNeMo-Bootcamp/ETC/launchable/setup.sh
+```
+
+For ordinary notebook/Python changes, **do not manually stash files, reinstall
+packages, or restart the Jupyter server**. The update command:
+
+1. Checks the selected GitHub revision and the files that would change.
+2. Preserves local answers, notes and untracked files that do not overlap the
+   release. If learner source and the release both changed the same file, it
+   stops and names the conflict before changing course files.
+3. Backs up execution-only notebook changes before replacing an updated notebook.
+   Backups are private, outside the course folder, under
+   `~/.ai4sci-course-backups/`. The output prints the exact directory; each backup
+   contains the original notebook bytes and a revision/file manifest. Unknown
+   metadata, cell source, notes and attachments are treated as learner content,
+   not disposable output.
+4. Reuses the existing ready Python environment and kernel. Unchanged Jupyter
+   configuration is checked without restarting the server or stopping kernels.
+
+If a notebook that will be replaced is still connected in your browser, the
+command asks you to save and close that tab (or the Jupyter browser tab), then
+rerun the **same command**. You do not need to shut down idle kernels. This keeps
+an old browser editor from saving over the newly downloaded notebook. A running
+training cell must finish before source files are updated. Jupyter's API cannot
+detect every browser text editor or a notebook that never started a kernel;
+closing editing tabs first is still necessary even if the command detects none.
+
+After success, reopen changed notebooks from disk. Python modules already
+imported by a kernel are not hot-reloaded; restart only that notebook's kernel
+before using the changed module. Saved results and learner answers stay on disk.
+An update does not automatically restore old Git stashes over the new files.
+
+If the release changes Python or locked packages, the command says so **before
+updating source** and asks you to save and shut down kernels. Only that kind of
+environment change needs the installation path. If installation subsequently
+fails, the log reports the source revision separately; do not interpret a
+downloaded revision as a completed environment installation.
+
 The checked-in CUDA lock pins all 181 packages, including widgets. Environments
 are named by that lock's fingerprint. A new lock gets a separate environment;
 the previous one is retained. This lock reproduces the local WSL package set,
@@ -96,9 +146,9 @@ An interrupted package download can be retried in the matching installer-owned
 environment. Unrecognized existing environments are never repaired by replacement.
 
 - **New deployments:** the source/bootstrap uses GitHub `main` by default.
-- **Existing learners:** their running workspace does not change when GitHub
-  changes. A deliberate setup rerun uses the canonical folder. Uncommitted work
-  or private commits prevent source upgrades; ignored training outputs remain.
+- **Existing learners:** GitHub changes do not silently alter their files. The
+  explicit update above uses the canonical folder and preserves local work.
+  Ignored training outputs remain; colliding files or private commits stop updates.
 - **Manual bootstrap without `--update`:** retains its original behavior of
   reusing the existing checkout. This is not the shared Launchable's setup command.
 - **Instructor copies:** the manual `--update` option still creates a dated copy
@@ -140,8 +190,10 @@ Deploy **one** rehearsal GPU VM after approving its cost, then check:
    The nickname input/buttons must render as widgets, not plain text. With no
    judge provisioned, registration/submission must remain disabled and practice
    must still work. Do not enable Run All against reference solutions.
-5. Re-run setup before student work: no duplicate folder is created. Confirm
-   learner edits block an attempted source upgrade and remain unchanged.
+5. Re-run setup: no duplicate folder or unnecessary server restart occurs.
+   Check an output-only saved notebook, an unrelated learner answer, an overlapping
+   answer, and a connected notebook tab. Backups and conflict messages must match
+   the cases above; learner work must remain recoverable.
 6. Stop/start that same VM and verify managed Jupyter, storage and course kernel
    persist. Measure cold-start time before issuing 110 deployment links.
 

@@ -15,6 +15,7 @@ import tempfile
 PYTHON_VERSION = "3.12.11"
 UV_VERSION = "0.8.17"
 KERNEL_NAME = "ai4sci-physicsnemo-uv"
+KERNEL_DISPLAY_NAME = "AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)"
 LOCK_NAME = "requirements-linux-cu128.lock.txt"
 
 
@@ -62,7 +63,25 @@ def ensure_uv(home):
     return binary
 
 
-def ensure_environment(course, home):
+def verify_environment_metadata(python, prefix, lock):
+    """Check the interpreter and pinned packages without importing CUDA.
+
+    A ready marker alone is insufficient: the interpreter or packages may have
+    been removed since installation. Distribution metadata does not import
+    torch, PhysicsNeMo, or start GPU contexts.
+    """
+    run(python, "-I", "-c", "\n".join([
+        "import importlib.metadata as metadata, pathlib, sys",
+        "assert pathlib.Path(sys.prefix) == pathlib.Path(sys.argv[1]), 'Wrong environment prefix'",
+        "assert '.'.join(map(str, sys.version_info[:3])) == sys.argv[2], 'Wrong Python version'",
+        "for line in pathlib.Path(sys.argv[3]).read_text().splitlines():",
+        "    if line.strip() and not line.lstrip().startswith('#'):",
+        "        name, expected = line.strip().split('==', 1)",
+        "        assert metadata.version(name) == expected, 'Package differs from course lock: ' + name",
+    ]), prefix, PYTHON_VERSION, lock)
+
+
+def ensure_environment(course, home, *, refresh=False):
     lock = course / "ETC/launchable" / LOCK_NAME
     key = environment_key(lock)
     prefix = home / ".venvs" / ("ai4sci-brev-" + key)
@@ -74,6 +93,7 @@ def ensure_environment(course, home):
     if prefix.exists():
         metadata = json.loads(marker.read_text()) if marker.is_file() else None
         if (not isinstance(metadata, dict) or metadata.get("key") != key or not python.is_file()
+                or metadata.get("python", PYTHON_VERSION) != PYTHON_VERSION
                 or metadata.get("status", "ready") not in {"installing", "ready"}):
             raise ValueError("An unrecognized or incomplete environment exists. It was not overwritten.")
     else:
@@ -97,16 +117,29 @@ def ensure_environment(course, home):
         marker.write_text(json.dumps({"key": key, "python": PYTHON_VERSION, "status": "ready"}) + "\n")
     else:
         print("Reusing the verified course environment:", prefix)
-    run(python, course / "ETC/launchable/verify.py")
+        if refresh:
+            verify_environment_metadata(python, prefix, lock)
+        else:
+            run(python, course / "ETC/launchable/verify.py")
     return prefix
 
 
-def connect_kernel(prefix):
+def connect_kernel(prefix, *, check_only=False):
+    """Connect missing integrations, leaving matching kernel/widget files intact.
+
+    Return whether a change is needed/made. ``check_only`` permits the caller to
+    verify that the managed server is idle before replacing a kernel definition.
+    """
     python = prefix / "bin/python"
     data = Path(subprocess.check_output([str(python), "-c", "from jupyter_core.paths import jupyter_data_dir; print(jupyter_data_dir())"], text=True).strip())
     spec = data / "kernels" / KERNEL_NAME / "kernel.json"
+    existing = None
+    if spec.is_symlink() or spec.parent.is_symlink():
+        raise ValueError("A symlinked course kernelspec requires review; it was not replaced.")
     if spec.exists():
         existing = json.loads(spec.read_text())
+        if not isinstance(existing, dict) or not existing.get("argv"):
+            raise ValueError("The existing course kernelspec is incomplete; it was not replaced.")
         previous = Path(existing["argv"][0])
         if previous != python and (previous.parent.parent.parent != prefix.parent or not previous.parent.parent.name.startswith("ai4sci-brev-")):
             raise ValueError("The course kernel name is already used by an unrelated environment; it was not replaced.")
@@ -124,33 +157,58 @@ def connect_kernel(prefix):
         expected = json.loads((extension / "package.json").read_text()).get("version")
         if installed != expected:
             raise ValueError("An existing widgets frontend has a different version. Review it before updating; it was not overwritten.")
-    run(python, "-m", "ipykernel", "install", "--user", "--name", KERNEL_NAME,
-        "--display-name", "AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)", "--env", "AI4SCI_DEVICE", "cuda")
+    argv = [str(python), "-m", "ipykernel_launcher", "-f", "{connection_file}"]
+    frozen_argv = [str(python), "-Xfrozen_modules=off", *argv[1:]]
+    kernel_matches = (existing is not None and existing.get("argv") in (argv, frozen_argv)
+                      and existing.get("display_name") == KERNEL_DISPLAY_NAME
+                      and existing.get("language") == "python"
+                      and isinstance(existing.get("env"), dict)
+                      and existing["env"].get("AI4SCI_DEVICE") == "cuda")
+    changed = not kernel_matches or not exists
+    if check_only:
+        return changed
+    if not kernel_matches:
+        run(python, "-m", "ipykernel", "install", "--user", "--name", KERNEL_NAME,
+            "--display-name", KERNEL_DISPLAY_NAME, "--env", "AI4SCI_DEVICE", "cuda")
     if not exists:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.symlink_to(extension, target_is_directory=True)
+    return changed
+
+
+def load_jupyter_setup():
+    # Loading the sibling by path works outside the checkout or when the root
+    # package is absent from sys.path.
+    spec = importlib.util.spec_from_file_location("ai4sci_jupyter_setup", Path(__file__).with_name("jupyter.py"))
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--course-dir", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--configure-jupyter", action="store_true", help="Configure the existing Brev Jupyter service for this course")
+    parser.add_argument("--refresh", action="store_true", help="Reuse matching verified dependencies without importing CUDA or reinstalling the kernel")
     args = parser.parse_args()
     if sys.platform != "linux" or os.geteuid() == 0:
         parser.error("Use a Linux NVIDIA GPU VM as the same non-root user as Brev Jupyter.")
     if not shutil.which("nvidia-smi"):
         parser.error("NVIDIA drivers are required. Select a GPU VM; do not install drivers from this script.")
     course = args.course_dir.resolve()
-    prefix = ensure_environment(course, Path.home())
-    connect_kernel(prefix)
+    prefix = ensure_environment(course, Path.home(), refresh=args.refresh)
+    module = None
+    if args.configure_jupyter or args.refresh:
+        module = load_jupyter_setup()
+    if connect_kernel(prefix, check_only=True):
+        if module is not None:
+            module.require_managed_idle(Path.home())
+        connect_kernel(prefix)
     if args.configure_jupyter:
-        # Loading the sibling by path also works when this installer is invoked
-        # from outside the checkout or the root package is absent from sys.path.
-        spec = importlib.util.spec_from_file_location("ai4sci_jupyter_setup", Path(__file__).with_name("jupyter.py"))
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-        module.configure_jupyter(course, prefix, Path.home())
+        result = module.configure_jupyter(course, prefix, Path.home())
+        if result["status"] == "unchanged":
+            print("Managed Jupyter already matches the course. Running kernels were left untouched.")
     # No judge credentials are embedded in this public template. Personal
     # provisioning remains separate and local practice works without a judge.
     print("Course kernel ready. Use Brev's managed Jupyter; no second server was started.")

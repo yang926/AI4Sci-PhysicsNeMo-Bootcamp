@@ -178,6 +178,11 @@ def _require_idle(info):
         raise ValueError("Managed Jupyter has active notebook sessions or kernels. Save and shut them down before rerunning setup.")
 
 
+def require_managed_idle(home):
+    """Read-only preflight for changes to an existing managed environment."""
+    _require_idle(_server_info(inspect_service(Path(home).resolve())))
+
+
 def _check_kernel(info, prefix, *, exclusive=False):
     listing = _api(info, "kernelspecs")
     specs = listing.get("kernelspecs", {})
@@ -186,6 +191,17 @@ def _check_kernel(info, prefix, *, exclusive=False):
         raise ValueError("The managed server cannot see the installed course kernel; no verified setup is possible.")
     if exclusive and (set(specs) != {KERNEL_NAME} or listing.get("default") != KERNEL_NAME):
         raise ValueError("The restarted service did not apply the course-only kernel selection.")
+
+
+def _verify_course_runtime(info, course, prefix):
+    """Verify effective settings, not merely the configuration saved on disk."""
+    if Path(info.get("root_dir", "")) != course:
+        raise ValueError("The managed server did not apply the course root.")
+    _check_kernel(info, prefix, exclusive=True)
+    notebook = _api(info, "contents/Start_Here.ipynb?content=0")
+    if notebook.get("path") != "Start_Here.ipynb" or notebook.get("type") != "notebook":
+        raise ValueError("The course start notebook is not available at the managed server root.")
+    _verify_landing(info)
 
 
 def course_config(existing, course):
@@ -213,7 +229,7 @@ def _private_write(path, content):
 
 
 def configure_jupyter(course, prefix, home, *, allow_active_restart=False):
-    """Apply course UI settings to the existing, idle managed server and verify them.
+    """Leave matching servers untouched; otherwise require idle before reconfiguring.
 
     All service commands address only jupyter.service. sudo is noninteractive;
     unsupported service ownership, launchers, authentication, and busy servers
@@ -226,15 +242,24 @@ def configure_jupyter(course, prefix, home, *, allow_active_restart=False):
         raise ValueError("The course notebook and installed course Python must exist before Jupyter setup.")
     service = inspect_service(home)
     info = _server_info(service)
-    if not allow_active_restart:
-        _require_idle(info)
-    _check_kernel(info, prefix)
     config_dir = home / ".jupyter"
     config_file = config_dir / "jupyter_server_config.json"
     if config_dir.is_symlink() or config_file.is_symlink():
         raise ValueError("A symlinked Jupyter configuration requires review; nothing was overwritten.")
     original = config_file.read_bytes() if config_file.exists() else None
     updated = course_config(original, course)
+    if original is not None and json.loads(original) == json.loads(updated):
+        try:
+            _verify_course_runtime(info, course, prefix)
+        except (OSError, ValueError):
+            # Saved configuration alone is not proof that the running process
+            # loaded it. Drift still needs the normal guarded restart below.
+            pass
+        else:
+            return {"status": "unchanged", "config": config_file, "backup": None, "service": UNIT}
+    if not allow_active_restart:
+        _require_idle(info)
+    _check_kernel(info, prefix)
     backups = home / ".local/share/ai4sci-jupyter-backups"
     if backups.is_symlink():
         raise ValueError("The Jupyter backup directory must not be a symlink.")
@@ -267,14 +292,8 @@ def configure_jupyter(course, prefix, home, *, allow_active_restart=False):
         try:
             restarted = inspect_service(home)
             running = _server_info(restarted)
-            if Path(running.get("root_dir", "")) != course:
-                raise ValueError("The restarted managed server did not apply the course root.")
-            _check_kernel(running, prefix, exclusive=True)
-            notebook = _api(running, "contents/Start_Here.ipynb?content=0")
-            if notebook.get("path") != "Start_Here.ipynb" or notebook.get("type") != "notebook":
-                raise ValueError("The course start notebook is not available at the managed server root.")
-            _verify_landing(running)
-            return {"config": config_file, "backup": stage, "service": UNIT}
+            _verify_course_runtime(running, course, prefix)
+            return {"status": "changed", "config": config_file, "backup": stage, "service": UNIT}
         except (OSError, ValueError, subprocess.CalledProcessError) as exc:
             last_error = exc
             if attempt < 19:

@@ -154,7 +154,7 @@ def managed_server(tmp_path, monkeypatch):
             specs = {jupyter.KERNEL_NAME: {"spec": {"argv": [str(prefix / "bin/python"), "-m", "ipykernel_launcher"]}}}
             if not state["restarted"] or state.get("stale_kernels"):
                 specs["python3"] = {"spec": {"argv": ["/managed/python"]}}
-            return {"default": jupyter.KERNEL_NAME, "kernelspecs": specs}
+            return {"default": state.get("default_kernel", jupyter.KERNEL_NAME), "kernelspecs": specs}
         assert resource == "contents/Start_Here.ipynb?content=0"
         return {"path": "Start_Here.ipynb", "type": "notebook"}
 
@@ -201,6 +201,69 @@ def test_active_notebook_state_blocks_all_config_and_service_changes(managed_ser
     with pytest.raises(ValueError, match="active notebook"):
         jupyter.configure_jupyter(course, prefix, home)
     assert not (home / ".jupyter").exists()
+    assert not state["commands"]
+
+
+def test_matching_busy_server_is_noop_even_with_different_json_formatting(managed_server, monkeypatch):
+    home, course, prefix, state = managed_server
+    config = home / ".jupyter/jupyter_server_config.json"
+    config.parent.mkdir()
+    wanted = json.loads(jupyter.course_config(
+        b'{"IdentityProvider":{"token":"keep-private"},"ServerApp":{"port":8888}}', course))
+    config.write_text(json.dumps(wanted, separators=(",", ":")))
+    original = config.read_bytes()
+    stamp = config.stat().st_mtime_ns
+    state.update(restarted=True, sessions=[{"id": "live-notebook"}], kernels=[{"id": "live-kernel"}])
+    monkeypatch.setattr(jupyter, "_require_idle", lambda _: pytest.fail("Matching configuration must not require idle kernels."))
+    monkeypatch.setattr(jupyter, "_private_write", lambda *_: pytest.fail("A no-op must not write backup/config files."))
+
+    result = jupyter.configure_jupyter(course, prefix, home)
+
+    assert result == {"status": "unchanged", "config": config, "backup": None, "service": "jupyter.service"}
+    assert not state["commands"]
+    assert "sessions" not in state["resources"] and "kernels" not in state["resources"]
+    assert state["landing_verified"]
+    assert config.read_bytes() == original
+    assert config.stat().st_mtime_ns == stamp
+    assert not (home / ".local").exists()
+
+
+@pytest.mark.parametrize("drift", ["root", "kernels", "default", "landing", "config"])
+def test_matching_disk_config_with_effective_drift_does_not_bypass_busy_guard(managed_server, monkeypatch, drift):
+    home, course, prefix, state = managed_server
+    config = home / ".jupyter/jupyter_server_config.json"
+    config.parent.mkdir()
+    config.write_bytes(jupyter.course_config(None, course))
+    state.update(restarted=True, kernels=[{"id": "keep-this-kernel"}])
+    if drift == "root":
+        state["restarted"] = False
+    elif drift == "kernels":
+        state["stale_kernels"] = True
+    elif drift == "default":
+        state["default_kernel"] = "python3"
+    elif drift == "landing":
+        def wrong_landing(_):
+            raise ValueError("Wrong landing path")
+        monkeypatch.setattr(jupyter, "_verify_landing", wrong_landing)
+    else:
+        content = json.loads(config.read_bytes())
+        content["ServerApp"]["default_url"] = "/lab"
+        config.write_text(json.dumps(content))
+    original = config.read_bytes()
+    with pytest.raises(ValueError, match="active notebook"):
+        jupyter.configure_jupyter(course, prefix, home)
+    assert config.read_bytes() == original
+    assert not (home / ".local").exists()
+    assert not state["commands"]
+
+
+def test_public_idle_preflight_never_changes_service(managed_server):
+    home, _, _, state = managed_server
+    jupyter.require_managed_idle(home)
+    assert not state["commands"]
+    state["sessions"] = [{"id": "learner"}]
+    with pytest.raises(ValueError, match="active notebook"):
+        jupyter.require_managed_idle(home)
     assert not state["commands"]
 
 
