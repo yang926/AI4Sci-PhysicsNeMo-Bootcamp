@@ -23,7 +23,7 @@ Every PDE declares `dim`. PhysicsInformer evaluates spatial derivatives; program
 - **Neural Operators:** The lesson's `u − Δu = f` was inconsistent with the old Poisson data generator. New data uses exact Fourier solutions on periodic `[0,1)^2` with independent train/validation/test draws. Historical Poisson HDF5 files remain but are rejected as current training data. All three levels use the same constant-coefficient reaction–diffusion benchmark.
 - **Diffusion:** Composite-bar interfaces enforce physical heat-flux continuity. Parameter definitions, analytical solutions and losses are checked together.
 - **Navier–Stokes:** The original array and its numerical normalization are used in the student Lab. The unresolved pressure conversion and source metadata are described in [data provenance](../../01_labs/04_navier_stokes/DATA_PROVENANCE.md). Output now includes 11 frames from 0 to 60 hours, notebook playback and ParaView VTI/PVD export. The command-line `--smoke-data` option selects a separate analytical regression fixture for tests only; the student notebook has no such switch.
-- **Fluid and Climate:** The main PDE families and domains are retained, but some conditions and defaults have changed as listed below. Fluid Levels 1/2 use viscosity 0.02; Level 3 retains the original 0.01. Obstacles are fixed; two-way fluid–structure coupling is not implemented.
+- **Fluid and Climate:** Original startup and baseline coefficients were restored on 2026-09-25 as listed below. Fluid Levels 1/2 use viscosity 0.02; Level 3 retains the original 0.01. Obstacles are fixed; two-way fluid–structure coupling is not implemented.
 
 See [tutorial migration details](../legacy/tutorial/MIGRATION.md) for Lab-specific changes.
 
@@ -33,15 +33,27 @@ These are changes to the exercises, not just API or presentation updates. The cu
 
 | Exercise | Original source at the reference commit | Current local adaptation |
 |---|---|---|
-| Wave Level 3 | Initial displacement is the sum of two Gaussian bumps. | Both bumps are multiplied by `(1-x*x-y*y)**2` to satisfy the initial Robin boundary condition. This changes the initial displacement. |
-| Fluid Level 3 | Time-independent parabolic inlet and unit section flux, with zero initial velocity. | Inlet velocity and section flux both use `R(t)=1-exp(-(t/tau)**2)` to start smoothly from rest. This changes the boundary conditions. |
-| Climate Level 2 | The notebook's default validation case is decoupled: `gamma0=0`. | The default is `gamma0=0.5`, with a coupled analytical reference. This changes the default validation problem. |
+| Wave Level 3 | Initial displacement is the sum of two Gaussian bumps. | Restored the original two Gaussians; removed the added envelope. The original initial Robin compatibility is not exact and is now stated explicitly. |
+| Fluid Level 3 | Time-independent parabolic inlet and unit section flux, with zero initial velocity. | Restored the original sudden startup; removed the added ramp. The discontinuity at the initial inlet corner is documented. |
+| Climate Level 2 | The notebook's default validation case is decoupled: `gamma0=0`. | Restored `gamma0=0`. The coupled analytical reference remains available for a separate `gamma0=0.5` experiment. |
 
 The Neural Operators data correction above follows the original notebook's reaction–diffusion PDE, not its inconsistent Poisson generator. It is not the same dataset or experiment as the historical HDF5 files.
 
 On 2026-09-25, Lab 4's unintended synthetic default was removed. The original `data_lat.npy` path is again the student lesson, with original-input visualization and full time-series playback. The original six-layer, 256-unit SiLU/weight-normalized network settings, 50,000-update Adam budget, learning-rate decay and constraint scaling are restored through the current tensor API. Sampling uses a direct loop rather than the retired Solver, so execution is not bitwise identical. No pretrained checkpoint is bundled. Taylor–Green remains a separate test fixture; its convergence results must not be attributed to the original-data Lab.
 
-On 2026-09-22, the instructor chose to continue with the current exercises and remove unrelated topic comparisons from teaching materials. The local adaptations above remain documented; they are not purely cosmetic refactors. Further changes to challenge topics or problem definitions require a separate decision.
+The subsequent measured Lab 4 class preset uses 3,000 updates, periodic feature frequencies 1/2/4/8 and output mean/std from the training observations only. It keeps the original array, PDE, six-by-256 SiLU network and constraint weights. This representation change improves initial-fit efficiency but does not establish convergence; the near-initial-time PDE residual can increase. A 3,000-update production run took 202.69 seconds on L4. The restored original representation and 50,000-update configuration are still available with `--recipe upstream`. See [the measurements and limitations](LAB4_EFFICIENCY.md).
+
+The earlier decision to remove unrelated advertised topics did not authorize replacing the exercises or shrinking their tasks. On 2026-09-25 the condition, wave-speed, fluid-geometry, climate-coefficient and analytic-solution exercises were restored as named `student_*` functions. These functions now reach local training and the bounded submission interpreter. Trusted evaluation never substitutes an instructor implementation for a missing learner function. See [the task mapping](CHALLENGE_CONTRACTS.md).
+
+The tensor-loop adaptation still supplies framework plumbing such as model input wiring and sample/constraint assembly; it is not a literal restoration of the old `Domain`/`Solver` API blanks. Mathematical setup tasks are now explicit and graded, including Robin and chip geometry. This distinction must remain visible in instructor explanations.
+
+The class training budgets are also explicit adaptations, not a replay of the
+legacy Hydra settings. Wave 1 uses 20,000 Adam updates and 512/256/256 collocation
+points; the other PINN Challenge levels use 10,000 updates with their documented
+current models and sampling. All three Operators use 3,000 updates on the full
+64-by-64, 8,000/1,000/1,000 dataset. AFNO's original 8-by-8 patches and 256-wide
+embedding are restored. See [PINN measurements](CHALLENGE_EFFICIENCY.md) and
+[Operator measurements](OPERATOR_EFFICIENCY.md), including remaining errors.
 
 ## Original titles and linked files
 

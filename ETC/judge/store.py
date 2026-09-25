@@ -11,7 +11,7 @@ import uuid
 import unicodedata
 
 from .catalog import CHALLENGES, ROOT, fingerprint, rules
-from .expressions import SubmissionError, extract
+from .expressions import SubmissionError
 
 
 class BusyError(ValueError):
@@ -168,7 +168,8 @@ class Store:
                 from .operators import source_nodes
                 source_nodes(source, int(filename.removesuffix(".py").rsplit("_l", 1)[1]))
             else:
-                extract(source)
+                from .contracts import source_nodes
+                source_nodes(source, challenge)
         encoded = json.dumps(sources, sort_keys=True)
         digest = hashlib.sha256(encoded.encode()).hexdigest()
         _, revision = self.require_current_version()

@@ -20,13 +20,13 @@
 data:
   grid_size: 64
 model:
-  patch_size: [4, 4]
-  embed_dim: 64
+  patch_size: [8, 8]
+  embed_dim: 256
   depth: 4
   num_blocks: 8
   mlp_ratio: 4.0
 training:
-  steps: 10000
+  steps: 3000
   batch_size: 32
   learning_rate: 0.001
   cpu_threads: 2

@@ -1,0 +1,13 @@
+# FP32 class preset measured against the five-time analytical wave reference.
+# Same PDE, initial/boundary data and 3x64 network; more points/updates than the
+# old 200-step notebook. See ETC/course_materials/CHALLENGE_EFFICIENCY.md.
+training:
+  steps: 20000
+  learning_rate: 0.001
+model:
+  width: 64
+  layers: 3
+samples:
+  interior: 512
+  initial: 256
+  boundary: 256

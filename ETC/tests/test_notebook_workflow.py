@@ -42,6 +42,8 @@ def mock_results(output, metrics):
     (output / "metrics.json").write_text(json.dumps({"seed": 42, **metrics}), encoding="utf-8")
     for name in ("loss.csv", "model.pt", "predictions.npz"):
         (output / name).write_text("mock artifact for UI workflow tests", encoding="utf-8")
+    from PIL import Image
+    Image.new("RGB", (1, 1), color="white").save(output / "openfoam_comparison.png")
 
 
 def setup_namespace(relative, monkeypatch, tmp_path, reference="1"):
@@ -73,7 +75,7 @@ def test_setup_respects_automation_and_displays_actual_mode(relative, reference,
     expected = False  # All student notebooks ignore an inherited demo environment.
     assert namespace["USE_REFERENCE"] is expected
     assert namespace["DEVICE"] == "cuda"
-    assert namespace["STEPS"] == 2
+    assert namespace["STEPS"] == ({1: 2, 2: 2, 3: 2} if "/01_wave/" in relative else 2)
     assert namespace["OUTPUT_BASE"] == tmp_path / "runs"
     message = capsys.readouterr().out
     assert ("REFERENCE" if expected else "STUDENT") in message.upper()

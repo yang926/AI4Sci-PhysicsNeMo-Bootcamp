@@ -63,6 +63,7 @@ def _check_cli(argv):
         "--KernelSpecManager.allowed_kernelspecs", "--KernelSpecManager.whitelist",
         "--KernelSpecManager.ensure_native_kernel", "--MultiKernelManager.default_kernel_name",
         "--MappingKernelManager.default_kernel_name",
+        "--ServerApp.jpserver_extensions",
     }
     if any(arg.split("=", 1)[0] in overrides or arg == "--" for arg in argv):
         raise ValueError("jupyter.service has command-line course/config overrides. An administrator must remove those overrides before setup; the service was not changed.")
@@ -202,6 +203,18 @@ def _verify_course_runtime(info, course, prefix):
     if notebook.get("path") != "Start_Here.ipynb" or notebook.get("type") != "notebook":
         raise ValueError("The course start notebook is not available at the managed server root.")
     _verify_landing(info)
+    _verify_proxy(info)
+
+
+def _verify_proxy(info):
+    request = _local_request(info, "server-proxy/servers-info")
+    try:
+        with build_opener(ProxyHandler({}), _NoRedirect()).open(request, timeout=5) as response:
+            result = json.load(response)
+        if not isinstance(result, dict) or not isinstance(result.get("server_processes"), list):
+            raise ValueError("Unexpected Jupyter proxy response")
+    except (OSError, ValueError) as exc:
+        raise ValueError("The managed server has not enabled its authenticated TensorBoard proxy.") from exc
 
 
 def course_config(existing, course):
@@ -219,6 +232,10 @@ def course_config(existing, course):
         if not isinstance(config.setdefault(section, {}), dict):
             raise ValueError("Existing Jupyter configuration section is not an object: " + section)
         config[section].update(fields)
+    extensions = config["ServerApp"].setdefault("jpserver_extensions", {})
+    if not isinstance(extensions, dict):
+        raise ValueError("Existing Jupyter server extension settings are not an object.")
+    extensions["jupyter_server_proxy"] = True
     return (json.dumps(config, indent=2) + "\n").encode()
 
 

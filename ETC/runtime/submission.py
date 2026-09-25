@@ -7,14 +7,15 @@ from pathlib import Path
 from uuid import uuid4
 
 from ETC.judge.catalog import CHALLENGES
-from ETC.judge.expressions import SubmissionError, extract
+from ETC.judge.expressions import SubmissionError
+from ETC.judge.contracts import function_names, source_nodes as problem_source_nodes
 from .judge_client import validate_url
 
 
 def submission_html(challenge, reference, judge_url=""):
     spec = CHALLENGES[str(challenge)]
     exercises = ("build_datasets, build_model and PINO's ReactionDiffusionPDE" if str(challenge) == "4"
-                 else "student_equations")
+                 else ", ".join(function_names(challenge)))
     mode = ("Instructor demonstration: submission is disabled. Switch USE_REFERENCE to False and rerun the submission cell."
             if reference else "Student practice: graphs and local errors are feedback, not a submitted score.")
     link = "If the judge connection is not configured, you can still practice. The submission controls below check the private workspace configuration."
@@ -51,7 +52,7 @@ def collect_submission(challenge, lesson_dir, *, levels=(1,), reference=False):
             from ETC.judge.operators import source_nodes
             nodes = source_nodes(source, level)
         else:
-            nodes = [extract(source)]
+            nodes = problem_source_nodes(source, challenge)
         # Validation guards may raise ValueError; unfinished exercise markers
         # must never be mistaken for a completed implementation.
         for function in nodes:

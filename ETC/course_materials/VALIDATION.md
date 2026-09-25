@@ -1,5 +1,35 @@
 # Validation record: PhysicsNeMo 2.2.2
 
+## 2026-09-25: original tasks and teaching workflows
+
+The earlier execution checks did not establish preservation of the original
+exercise scope. The [task mapping](CHALLENGE_CONTRACTS.md) now records restored
+conditions, wave speeds, chip geometry, climate coefficients and analytic
+solutions, together with the framework scaffolding that remains provided.
+The submission interpreter and v3 completion rubric check those tasks together.
+Fully correct submissions tie; numerical errors are feedback, not extra points.
+
+- The clean publication snapshot passed **1,033 CPU tests and 12 subtests**, with
+  30 explicitly optional checks skipped. This is not a full-GPU convergence test.
+- Strict publication checks passed: 104 Python files, 12 notebooks, local
+  navigation links, all 18 execution modes, all 11 Challenge levels and all 45 original
+  data/media assets. There were no saved-output exemptions or static warnings.
+- The separately staged judge contract changes passed **92 tests**, with five
+  optional checks skipped. Existing unrelated projector/UI edits were excluded
+  from that publication snapshot.
+- [Lab 2/3 workflow checks](LAB23_TEACHING_RESTORATION.md) cover actual VTK
+  readers, authenticated Jupyter/TensorBoard proxy access, notebook execution and
+  checkpoint inference without training.
+- Numerical measurements are separate: [PINN Challenges](CHALLENGE_EFFICIENCY.md),
+  [full-data Operators](OPERATOR_EFFICIENCY.md), and [original-data Lab 4](LAB4_EFFICIENCY.md).
+  Those reports state hardware, settings, errors and limitations, including
+  runs that did not improve or did not converge sufficiently.
+
+Historical wording below reflects previous implementations. In particular,
+the altered Wave 3 / Fluid 3 / Climate 2 conditions described in the September
+21 record are no longer the student baseline. Asset retention and successful
+execution must not be presented as proof of unchanged teaching content.
+
 ## 2026-09-25: FP32 Lab accuracy
 
 The current Lab settings and measured CPU/L4 results are recorded in

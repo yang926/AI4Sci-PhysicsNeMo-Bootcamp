@@ -17,6 +17,20 @@ UV_VERSION = "0.8.17"
 KERNEL_NAME = "ai4sci-physicsnemo-uv"
 KERNEL_DISPLAY_NAME = "AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)"
 LOCK_NAME = "requirements-linux-cu128.lock.txt"
+# The managed Jupyter environment is separate from the CUDA course kernel.
+# Add missing packages only; compatible existing server dependencies stay put.
+PROXY_PACKAGES = {
+    "jupyter-server-proxy": "4.6.0", "simpervisor": "1.0.0", "aiohttp": "3.14.3",
+    "aiohappyeyeballs": "2.7.1", "aiosignal": "1.4.0", "attrs": "26.1.0",
+    "frozenlist": "1.8.0", "multidict": "6.9.0", "propcache": "0.5.4",
+    "yarl": "1.25.1", "idna": "3.20", "typing-extensions": "4.16.0",
+}
+PROXY_COMPATIBILITY = {
+    "jupyter-server-proxy": "==4.6.0", "simpervisor": "==1.0.0", "aiohttp": ">=3.14.3,<4",
+    "aiohappyeyeballs": ">=2.5.0", "aiosignal": ">=1.4.0", "attrs": ">=17.3.0",
+    "frozenlist": ">=1.1.1", "multidict": ">=4.5,<7", "propcache": ">=0.2.1",
+    "yarl": ">=1.17.0,<2", "idna": ">=2.0", "typing-extensions": ">=4.4",
+}
 
 
 def run(*args, **kwargs):
@@ -186,6 +200,74 @@ def load_jupyter_setup():
     return module
 
 
+def managed_server_python(service, home):
+    """Accept only the verified user's virtualenv, never mutate system Python."""
+    argv = service.argv
+    if argv and Path(argv[0]).name.startswith("python"):
+        python = Path(argv[0])
+    elif argv and Path(argv[0]).name in {"jupyter", "jupyter-lab", "jupyter-server"}:
+        first = Path(argv[0]).open(encoding="utf-8").readline().strip()
+        if not first.startswith("#!/") or " " in first:
+            raise ValueError("The Jupyter entrypoint has an unsupported Python shebang.")
+        python = Path(first[2:])
+    else:
+        raise ValueError("Cannot identify the managed Jupyter Python interpreter.")
+    if (not python.is_absolute() or not python.is_relative_to(home)
+            or python.parent.name != "bin" or not (python.parent.parent / "pyvenv.cfg").is_file()
+            or not python.is_file()):
+        raise ValueError("Jupyter proxy setup requires the existing user-owned server virtualenv; system Python was not changed.")
+    return python
+
+
+def proxy_environment(python):
+    script = "\n".join([
+        "import importlib.metadata as m, json, pathlib, sys",
+        "from packaging.version import Version",
+        "from packaging.specifiers import SpecifierSet",
+        "assert pathlib.Path(sys.prefix) == pathlib.Path(sys.argv[1]), 'Unexpected server environment'",
+        "assert sys.version_info >= (3, 11), 'Server Python 3.11 or later required'",
+        "required = {'jupyter-server': '1.24.0', 'tornado': '6.1.0', 'traitlets': '5.1.0'}",
+        "for name, minimum in required.items():",
+        "    assert Version(m.version(name)) >= Version(minimum), 'Incompatible existing server dependency: ' + name",
+        "versions = {}",
+        "constraints = json.loads(sys.argv[2])",
+        "for name in constraints:",
+        "    try: versions[name] = m.version(name)",
+        "    except m.PackageNotFoundError: versions[name] = None",
+        "    if versions[name] is not None:",
+        "        assert Version(versions[name]) in SpecifierSet(constraints[name]), 'Incompatible existing server dependency: ' + name",
+        "print(json.dumps(versions))",
+    ])
+    return json.loads(subprocess.check_output([str(python), "-I", "-c", script,
+                                               str(python.parent.parent), json.dumps(PROXY_COMPATIBILITY)], text=True))
+
+
+def ensure_server_proxy(home, module):
+    """Install only missing proxy pins, after checking the known server is idle."""
+    home = Path(home).resolve()
+    service = module.inspect_service(home)
+    python = managed_server_python(service, home)
+    installed = proxy_environment(python)
+    wrong = {name: installed.get(name) for name in ("jupyter-server-proxy", "simpervisor")
+             if installed.get(name) is not None and installed[name] != PROXY_PACKAGES[name]}
+    if wrong:
+        raise ValueError("Existing Jupyter proxy packages differ from the tested pins; review before replacing: " + str(wrong))
+    missing = [f"{name}=={version}" for name, version in PROXY_PACKAGES.items() if installed.get(name) is None]
+    if missing:
+        module.require_managed_idle(home)
+        uv = ensure_uv(home)
+        current = module.inspect_service(home)
+        if current.pid != service.pid or current.argv != service.argv:
+            raise ValueError("Managed Jupyter changed during proxy setup; no packages were installed.")
+        module.require_managed_idle(home)
+        run(uv, "pip", "install", "--python", python, "--no-deps", *missing)
+        verified = proxy_environment(python)
+        if any(verified.get(name) is None for name in PROXY_PACKAGES):
+            raise ValueError("Managed Jupyter proxy package verification failed.")
+        run(python, "-I", "-c", "import aiohttp, jupyter_server_proxy, simpervisor")
+    return bool(missing)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--course-dir", type=Path, default=Path(__file__).resolve().parents[2])
@@ -201,6 +283,8 @@ def main():
     module = None
     if args.configure_jupyter or args.refresh:
         module = load_jupyter_setup()
+    if args.configure_jupyter:
+        ensure_server_proxy(Path.home(), module)
     if connect_kernel(prefix, check_only=True):
         if module is not None:
             module.require_managed_idle(Path.home())

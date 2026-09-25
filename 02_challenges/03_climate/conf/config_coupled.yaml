@@ -16,7 +16,7 @@
 
 # PhysicsNeMo 2.2.2 explicit-loop config; no Hydra defaults.
 training:
-  steps: 40000
+  steps: 10000
   learning_rate: 0.001
 model:
   width: 64
@@ -35,4 +35,4 @@ physics:
   Q_o0: 0.0
   Teq_a0: 0.0
   # Positive exchange couples the two fields; use 0.0 for the uncoupled comparison.
-  gamma0: 0.5
+  gamma0: 0.0

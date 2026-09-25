@@ -13,6 +13,7 @@ from pathlib import Path
 import sys
 import time
 import traceback
+import numpy as np
 
 import nbformat
 from nbclient import NotebookClient
@@ -30,13 +31,31 @@ def check_artifacts(case_id, target, manifest, steps, device):
     """A rendered notebook is not enough: verify every expected training result."""
     expected = (1 if case_id == 'wave_reference' else
                 sum(run['course'] == case_id for run in manifest['runs']))
-    files = sorted((target / 'training').rglob('metrics.json'))
+    all_files = sorted((target / 'training').rglob('metrics.json'))
+    inference = [path for path in all_files if json.loads(path.read_text()).get('mode') == 'inference']
+    files = [path for path in all_files if path not in inference]
     if len(files) != expected:
         raise AssertionError(f'{case_id}: expected {expected} completed training runs, found {len(files)}')
-    return [{"path": str(path.parent.relative_to(target)),
+    results = [{"path": str(path.parent.relative_to(target)),
              **validate_artifacts(path.parent, steps=steps, device=device,
                                   expected_version=manifest['physicsnemo'], seed=42)}
             for path in files]
+    if case_id == 'lab3':
+        if len(inference) != 1:
+            raise AssertionError('lab3: expected one saved-model inference run')
+        path = inference[0]
+        metrics = json.loads(path.read_text())
+        checkpoint = Path(metrics['source_checkpoint'])
+        if (metrics.get('optimizer_steps') != 0 or checkpoint.parent not in [p.parent for p in files]
+                or metrics['checkpoint_sha256'] != hashlib.sha256(checkpoint.read_bytes()).hexdigest()):
+            raise AssertionError('lab3: inference must reuse an unchanged training checkpoint without updates')
+        with np.load(path.parent / 'material_fields.npz', allow_pickle=False) as fields:
+            if set(np.unique(fields['material'])) != {1, 2} or not all(np.isfinite(fields[k]).all() for k in fields.files):
+                raise AssertionError('lab3: invalid two-material inference fields')
+        results.append({'path': str(path.parent.relative_to(target)), 'mode': 'inference', 'passed': True})
+    elif inference:
+        raise AssertionError(f'{case_id}: unexpected inference artifacts')
+    return results
 
 
 def main():

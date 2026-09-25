@@ -118,7 +118,11 @@ def test_each_challenge_uses_shared_safe_results():
         sources = ["".join(cell["source"]) for cell in notebook["cells"] if cell["cell_type"] == "code"]
         setup = next(source for source in sources if "def show_mode():" in source)
         assert "from ETC.runtime.notebook import" in setup
-        assert "validate_settings(DEVICE, STEPS, USE_REFERENCE)" in setup
+        if path.parent.name == "01_wave":
+            assert "for steps in STEPS.values():" in setup
+            assert "validate_settings(DEVICE, steps, USE_REFERENCE)" in setup
+        else:
+            assert "validate_settings(DEVICE, STEPS, USE_REFERENCE)" in setup
         results = "\n".join(sources)
         assert "reference=USE_REFERENCE" in results
         assert "show_results(" in results

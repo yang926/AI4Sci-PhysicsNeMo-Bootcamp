@@ -150,8 +150,9 @@ def test_notebook_only_runs_original_data_and_provides_complete_playback():
     assert "not a future reference" in all_source
     training = next(source for source in code if "subprocess.run(" in source)
     assert training.index("load_original_flow(OUTPUT)") < training.index('RUN_COMPLETED["navier_stokes"] = True')
-    assert 'os.environ.get("AI4SCI_STEPS", "50000")' in "\n".join(code)
-    assert "50,000" in all_source and "2,048 samples per constraint" in all_source
+    assert 'os.environ.get("AI4SCI_STEPS", "3000")' in "\n".join(code)
+    assert "3,000" in all_source and "2,048 samples per constraint" in all_source
+    assert "--recipe upstream" in all_source and "50,000" in all_source
     assert "six 256-unit hidden layers" in all_source
     assert "L-BFGS" not in all_source
     assert "multiplied by 10" not in all_source

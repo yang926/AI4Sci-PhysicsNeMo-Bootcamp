@@ -24,7 +24,7 @@ from ETC.runtime.artifacts import staged_output
 
 def parse_args(script, description, config_name):
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("--reference", action="store_true", help="Use the complete reference PDE; default uses your student_equations function.")
+    parser.add_argument("--reference", action="store_true", help="Use all instructor exercise functions; default uses your equations, conditions, and level-specific geometry/parameters.")
     parser.add_argument("--config", type=Path, default=Path(script).parent / "conf" / config_name)
     parser.add_argument("--steps", type=int)
     parser.add_argument("--seed", type=int, default=42)
@@ -93,8 +93,17 @@ def create_informer(pde, device):
     if (not isinstance(pde.equations, dict) or not pde.equations
             or any(not isinstance(name, str) or not name for name in pde.equations)):
         raise ValueError("Equations must be a nonempty mapping of residual names to SymPy expressions")
-    return PhysicsInformer(required_outputs=list(pde.equations), equations=pde,
-                           grad_method="autodiff", device=device)
+    # residuals() supplies first/second time derivatives explicitly. Register
+    # only those actually used, retaining errors for absent tensors instead of
+    # hiding PhysicsInformer warnings globally.
+    from sympy import Derivative
+    from ETC.runtime.labs import informer
+    supplied = set()
+    for expression in pde.equations.values():
+        for derivative in getattr(expression, "atoms", lambda *_: set())(Derivative):
+            if all(str(variable) == "t" for variable in derivative.variables) and len(derivative.variables) <= 2:
+                supplied.add(derivative.expr.func.__name__ + "__t" * len(derivative.variables))
+    return informer(pde, device, supplied_derivatives=supplied)
 
 
 def create_evaluation_informer(pde_type, device, **parameters):
@@ -189,7 +198,7 @@ def evaluation_grid(device, time_end, circle=False, fluid_blocks=None, side=24):
     return coordinates, time
 
 
-def save_results(args, config, model, history, coordinates, time, names, metrics, reference=None, notes=()):
+def save_results(args, config, model, history, coordinates, time, names, metrics, reference=None, notes=(), extra_artifacts=None):
     """Publish complete results only, preserving existing results on any failure.
 
     All serialization and plotting finish in a temporary sibling directory.
@@ -210,6 +219,8 @@ def save_results(args, config, model, history, coordinates, time, names, metrics
         with staged_output(destination) as staging:
             _write_results(staging, args, config, model, history, coordinates, time,
                            names, dict(metrics), reference, notes)
+            if extra_artifacts is not None:
+                extra_artifacts(staging)
     finally:
         model.train(was_training)
     print("Results:", destination)

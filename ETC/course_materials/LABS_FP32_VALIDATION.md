@@ -3,7 +3,13 @@
 This report records the earlier Adam/L-BFGS recipes tested below. Lab 1 now
 uses 1,000 L-BFGS calls without Adam; its separate results are recorded in
 [LAB1_LBFGS_VALIDATION.md](LAB1_LBFGS_VALIDATION.md). The older Lab 1 L4 results
-below do not validate the new recipe. Labs 2–4 retain their training settings.
+below do not validate the new recipe. Lab 4 below is the historical synthetic
+Taylor–Green check, not the current original-data lesson. Its accuracy numbers
+must not be used to certify the weather-array run. See
+[LAB4_RESTORATION.md](LAB4_RESTORATION.md) and
+[LAB4_EFFICIENCY.md](LAB4_EFFICIENCY.md) for the restored problem and measurements.
+Lab 2 and Lab 3 retain the numerical recipes tested here; their restored
+TensorBoard/ParaView/inference workflow has separate regression tests.
 
 Date: 2026-09-25. PhysicsNeMo 2.2.2, PyTorch 2.10.0+cu128, Python 3.12.
 Training models and coordinates use FP32, not FP64 or automatic mixed precision.

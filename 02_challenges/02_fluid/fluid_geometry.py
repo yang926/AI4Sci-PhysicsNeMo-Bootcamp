@@ -84,18 +84,55 @@ def sample_flux(lines, points, blocks, device, time_end=None):
     return coordinates, time, height
 
 
-def openfoam_metrics(model, device):
-    """Compare L1 with supplied CFD data, not an analytic solution."""
+def openfoam_fields(model, device):
+    """All supplied CFD points, evaluated in bounded batches without gradients."""
     from ETC.runtime.pinn import evaluate_fields
     source = Path(__file__).parent / "examples_sym/chip_2d/openfoam/2D_chip_fluid0.csv"
     if not source.is_file():
-        return {"openfoam_reference_available": False}
+        raise FileNotFoundError("The supplied Level 1 OpenFOAM comparison file is missing")
     data = np.loadtxt(source, delimiter=",", skiprows=1)
-    data = data[np.linspace(0, len(data) - 1, min(1024, len(data)), dtype=int)]
-    xy = torch.tensor(data[:, [5, 6]] - [2.5, .5], dtype=torch.float32, device=device)
+    coordinates = data[:, [5, 6]] - [2.5, .5]
+    predictions = []
     with torch.no_grad():
-        prediction = evaluate_fields(model, xy, None, ["u", "v", "p"])
-    result = {"openfoam_reference_available": True, "openfoam_evaluation_points": len(data)}
-    for name, column in (("u", 1), ("v", 2), ("p", 4)):
-        result["openfoam_" + name + "_rmse"] = float(np.sqrt(np.mean((prediction[name].cpu().numpy().ravel() - data[:, column]) ** 2)))
+        for start in range(0, len(data), 1024):
+            xy = torch.tensor(coordinates[start:start + 1024], dtype=torch.float32, device=device)
+            fields = evaluate_fields(model, xy, None, ["u", "v", "p"])
+            predictions.append(torch.cat([fields[name] for name in ("u", "v", "p")], dim=1).cpu().numpy())
+    return coordinates, data[:, [1, 2, 4]], np.concatenate(predictions)
+
+
+def openfoam_metrics(model, device):
+    """Full supplied L1 CFD comparison, not an analytic solution or ranking score."""
+    coordinates, reference, prediction = openfoam_fields(model, device)
+    result = {"openfoam_reference_available": True, "openfoam_evaluation_points": len(coordinates)}
+    for index, name in enumerate(("u", "v", "p")):
+        result["openfoam_" + name + "_rmse"] = float(np.sqrt(np.mean((prediction[:, index] - reference[:, index]) ** 2)))
     return result
+
+
+def write_openfoam_comparison(model, device, destination):
+    """Reference, prediction and signed error with matched field color scales."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    coordinates, reference, prediction = openfoam_fields(model, device)
+    if not np.isfinite(prediction).all():
+        raise FloatingPointError("Non-finite CFD comparison predictions")
+    figure, axes = plt.subplots(3, 3, figsize=(15, 8), constrained_layout=True)
+    for row, name in enumerate(("u", "v", "p")):
+        actual, expected = prediction[:, row], reference[:, row]
+        low, high = min(actual.min(), expected.min()), max(actual.max(), expected.max())
+        error = actual - expected
+        error_limit = max(float(np.abs(error).max()), 1e-12)
+        for column, (values, label) in enumerate(((expected, "OpenFOAM"), (actual, "PINN"), (error, "PINN minus OpenFOAM"))):
+            axis = axes[row, column]
+            limits = (-error_limit, error_limit) if column == 2 else (low, high)
+            plot = axis.scatter(coordinates[:, 0], coordinates[:, 1], c=values, s=1,
+                                cmap="coolwarm", vmin=limits[0], vmax=limits[1], rasterized=True)
+            axis.set(title=f"{name}: {label}", xlabel="x", ylabel="y", xlim=(-2.5, 2.5), ylim=(-.5, .5), aspect="equal")
+            figure.colorbar(plot, ax=axis, shrink=.75)
+    figure.suptitle(f"Level 1 only: all {len(coordinates):,} supplied CFD points. Each error panel has its own signed scale.")
+    try:
+        figure.savefig(Path(destination) / "openfoam_comparison.png", dpi=140)
+    finally:
+        plt.close(figure)

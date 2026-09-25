@@ -21,9 +21,11 @@ CASES = [(key, name) for key, spec in CHALLENGES.items() if key != "4" for name 
 
 
 def answer(challenge, filename):
+    from ETC.judge.contracts import function_names
     source = lesson_path(challenge, filename).read_text()
-    function = next(n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name == "reference_equations")
-    return ast.get_source_segment(source, function).replace("def reference_equations(", "def student_equations(", 1)
+    definitions = {n.name: n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
+    return "\n\n".join(ast.get_source_segment(source, definitions[name.replace("student_", "reference_", 1)])
+        .replace("def reference_", "def student_", 1) for name in function_names(challenge))
 
 
 @pytest.fixture
@@ -49,6 +51,9 @@ def test_every_equation_contract_accepts_reference_and_rejects_unfinished(challe
         check_equations(module, lesson_path(challenge, filename).read_text(), challenge)
     # Defaults containing Python floats must work during real training too.
     module.student_equations = fn
+    from ETC.judge.contracts import check_setup
+    for name, function in check_setup(module, answer(challenge, filename), challenge)[0].items():
+        setattr(module, name, function)
     pde_type = getattr(module, "WaveEquation2D", getattr(module, "NavierStokes2D", getattr(module, "ClimatePDE", None)))
     assert pde_type(reference=False).equations
 
@@ -98,7 +103,7 @@ def test_quality_scoring_requires_all_metrics_and_equation_gate():
     settings = rules(2)
     assert level_points({"pde": False}, {}, ["rmse"], settings)["score"] == 0
     assert level_points({"pde": True}, {"rmse": 0}, ["rmse"], settings)["score"] == 100
-    assert level_points({"pde": True}, {"rmse": 1}, ["rmse"], settings)["score"] == 75
+    assert level_points({"pde": True}, {"rmse": 1}, ["rmse"], settings)["score"] == 100
     for metrics in ({}, {"rmse": float("nan")}, {"rmse": -1}, {"rmse": True}):
         with pytest.raises(RuntimeError):
             level_points({"pde": True}, metrics, ["rmse"], settings)

@@ -166,6 +166,7 @@ def managed_server(tmp_path, monkeypatch):
 
     monkeypatch.setattr(jupyter, "_api", api)
     monkeypatch.setattr(jupyter, "_verify_landing", lambda _: state.update(landing_verified=True))
+    monkeypatch.setattr(jupyter, "_verify_proxy", lambda _: state.update(proxy_verified=True))
     monkeypatch.setattr(jupyter, "_command", command)
     monkeypatch.setattr(jupyter.time, "sleep", lambda _: None)
     return home, course, prefix, state
@@ -356,6 +357,30 @@ def test_actual_root_redirect_must_point_to_course_workspace(monkeypatch, locati
     else:
         with pytest.raises(ValueError, match="does not redirect"):
             jupyter._verify_landing(info)
+            # TensorBoard is reached through the same authenticated server and
+            # keeps its own listener on loopback, including non-root base URLs.
+            pytest.importorskip("jupyter_server_proxy")
+            pytest.importorskip("tensorboard")
+            jupyter._verify_proxy(info)
+            from ETC.runtime.lab_visualization import tensorboard_link, training_writer
+            with training_writer(tmp_path / "training-run") as record:
+                record({"step": 1, "loss": .25})
+            html = tensorboard_link(tmp_path / "_tensorboard", base_url=info.get("base_url", "/")).data
+            import re
+            route = re.search(r'href="([^"]+)"', html).group(1)
+            assert route.startswith("/proxy/")
+            with jupyter.build_opener(jupyter.ProxyHandler({})).open(
+                    jupyter._local_request(info, route.lstrip("/")), timeout=10) as response:
+                page = response.read().decode()
+            assert "TensorBoard" in page and "<html" in page.lower()
+            request = jupyter._local_request(info, route.lstrip("/") + "data/plugins_listing")
+            with jupyter.build_opener(jupyter.ProxyHandler({})).open(request, timeout=10) as response:
+                plugins = json.load(response)
+            assert "scalars" in plugins
+            from urllib.request import Request
+            unauthenticated = Request(request.full_url)
+            with pytest.raises((ValueError, HTTPError)):
+                jupyter.build_opener(jupyter.ProxyHandler({}), jupyter._NoRedirect()).open(unauthenticated, timeout=5)
 
 
 def test_real_jupyter_lab_loads_normal_config_and_course_landing(tmp_path):

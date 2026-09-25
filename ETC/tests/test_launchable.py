@@ -614,6 +614,7 @@ def test_refresh_installer_preflights_only_actual_integration_changes(installer_
 
     monkeypatch.setattr(install, "ensure_environment", environment)
     monkeypatch.setattr(install, "connect_kernel", connect)
+    monkeypatch.setattr(install, "ensure_server_proxy", lambda *args: events.append("proxy-check"))
     monkeypatch.setattr(install, "load_jupyter_setup", lambda: SimpleNamespace(
         require_managed_idle=idle, configure_jupyter=configure))
     monkeypatch.setattr(install.Path, "home", lambda: home)
@@ -621,7 +622,7 @@ def test_refresh_installer_preflights_only_actual_integration_changes(installer_
     monkeypatch.setattr(install.shutil, "which", lambda _: "/usr/bin/nvidia-smi")
     monkeypatch.setattr(install.sys, "argv", ["install.py", "--refresh", "--configure-jupyter", "--course-dir", str(course)])
     install.main()
-    assert events == ["reuse", "check-kernel", *(["idle", "connect-kernel"] if drift else []), "configure"]
+    assert events == ["reuse", "proxy-check", "check-kernel", *(["idle", "connect-kernel"] if drift else []), "configure"]
 
 
 def test_unrelated_kernel_with_same_name_is_not_replaced(tmp_path, monkeypatch):

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-RUBRIC = "bootcamp-pilot-v2"
+RUBRIC = "bootcamp-task-completion-pilot-v3"
 CHALLENGES = {
     "1": {"title": "Wave Dynamics", "directory": "01_wave", "files": ["wave_l1.py", "wave_l2.py", "wave_l3.py"]},
     "2": {"title": "Fluid Flow", "directory": "02_fluid", "files": ["chip_2d_l1.py", "chip_2d_l2.py", "chip_2d_l3.py"]},
@@ -29,13 +29,14 @@ def rules(steps=200, device="cpu"):
     # These are provisional scales, not calibrated claims about convergence.
     return {"rubric": RUBRIC, "status": "pilot_not_official", "steps": steps,
             "seed": 42, "timeout_seconds": 600, "device": device,
-            "implementation_points": 50, "quality_points": 50,
+            "implementation_points": 100, "quality_points": 0,
             "quality_error_scale": 1.0, "challenge_max": 100, "overall_max": 100 * len(CHALLENGES),
             "operator_data": {"grid_size": 64, "max_mode": 6, "train_samples": 64,
                               "val_samples": 16, "test_samples": 16, "seed": 1729, "batch_size": 32},
-            "description": "Each Level: 50 points for implementation checks (equations, or operator data/model/physics); "
-            "up to 50 for fixed-run evaluation, only after every component matches. "
-            "Quality averages 1/(1+(error/scale)^2) across listed checks. "
+            "description": "Each Level: 100 points for completion checks: PDE, initial/boundary conditions, "
+            "geometry and coefficients where requested; or operator data/model/physics. "
+            "Fixed-run numerical errors are feedback only, not additional points or a tuning competition. "
+            "Numerical feedback is run only after every component matches. "
             "Levels have equal weight. Missing Levels earn zero. "
             "One best complete submission record per Challenge; joint ranks on rounded totals. "
             "All four Challenges are included. Operator evaluation uses a fixed 64/16/16 pilot dataset "

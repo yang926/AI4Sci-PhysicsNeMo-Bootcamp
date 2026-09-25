@@ -111,7 +111,8 @@ def main():
     for run in manifest["runs"]:
         check((ROOT / run["script"]).is_file(), "missing executable: " + run["script"])
     report["coverage"] = {"course_notebooks": len(manifest["course"]), "executable_modes": len(manifest["runs"]), "challenge_levels": 11}
-    # Original data and figures are retained byte-for-byte. Code/config changes are authorized.
+    # Asset retention only: this does NOT certify task/algorithm preservation.
+    # Executable learning objectives require the separate contract/teaching tests.
     tree = subprocess.run(["git", "ls-tree", "-r", UPSTREAM, "--", "tutorial", "challenge"],
                           cwd=ROOT, capture_output=True, text=True)
     if tree.returncode == 0:
@@ -131,6 +132,11 @@ def main():
         report["asset_check"] = "upstream Git blob comparison"
     else:
         report["asset_check"] = "unavailable: source snapshot has no upstream Git object"
+    report["original_course_equivalence"] = {
+        "certified": False,
+        "reason": "Asset hashes and compilation do not establish equivalent exercises or training quality.",
+        "required_evidence": "Exercise-contract tests, Lab teaching-workflow tests and measured full lesson runs",
+    }
     language_files = []
     hangul = re.compile(r"[\u1100-\u11ff\u3130-\u318f\uac00-\ud7a3]")
     for path in sorted(p for p in ROOT.rglob("*") if p.is_file() and is_active(p)):

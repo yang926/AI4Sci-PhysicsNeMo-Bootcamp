@@ -154,6 +154,11 @@ class JudgeClient:
     def submit(self, payload):
         if not isinstance(payload, dict) or set(payload) != {"challenge", "sources"}:
             raise JudgeConnectionError("Submit exercise code only; identity comes from the private credential.")
+        # Old judges accepted PDE-only answers and ignored the added setup tasks.
+        # Check capability before sending code, not after recording a false score.
+        from ETC.judge.contracts import CONTRACT_VERSION
+        if self.me().get("submission_contract") != CONTRACT_VERSION:
+            raise JudgeConnectionError("Course/judge submission formats differ. Ask the instructor to update the judge and course together to format v3; no code was submitted.")
         result = self._request("/api/submissions", payload)
         if not isinstance(result.get("submission_id"), str) or not result["submission_id"]:
             raise JudgeConnectionError("No submission receipt was returned. Refresh status before retrying.")

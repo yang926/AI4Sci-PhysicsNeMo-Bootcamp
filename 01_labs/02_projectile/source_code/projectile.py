@@ -29,6 +29,7 @@ import numpy as np
 import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from ETC.runtime.labs import parser, setup, mlp, derivative, informer, save_run
+from ETC.runtime.lab_visualization import training_writer
 from projectile_eqn import ProjectileEquation
 
 
@@ -53,10 +54,12 @@ def residuals(field, t, physics):
                             "y__t__t": derivative(derivative(y, t), t)})
 
 
-def loss_terms(model, physics, batch_size, device):
+def loss_terms(model, physics, batch_size, device, *, capture=None):
     t = (5.0 * torch.rand(batch_size, 1, device=device, dtype=torch.float32)).requires_grad_()
     res = residuals(model(t), t, physics)
     t0 = torch.zeros(batch_size, 1, device=device, dtype=torch.float32, requires_grad=True)
+    if capture is not None:
+        capture.update(interior_t=t.detach().cpu().numpy(), initial_t=t0.detach().cpu().numpy())
     xy0 = model(t0)
     vx, vy = derivative(xy0[:, :1], t0), derivative(xy0[:, 1:], t0)
     return {"physics": sum((v / 9.81).square().mean() for v in res.values()),
@@ -65,7 +68,7 @@ def loss_terms(model, physics, batch_size, device):
                                 + ((vy - 40 * math.sin(math.pi / 3)) / 40).square().mean()}
 
 
-def optimize_projectile(model, physics, cfg, device):
+def optimize_projectile(model, physics, cfg, device, *, record=None, teaching_samples=None):
     """Adam with a decreasing step size so the initial conditions can settle.
 
     Each requested step is one real optimizer update. Analytical trajectories
@@ -78,7 +81,9 @@ def optimize_projectile(model, physics, cfg, device):
     history = []
     for step in range(1, cfg["steps"] + 1):
         optimizer.zero_grad(set_to_none=True)
-        terms = loss_terms(model, physics, cfg["batch_size"], device)
+        terms = (loss_terms(model, physics, cfg["batch_size"], device)
+                 if teaching_samples is None or step != cfg["steps"] else
+                 loss_terms(model, physics, cfg["batch_size"], device, capture=teaching_samples))
         loss = sum(terms.values())
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Nonfinite training loss at step {step}")
@@ -94,6 +99,8 @@ def optimize_projectile(model, physics, cfg, device):
         row = {"step": step, "learning_rate": learning_rate, "loss": float(loss.detach()),
                **{name: float(value.detach()) for name, value in terms.items()}}
         history.append(row)
+        if record is not None:
+            record(row)
         if step == 1 or step == cfg["steps"] or step % 500 == 0:
             print(json.dumps(row), flush=True)
     return history
@@ -145,7 +152,10 @@ def main():
     physics = informer(ProjectileEquation(), device,
                        supplied_derivatives=("x__t__t", "y__t__t"))
     heldout_before = evaluate(model, physics, device)
-    history = optimize_projectile(model, physics, cfg, device)
+    teaching_samples = {}
+    with training_writer(args.output_dir) as record:
+        history = optimize_projectile(model, physics, cfg, device,
+                                      record=record, teaching_samples=teaching_samples)
     t = torch.linspace(0, 8, 401, device=device, dtype=torch.float32)[:, None]
     with torch.no_grad():
         pred, exact = model(t), analytical(t)
@@ -172,6 +182,7 @@ def main():
             ax[j].legend()
         return fig
     save_run(args, cfg, model, history, {"t": t, "prediction": pred, "reference": exact}, metrics, plot)
+    np.savez_compressed(args.output_dir / "training_points.npz", **teaching_samples)
 
 
 if __name__ == "__main__":

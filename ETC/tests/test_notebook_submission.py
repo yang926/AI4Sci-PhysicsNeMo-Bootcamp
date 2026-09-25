@@ -139,6 +139,31 @@ def test_no_redirect_or_server_error_secret_leak():
     assert seen == ["/api/me"]
 
 
+@pytest.mark.parametrize("version", [None, 2, "3"])
+def test_old_judge_cannot_silently_grade_only_the_pde(version):
+    calls = []
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *_):
+            pass
+        def do_GET(self):
+            calls.append(("GET", self.path))
+            payload = {"nickname": "Legacy", "submissions": [], "submission_contract": version}
+            body = json.dumps(payload).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        def do_POST(self):
+            calls.append(("POST", self.path))
+            self.send_response(500)
+            self.end_headers()
+    with serving(ThreadingHTTPServer(("127.0.0.1", 0), Handler)) as url:
+        with pytest.raises(JudgeConnectionError, match="update the judge and course together"):
+            JudgeClient(url, TOKEN).submit({"challenge": "1", "sources": {"wave_l1.py": "unused"}})
+    assert calls == [("GET", "/api/me")]
+
+
 class FakeClient:
     def __init__(self):
         self.sent = []

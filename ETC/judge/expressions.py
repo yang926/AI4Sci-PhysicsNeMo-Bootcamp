@@ -1,6 +1,6 @@
 """Interpret a small equation language, never import/exec submitted Python.
 
-Full lesson files may be uploaded. Only student_equations is extracted. All
+Full lesson files may be uploaded. Only named exercise functions are extracted. All
 other source, imports, decorators and default expressions are NOT executed.
 This deliberately excludes arbitrary Python, even inside that function.
 """
@@ -41,9 +41,9 @@ def extract(source, name="student_equations", parameters=None):
     return validate_function(node, parameters)
 
 
-def build(source, parameters):
+def build(source, parameters, *, name="student_equations", data=False):
     """Return a callable interpreted by trusted code, not a compiled function."""
-    node = extract(source)
+    node = extract(source, name, parameters)
     names = [arg.arg for arg in node.args.args]
     if names != list(parameters):
         raise SubmissionError("Keep the original arguments: " + ", ".join(parameters))
@@ -52,12 +52,12 @@ def build(source, parameters):
         env = dict(parameters)
         env.update(zip(names, args))
         env.update(kwargs)
-        return Interpreter(env).run(node.body)
+        return Interpreter(env, data=data).run(node.body)
     return equations
 
 
 class Interpreter:
-    def __init__(self, environment):
+    def __init__(self, environment, *, data=False):
         import sympy
         self.sp = sympy
         def convert(value):
@@ -68,6 +68,7 @@ class Interpreter:
             return value
         self.env = {key: convert(value) for key, value in environment.items()}
         self.budget = 400
+        self.data = data
 
     def checked(self, value):
         if isinstance(value, self.sp.Expr):
@@ -102,13 +103,13 @@ class Interpreter:
                 self.assign(statement.targets[0], self.value(statement.value))
             elif isinstance(statement, ast.Return) and index == len(statements) - 1:
                 result = self.value(statement.value)
-                if not isinstance(result, dict) or not result or len(result) > 4:
-                    raise SubmissionError("Return a dictionary of named PDE residuals.")
-                if any(not isinstance(v, self.sp.Expr) for v in result.values()):
+                if not isinstance(result, dict) or not result or len(result) > (16 if self.data else 4):
+                    raise SubmissionError("Return a dictionary of named exercise components.")
+                if not self.data and any(not isinstance(v, self.sp.Expr) for v in result.values()):
                     raise SubmissionError("Each residual must be a mathematical expression.")
                 return result
             elif isinstance(statement, (ast.Raise, ast.Pass)):
-                raise SubmissionError("Exercise is unfinished. Complete student_equations first.")
+                raise SubmissionError("Exercise is unfinished. Complete all required student functions first.")
             else:
                 raise SubmissionError("Use local assignments and one final return; loops, imports and control flow are not accepted.")
         raise SubmissionError("Return the equation dictionary from student_equations.")
@@ -134,9 +135,9 @@ class Interpreter:
                 return node.value
         elif isinstance(node, ast.Name) and node.id in self.env:
             return self.env[node.id]
-        elif isinstance(node, (ast.Tuple, ast.List)):
+        elif isinstance(node, (ast.Tuple, ast.List)) and len(node.elts) <= 16:
             return tuple(self.value(item) for item in node.elts)
-        elif isinstance(node, ast.Dict) and len(node.keys) <= 4:
+        elif isinstance(node, ast.Dict) and len(node.keys) <= (16 if self.data else 4):
             pairs = [(self.value(key), self.value(value)) for key, value in zip(node.keys, node.values)]
             if any(not isinstance(key, str) for key, _ in pairs) or len({key for key, _ in pairs}) != len(pairs):
                 raise SubmissionError("Residual keys must be distinct strings.")
@@ -163,7 +164,7 @@ class Interpreter:
                     raise SubmissionError("Divide only by a number or a supplied parameter.")
                 return self.checked(operations[type(node.op)](left, right))
         elif isinstance(node, ast.Call) and not node.keywords:
-            if isinstance(node.func, ast.Name) and node.func.id in {"sin", "cos"} and len(node.args) == 1:
+            if isinstance(node.func, ast.Name) and node.func.id in {"sin", "cos", "exp"} and len(node.args) == 1:
                 arg = self.value(node.args[0])
                 if isinstance(arg, sp.Expr):
                     return self.checked(getattr(sp, node.func.id)(arg))
@@ -177,4 +178,4 @@ class Interpreter:
                     if any(sum(n for _, n in d.variable_count) + int(order) > 2 for d in expression.atoms(sp.Derivative)):
                         raise SubmissionError("Only derivatives up to second order are supported.")
                     return self.checked(expression.diff(coordinate, int(order)))
-        raise SubmissionError("Unsupported expression. Use supplied variables, + - * / **, .diff(), sin() and cos().")
+        raise SubmissionError("Unsupported expression. Use supplied variables, + - * / **, .diff(), sin(), cos() and exp().")

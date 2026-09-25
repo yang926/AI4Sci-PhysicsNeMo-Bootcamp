@@ -1,4 +1,13 @@
 # Verified on Linux x86_64, Python 3.12; CPU-only PyTorch.
+# TensorBoard/proxy pins added for Lab 2/3; full clean reinstall pending.
+absl-py==2.5.0
+grpcio==1.84.0
+markdown==3.10.3
+tensorboard==2.21.0
+tensorboard-data-server==0.7.2
+werkzeug==3.1.8
+jupyter-server-proxy==4.6.0
+simpervisor==1.0.0
 --extra-index-url https://download.pytorch.org/whl/cpu
 aiobotocore==3.9.1
 aiohappyeyeballs==2.7.1

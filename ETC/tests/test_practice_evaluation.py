@@ -32,7 +32,7 @@ def test_incorrect_student_pde_cannot_lower_canonical_residual():
     time = torch.ones(2, 1)
     model = Field(lambda a: .5 * a[:, :2].square().sum(1, keepdim=True)
                   + 0 * a[:, 2:3].pow(3))
-    with patch.object(wave, "student_equations", wrong_equation):
+    with patch.object(wave, "student_equations", wrong_equation), patch.object(wave, "student_speed", wave.reference_speed):
         student = create_informer(wave.WaveEquation2D(), "cpu")
         canonical = create_evaluation_informer(wave.WaveEquation2D, "cpu")
     torch.testing.assert_close(residuals(model, student, xy, time, ["u"])["wave"],

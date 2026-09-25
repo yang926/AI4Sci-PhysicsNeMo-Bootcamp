@@ -1,0 +1,6 @@
+# Original source lesson settings; current-API implementation, not a bitwise replay.
+steps: 50000
+batch_size: 2048
+learning_rate: 0.001
+layer_size: 256
+num_layers: 6

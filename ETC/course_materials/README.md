@@ -66,7 +66,7 @@ The notebook normally starts in its own directory. Use `%pwd` if a file cannot b
 
 | Challenge | Level | Edit this file | Configuration |
 |---|---|---|---|
-| Wave dynamics | 1 | [wave_l1.py](../../02_challenges/01_wave/wave_l1.py) | [config_wave.yaml](../../02_challenges/01_wave/conf/config_wave.yaml) |
+| Wave dynamics | 1 | [wave_l1.py](../../02_challenges/01_wave/wave_l1.py) | [config_wave_l1.yaml](../../02_challenges/01_wave/conf/config_wave_l1.yaml) |
 | Wave dynamics | 2 | [wave_l2.py](../../02_challenges/01_wave/wave_l2.py) | [config_wave.yaml](../../02_challenges/01_wave/conf/config_wave.yaml) |
 | Wave dynamics | 3 | [wave_l3.py](../../02_challenges/01_wave/wave_l3.py) | [config_wave.yaml](../../02_challenges/01_wave/conf/config_wave.yaml) |
 | Fluid flow | 1 | [chip_2d_l1.py](../../02_challenges/02_fluid/chip_2d_l1.py) | [config_chip_2d.yaml](../../02_challenges/02_fluid/conf/config_chip_2d.yaml) |
@@ -84,13 +84,13 @@ For Neural Operators, follow the notebook's data-generation step using [generate
 
 Every successful run saves `metrics.json` (evaluation), `loss.csv` (training history), `model.pt` (weights), `predictions.npz` (predictions), and `preview.png` (plot). Use a fresh output directory for each run; existing results are not overwritten.
 
-The shared [notebook helper](../runtime/notebook.py) presents results and checks their identity; it does not train models or assign points. Problem equations remain in the lesson programs, and the launch commands remain visible in each notebook. No widgets or browser extensions are required.
+The shared [notebook helper](../runtime/notebook.py) presents results and checks their identity; it does not train models or assign points. Equations remain in the lesson programs, and launch commands remain visible in each notebook. Result tables need no widgets; the separate submission panel uses the environment's installed `ipywidgets` package.
 
 The notebook training cells choose a new result directory on every execution, including when only that cell is rerun. Run the following plot/evaluation cell after a successful run; failure must not be mistaken for an older successful result. If you use the command line instead, choose a new `--output-dir` yourself and pass an explicit `--steps` value: configuration defaults can be much longer than notebook checks.
 
-`--reference` runs the completed instructor implementation. The default Challenge mode requires you to complete the student function. The initial 200-step notebook setting is an execution check, not evidence of convergence. Use held-out errors, analytical references and individual constraint residuals to decide whether more training is needed.
+`--reference` runs the completed instructor implementation. Student mode requires every marked function for the Level, not just its PDE. The notebook and YAML defaults now use measured class budgets instead of a 200-step execution check. See the [Challenge measurements](CHALLENGE_EFFICIENCY.md); use held-out errors, analytical references and individual constraint residuals to judge learning. A successful run does not certify convergence.
 
-For an instructor demonstration, select `USE_REFERENCE = True`. An inherited `AI4SCI_REFERENCE=1` also enables this mode; the setup cell and each run display the choice. Explicitly switch back to `False` for student work. Do not change or delete your exercise code to switch modes.
+For an instructor demonstration, select `USE_REFERENCE = True` in the setup cell. All four notebooks default to `False` and ignore `AI4SCI_REFERENCE`; the setup cell and each run display the explicit choice. Switch back to `False` for student work. Do not change or delete your exercise code to switch modes.
 
 ## Troubleshooting
 

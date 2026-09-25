@@ -1,7 +1,7 @@
 """Level 3: Time-dependent channel flow around one chip, PhysicsNeMo 2.2.2.
 
 The blocks are fixed. No structural-deformation model is implied by this flow
-exercise. Complete student_equations or select --reference.
+exercise. Complete equations, conditions and geometry, or select --reference.
 """
 from pathlib import Path
 import math
@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import torch
 from sympy import symbols, Function
+from ETC.runtime.exercises import conditions, condition_tensor, block_geometry
 from physicsnemo.sym.eq.pde import PDE
 from ETC.runtime.pinn import (parse_args, create_model, create_informer, residuals,
     evaluate_fields, sample_time, evaluation_grid, save_results, record_step,
@@ -21,7 +22,6 @@ LEVEL = 3
 BLOCKS = SINGLE_BLOCK
 TIME_END = 10.0
 FIELD_NAMES = ["u", "v", "p"]
-DEFAULT_INLET_RAMP_TIME = 1.0
 
 
 def reference_equations(x, y, t, u, v, p, nu=.01, rho=1.0):
@@ -38,6 +38,28 @@ def student_equations(x, y, t, u, v, p, nu=.01, rho=1.0):
     raise NotImplementedError("Complete student_equations in {} and save, or add --reference for the completed PDE.".format(Path(__file__).name))
 
 
+def reference_conditions(x, y, t):
+    return {"inlet_u": 1.5 * (1 - 4*y**2), "inlet_v": 0,
+            "outlet_pressure": 0, "wall_u": 0, "wall_v": 0, "flux": 1,
+            "initial_u": 0, "initial_v": 0, "initial_p": 0}
+
+
+def student_conditions(x, y, t):
+    # FIXME: inlet_u, inlet_v, outlet_pressure, wall_u, wall_v and integral flux.
+    # Also return initial_u, initial_v and initial_p for the rest initial state.
+    raise NotImplementedError("Complete student_conditions: inlet, outlet, walls, flux and any initial values.")
+
+
+def reference_geometry():
+    return {"blocks": ((-1.0, 0.0, 0.1),)}
+
+
+def student_geometry():
+    # FIXME: {"blocks": ((xmin, xmax, top), ...)}. Every chip starts at y=-0.5.
+    # One cutout: start x=-1, width=1, height=0.6.
+    raise NotImplementedError("Complete student_geometry: subtract the specified chip rectangles from the channel.")
+
+
 class NavierStokes2D(PDE):
     def __init__(self, reference=False):
         self.dim = 2
@@ -51,61 +73,45 @@ def time_sample(count, device):
     return None if TIME_END is None else sample_time(count, TIME_END, device)
 
 
-def inlet_ramp_time(config):
-    """Return the positive startup timescale; it is fixed for comparisons."""
-    physics = config.get("physics", {})
-    if not isinstance(physics, dict):
-        raise ValueError("physics must be a mapping")
-    value = physics.get("inlet_ramp_time", DEFAULT_INLET_RAMP_TIME)
-    if (isinstance(value, bool) or not isinstance(value, (int, float))
-            or not math.isfinite(value) or value <= 0):
-        raise ValueError("physics.inlet_ramp_time must be positive and finite")
-    return float(value)
-
-
-def startup_ramp(time, timescale=DEFAULT_INLET_RAMP_TIME):
-    """R(0)=R'(0)=0: rest and zero initial pressure admit zero acceleration."""
-    if (isinstance(timescale, bool) or not isinstance(timescale, (int, float))
-            or not math.isfinite(timescale) or timescale <= 0):
-        raise ValueError("inlet ramp timescale must be positive and finite")
-    return -torch.expm1(-(time / timescale).square())
-
-
-def loss_terms(model, informer, config, device):
+def loss_terms(model, informer, config, device, exercise=None, geometry=None):
+    exercise = conditions(reference_conditions) if exercise is None else exercise
+    geometry = block_geometry(reference_geometry) if geometry is None else geometry
     count = config["samples"]
-    ramp_time = inlet_ramp_time(config)
-    xy = sample_interior(count["interior"], BLOCKS, device)
+    xy = sample_interior(count["interior"], geometry, device)
     pde = residuals(model, informer, xy, time_sample(len(xy), device), FIELD_NAMES)
-    weighting = sdf_weight(xy, BLOCKS)
+    weighting = sdf_weight(xy, geometry)
     losses = {"pde_" + name + "_weighted": (weighting * value.square()).mean() for name, value in pde.items()}
     inlet = sample_inlet(count["boundary"], device)
     inlet_time = time_sample(len(inlet), device)
     incoming = evaluate_fields(model, inlet, inlet_time, FIELD_NAMES)
-    inlet_target = inlet_velocity(inlet) * startup_ramp(inlet_time, ramp_time)
-    losses["inlet_u"] = (incoming["u"] - inlet_target).square().mean()
-    losses["inlet_v"] = incoming["v"].square().mean()
+    losses["inlet_u"] = (incoming["u"] - condition_tensor(exercise, "inlet_u", inlet, inlet_time)).square().mean()
+    losses["inlet_v"] = (incoming["v"] - condition_tensor(exercise, "inlet_v", inlet, inlet_time)).square().mean()
     outlet = sample_inlet(count["boundary"], device, outlet=True)
-    losses["outlet_pressure"] = evaluate_fields(model, outlet, time_sample(len(outlet), device), FIELD_NAMES)["p"].square().mean()
-    walls = sample_walls(count["boundary"], BLOCKS, device)
-    velocity = evaluate_fields(model, walls, time_sample(len(walls), device), FIELD_NAMES)
-    losses["no_slip"] = velocity["u"].square().mean() + velocity["v"].square().mean()
-    flux_xy, flux_time, height = sample_flux(count["flux_lines"], count["flux_points"], BLOCKS, device, TIME_END)
+    outlet_time = time_sample(len(outlet), device)
+    pressure = evaluate_fields(model, outlet, outlet_time, FIELD_NAMES)["p"]
+    losses["outlet_pressure"] = (pressure - condition_tensor(exercise, "outlet_pressure", outlet, outlet_time)).square().mean()
+    walls = sample_walls(count["boundary"], geometry, device)
+    wall_time = time_sample(len(walls), device)
+    velocity = evaluate_fields(model, walls, wall_time, FIELD_NAMES)
+    losses["no_slip"] = sum((velocity[name] - condition_tensor(exercise, "wall_" + name, walls, wall_time)).square().mean() for name in ("u", "v"))
+    flux_xy, flux_time, height = sample_flux(count["flux_lines"], count["flux_points"], geometry, device, TIME_END)
     flux_u = evaluate_fields(model, flux_xy, flux_time, FIELD_NAMES)["u"]
     flux = flux_u.reshape(count["flux_lines"], count["flux_points"]).mean(1, keepdim=True) * height
-    # Each section is sampled at one time: Q(t) equals the ramped inlet flux.
-    section_time = flux_time.reshape(count["flux_lines"], count["flux_points"])[:, :1]
-    flux_target = startup_ramp(section_time, ramp_time)
-    losses["integral_continuity"] = (flux - flux_target).square().mean()
+    section_xy = flux_xy.reshape(count["flux_lines"], count["flux_points"], 2)[:, 0, :]
+    section_time = None if flux_time is None else flux_time.reshape(count["flux_lines"], count["flux_points"])[:, :1]
+    losses["integral_continuity"] = (flux - condition_tensor(exercise, "flux", section_xy, section_time)).square().mean()
     if TIME_END is not None:
-        initial_xy = sample_interior(count["initial"], BLOCKS, device)
-        fields = evaluate_fields(model, initial_xy, torch.zeros(len(initial_xy), 1, device=device), FIELD_NAMES)
-        losses["initial_rest"] = sum(value.square().mean() for value in fields.values())
+        initial_xy = sample_interior(count["initial"], geometry, device)
+        initial_t = torch.zeros(len(initial_xy), 1, device=device)
+        fields = evaluate_fields(model, initial_xy, initial_t, FIELD_NAMES)
+        losses["initial_rest"] = sum((value - condition_tensor(exercise, "initial_" + name, initial_xy, initial_t)).square().mean() for name, value in fields.items())
     return losses
 
 
 def main():
     args, config = parse_args(__file__, __doc__, "config_chip_2d.yaml")
-    ramp_time = inlet_ramp_time(config)
+    exercise = conditions(reference_conditions if args.reference else student_conditions)
+    geometry = block_geometry(reference_geometry if args.reference else student_geometry)
     pde = NavierStokes2D(reference=args.reference)
     informer = create_informer(pde, args.device)
     eval_informer = create_evaluation_informer(NavierStokes2D, args.device)
@@ -117,7 +123,7 @@ def main():
     history = [heldout_row(0, "heldout_before_training", initial)]
     for step in range(1, args.steps + 1):
         optimizer.zero_grad(set_to_none=True)
-        losses = loss_terms(model, informer, config, args.device)
+        losses = loss_terms(model, informer, config, args.device, exercise, geometry)
         total = record_step(step, losses, history)
         total.backward()
         optimizer.step()
@@ -125,7 +131,8 @@ def main():
     history.append(heldout_row(args.steps, "heldout_after_training", final))
     metrics = {name + "_rmse": float(value.sqrt()) for name, value in final.items()}
     metrics["evaluation_equations"] = "provided_reference_equations"
-    metrics["inlet_ramp_time"] = ramp_time
+    metrics["evaluation_conditions"] = "provided_reference_conditions_and_geometry"
+    metrics["training_blocks"] = geometry
     # Separate unweighted PDE residuals from the SDF-weighted training objective.
     torch.manual_seed(args.seed + 200000)
     xy_check = sample_interior(256, BLOCKS, args.device)
@@ -136,8 +143,8 @@ def main():
     save_results(args, config, model, history, xy, time, FIELD_NAMES, metrics, notes=[
         "No analytic solution is claimed for channel flow around these blocks.",
         "Zero outlet pressure, no-slip walls, nu=.01, rho=1; initial u=v=p=0.",
-        f"Inlet=1.5*(1-4*y^2)*R(t) and section flux=R(t), R(t)=1-exp(-(t/{ramp_time:g})^2).",
-        "R(0)=R'(0)=0 removes the instantaneous inlet/flux jump; the late-time inlet peak tends to 1.5."])
+        "Original sudden startup restored: inlet=1.5*(1-4*y^2), flux=1 for t>0.",
+        "Rest initial data and nonzero inlet are incompatible at the t=0 inlet corner; no smooth compatibility correction is hidden."])
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@
 import math
 import json
 import sys
+import time
 from pathlib import Path
 import numpy as np
 import torch
@@ -118,20 +119,77 @@ def sample_initial_field(initial_data, grid_size=128):
     return coords[indices], values[indices]
 
 
+def split_initial_observations(initial_data, grid_size=32):
+    """Reserve a Cartesian initial grid; never use it for training or scaling.
+
+    The full input remains unchanged for plotting. This is spatial validation
+    at t=0, not a held-out future-weather dataset.
+    """
+    if type(grid_size) is not int or grid_size < 2:
+        raise ValueError("Initial validation grid_size must be an integer of at least two")
+    coords, fields = initial_data
+    # Also validate the rectangular x-fast ordering through the common sampler.
+    sample_initial_field(initial_data, 2)
+    nx = torch.unique(coords[:, 0]).numel()
+    ny = len(coords) // nx
+    count = min(grid_size, max(2, min(nx, ny) // 4))
+    if count ** 2 >= len(coords):
+        raise ValueError("Initial validation needs at least two points per axis and a nonempty training set")
+    ix = torch.linspace(0, nx - 1, count, device=coords.device).long()
+    iy = torch.linspace(0, ny - 1, count, device=coords.device).long()
+    indices = (iy[:, None] * nx + ix[None, :]).reshape(-1)
+    keep = torch.ones(len(coords), dtype=torch.bool, device=coords.device)
+    keep[indices] = False
+    return ((coords[keep], fields[keep]), (coords[indices], fields[indices]))
+
+
+def configure_efficient_representation(cfg, training_initial):
+    """Reparameterize the same physical outputs using training statistics only."""
+    _, fields = training_initial
+    scale = fields.std(dim=0)
+    if not torch.isfinite(fields).all() or not (scale > 0).all():
+        raise ValueError("Efficient training needs finite, nonconstant initial u/v/p fields")
+    cfg.update(lab4_feature_bands=[1, 2, 4, 8],
+               lab4_field_center=fields.mean(dim=0).tolist(),
+               lab4_field_scale=scale.tolist())
+
+
 class PeriodicFlow(torch.nn.Module):
     def __init__(self, cfg):
         super().__init__()
+        bands = cfg.get("lab4_feature_bands")
+        in_features = 5
+        if bands is not None:
+            if (not isinstance(bands, (tuple, list)) or not bands
+                    or any(type(k) is not int or k <= 0 for k in bands)
+                    or len(set(bands)) != len(bands)):
+                raise ValueError("Periodic feature bands must be distinct positive integers")
+            center = torch.as_tensor(cfg["lab4_field_center"], dtype=torch.float32)
+            scale = torch.as_tensor(cfg["lab4_field_scale"], dtype=torch.float32)
+            if (center.shape != (3,) or scale.shape != (3,)
+                    or not torch.isfinite(center).all() or not torch.isfinite(scale).all()
+                    or not (scale > 0).all()):
+                raise ValueError("Field center and positive scale must contain finite u/v/p values")
+            self.register_buffer("bands", torch.tensor(bands, dtype=torch.float32))
+            self.register_buffer("center", center)
+            self.register_buffer("scale", scale)
+            in_features = 4 * len(bands) + 1
         if cfg.get("lab4_architecture") == "upstream_silu_weight_norm":
-            self.network = FullyConnected(in_features=5, out_features=3,
+            self.network = FullyConnected(in_features=in_features, out_features=3,
                                           layer_size=cfg["layer_size"], num_layers=cfg["num_layers"],
                                           activation_fn="silu", weight_norm=True)
         else:
             # The small analytic fixture is separate from the original-data lesson.
-            self.network = mlp(5, 3, cfg)
+            self.network = mlp(in_features, 3, cfg)
 
     def forward(self, xy, t):
         phase = 2 * math.pi * (xy - LOWER) / LENGTH
         # Periodic feature map replaces the retired architecture periodicity keyword.
+        if hasattr(self, "bands"):
+            phase = (phase[:, :, None] * self.bands).flatten(1)
+            values = self.network(torch.cat((phase.sin(), phase.cos(), t), dim=1))
+            # Return the original normalized physical fields before PDE derivatives.
+            return self.center + self.scale * values
         return self.network(torch.cat((phase.sin(), phase.cos(), t), dim=1))
 
 
@@ -268,7 +326,7 @@ def optimize_original(model, physics, cfg, device, initial_data):
             raise FloatingPointError(f"Nonfinite Adam loss at step {step}")
         loss.backward()
         gradients = [parameter.grad for parameter in model.parameters() if parameter.grad is not None]
-        if not gradients or not all(torch.isfinite(gradient).all() for gradient in gradients):
+        if not gradients or not torch.stack([torch.isfinite(gradient).all() for gradient in gradients]).all():
             raise FloatingPointError(f"Missing or nonfinite Adam gradients at step {step}")
         optimizer.step()
         values = torch.stack([loss, *terms.values()]).detach().cpu().tolist()
@@ -321,9 +379,12 @@ def periodic_errors(model, device, time):
             "periodic_gradient_max_abs": float(torch.stack(gradient_error).max().detach())}
 
 
-def evaluate(model, physics, device, synthetic, initial_data=None, *, initial_batch_size=2048):
-    """Held-out 24x24 cell-center grid at six times, including both endpoints."""
-    grid = LOWER + LENGTH * (torch.arange(24, device=device, dtype=torch.float32) + .5) / 24
+def evaluate(model, physics, device, synthetic, initial_data=None, *, initial_batch_size=2048,
+             initial_validation=None, grid_size=24):
+    """Fixed cell-center PDE grid at six times, including both endpoints."""
+    if type(grid_size) is not int or grid_size < 2:
+        raise ValueError("PDE evaluation grid_size must be an integer of at least two")
+    grid = LOWER + LENGTH * (torch.arange(grid_size, device=device, dtype=torch.float32) + .5) / grid_size
     xx, yy = torch.meshgrid(grid, grid, indexing="xy")
     base = torch.stack((xx.ravel(), yy.ravel()), dim=1)
     records = []
@@ -345,6 +406,8 @@ def evaluate(model, physics, device, synthetic, initial_data=None, *, initial_ba
     if synthetic:
         initial_xy = base
         initial_target = taylor_green(initial_xy, torch.zeros_like(initial_xy[:, :1]))
+    elif initial_validation is not None:
+        initial_xy, initial_target = (item.to(device) for item in initial_validation)
     else:
         initial_xy, initial_target = (item.to(device) for item in sample_initial_field(initial_data, 32))
     initial_prediction = model(initial_xy, torch.zeros_like(initial_xy[:, :1]))
@@ -358,14 +421,20 @@ def evaluate(model, physics, device, synthetic, initial_data=None, *, initial_ba
     initial_weight = INITIAL_DATA_WEIGHT if synthetic else 3 * initial_batch_size
     result.update(objective=3 * pde_weight * result["pde_rmse"] ** 2 + initial_weight * initial_rmse ** 2,
                   initial_data_rmse=initial_rmse, per_time=records,
-                  scope="24x24 held-out spatial cell centers at six times; not a continuous-domain bound")
+                  scope=f"{grid_size}x{grid_size} held-out spatial cell centers at six times; not a continuous-domain bound")
     result.update({f"initial_{name}": value for name, value in
                    solution_errors(initial_prediction, initial_target).items()})
     if not synthetic:
-        result["initial_evaluation_scope"] = "32x32 spatial subset of the supplied t=0 observations; not future forecast accuracy"
+        result["initial_evaluation_scope"] = (
+            "reserved spatial t=0 observations excluded from training and scaling; not future forecast accuracy"
+            if initial_validation is not None else
+            "32x32 spatial subset of the supplied t=0 observations; may overlap training, not future forecast accuracy")
         for column, name in enumerate(("u", "v", "p")):
             error = initial_prediction[:, column] - initial_target[:, column]
             result[f"initial_{name}_rmse"] = float(error.square().mean().sqrt().detach())
+            target_std = float(initial_target[:, column].std().detach())
+            if target_std > 0:
+                result[f"initial_{name}_nrmse"] = result[f"initial_{name}_rmse"] / target_std
     return result
 
 
@@ -397,25 +466,42 @@ def main():
     p = parser(__doc__)
     p.add_argument("--smoke-data", action="store_true", help="Use labeled analytic Taylor-Green fixture; no weather data")
     p.add_argument("--data-path", type=Path)
+    p.add_argument("--recipe", choices=("efficient", "upstream"), default="efficient",
+                   help="Measured 3000-update multiscale class preset, or original 50000-update settings")
     p.set_defaults(output_dir=Path("outputs/navier_stokes"))
     args = p.parse_args()
     if args.smoke_data and args.data_path is not None:
         p.error("--smoke-data and --data-path are mutually exclusive")
     if args.config is None:
-        args.config = Path(__file__).parent / "conf" / ("synthetic_fixture.yaml" if args.smoke_data else "config.yaml")
-    cfg, device = setup(args, defaults={"steps": 50000})
+        filename = ("synthetic_fixture.yaml" if args.smoke_data else
+                    "upstream.yaml" if args.recipe == "upstream" else "config.yaml")
+        args.config = Path(__file__).parent / "conf" / filename
+    default_steps = 50000 if not args.smoke_data and args.recipe == "upstream" else 3000
+    cfg, device = setup(args, defaults={"steps": default_steps})
     cfg.update(lab4_dtype="float32",
-               lab4_recipe="adam_lbfgs_fp32_v1" if args.smoke_data else "upstream_adam_fp32_v1",
+               lab4_recipe=("adam_lbfgs_fp32_v1" if args.smoke_data else
+                            "upstream_adam_fp32_v1" if args.recipe == "upstream" else "multiscale_adam_fp32_v1"),
                lab4_architecture="tanh_fixture" if args.smoke_data else "upstream_silu_weight_norm")
     nu = 0.01 if args.smoke_data else REAL_NU
     initial_data = None if args.smoke_data else tuple(torch.from_numpy(a) for a in read_wf_data(data_path=args.data_path))
+    training_initial = initial_data
+    evaluation_kwargs = {"initial_batch_size": cfg["batch_size"]}
+    if not args.smoke_data and args.recipe == "efficient":
+        initial_data = tuple(item.to(device) for item in initial_data)
+        training_initial, validation_initial = split_initial_observations(initial_data)
+        configure_efficient_representation(cfg, training_initial)
+        evaluation_kwargs.update(initial_validation=validation_initial, grid_size=64)
     model = PeriodicFlow(cfg).to(device=device, dtype=torch.float32)
     physics = informer(NavierStokes(nu=nu, rho=1.0, dim=2, time=True), device,
                        supplied_derivatives=("u__t", "v__t"))
     heldout_before = evaluate(model, physics, device, args.smoke_data, initial_data,
-                              initial_batch_size=cfg["batch_size"])
+                              **evaluation_kwargs)
+    training_started = time.perf_counter()
     history = (optimize_lab(model, physics, cfg, device) if args.smoke_data
-               else optimize_original(model, physics, cfg, device, initial_data))
+               else optimize_original(model, physics, cfg, device, training_initial))
+    if torch.device(device).type == "cuda":
+        torch.cuda.synchronize(device)
+    training_seconds = time.perf_counter() - training_started
     grid_size = 32 if args.smoke_data else 128
     axis = torch.linspace(LOWER, LOWER + LENGTH, grid_size + 1, device=device)[:-1]
     xx, yy = torch.meshgrid(axis, axis, indexing="xy")
@@ -447,7 +533,8 @@ def main():
             metrics["initial_data_source"] = "data_lat.npy (upstream normalization retained)" if args.data_path is None else str(args.data_path)
             metrics["initial_data_shape"] = [len(initial_data[0]), 3]
     metrics["heldout_after"] = evaluate(model, physics, device, args.smoke_data, initial_data,
-                                      initial_batch_size=cfg["batch_size"])
+                                      **evaluation_kwargs)
+    metrics["training_seconds"] = training_seconds
     if args.smoke_data:
         metrics["training_recipe"] = {
             "optimizer": "Adam then full-batch L-BFGS", "dtype": "float32",
@@ -462,7 +549,7 @@ def main():
         }
     else:
         metrics["training_recipe"] = {
-            "name": "upstream_adam_fp32_v1", "optimizer": "Adam", "dtype": "float32",
+            "name": cfg["lab4_recipe"], "optimizer": "Adam", "dtype": "float32",
             "optimizer_step_calls": len(history), "learning_rate_initial": cfg["learning_rate"],
             "decay_rate": .95, "decay_steps": 3000,
             "architecture": "periodic MLP, SiLU, weight normalization",
@@ -473,6 +560,13 @@ def main():
             "sampling": "fresh uniform samples each step; not the legacy fixed shuffled dataset",
             "positive_time_reference_targets_used_for_training": False,
         }
+        if args.recipe == "efficient":
+            metrics["training_recipe"].update(
+                periodic_feature_bands=cfg["lab4_feature_bands"],
+                output_scaling="training-field mean/std; converted back before PDE and original loss",
+                initial_training_points=len(training_initial[0]),
+                initial_validation_points=len(validation_initial[0]),
+                selection="bounded class-time/initial-fit tradeoff, not convergence or forecast validation")
     if args.smoke_data:
         metrics["accuracy"] = accuracy_checks(metrics["heldout_after"])
         print("Synthetic fixture accuracy checks: " + ("PASS" if metrics["accuracy"]["passed"] else "NOT MET"), flush=True)

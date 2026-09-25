@@ -12,8 +12,8 @@ root. Keep judge state outside the repository and outside Jupyter's served
 directory. The following path is an example private directory, not a URL.
 
 ```bash
-python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v2" init --steps 2 --device cpu
-python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v2" add-participant
+python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v3" init --steps 2 --device cpu
+python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v3" add-participant
 ```
 
 The second command prints a randomly generated participant access code once.
@@ -30,8 +30,8 @@ Git, screenshots or shell command arguments.
 Start the web page in one terminal and the worker in another:
 
 ```bash
-python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v2" serve --port 8090
-python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v2" worker --device cpu
+python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v3" serve --port 8090
+python -m ETC.judge --state "$HOME/.local/share/ai4sci-judge-pilot-v3" worker --device cpu
 ```
 
 The page is at `http://127.0.0.1:8090/` **on the computer running the server**.
@@ -81,14 +81,15 @@ Two training steps verify the plumbing only. Create a fresh state with an
 agreed training budget for meaningful rehearsal. `init` refuses to overwrite
 an existing database. Trusted code, configuration or dependency changes require
 a new pilot state, so results from different versions are never mixed.
-The four-Challenge rubric is `bootcamp-pilot-v2`. Existing three-Challenge
-databases are preserved; do not overwrite or silently merge them into v2.
+The rubric is `bootcamp-task-completion-pilot-v3`. Preserve existing v1/v2 databases;
+start a fresh v3 state rather than mixing earlier PDE-only scores with complete-task scores.
 
 ## Student workflow
 
 1. Leave `USE_REFERENCE = False` and complete the linked `.py` exercises:
-   `student_equations` for Challenges 1-3, or `build_datasets`, `build_model`
-   and Level 3's `ReactionDiffusionPDE` for Challenge 4. Save and run local checks.
+   equations/speed/conditions for Wave; equations/conditions/geometry for Fluid;
+   equations/parameters/conditions/analytic solutions for Climate; dataset/model
+   functions and PINO physics for Operators. See [the task mapping](../course_materials/CHALLENGE_CONTRACTS.md).
 2. Run the final notebook cell. Before the first submission, enter **Nickname**
    and click **Register nickname**. Names must be unique and contain 1-40 visible
    characters. The same name is reused across all four Challenges. Select the
@@ -111,9 +112,13 @@ Levels from different attempts are not silently stitched together.
 ## Accepted code
 
 The submitted file is **not imported or executed as Python**. For Challenges
-1-3, the evaluator extracts `student_equations` and interprets a restricted
-equation language: local assignments, tuple unpacking, literal dictionaries,
-supplied parameter dictionaries, arithmetic, `.diff()`, `sin()` and `cos()`.
+1-3, the evaluator extracts all required `student_*` functions and interprets a
+restricted language: local assignments, tuple unpacking, bounded literal
+dictionaries/tuples, supplied parameter dictionaries, arithmetic, `.diff()`,
+`sin()`, `cos()` and `exp()`. Geometry is bounded rectangle data, not executable
+CSG code. Old PDE-only submissions receive an explicit update/completion error.
+The notebook checks `submission_contract: 3` from the authenticated account API
+before sending code. A new course cannot silently use an older PDE-only judge.
 Keep the original argument names and order. Numerical defaults from uploaded
 code are not evaluated; the trusted lesson supplies its own defaults.
 
@@ -155,24 +160,21 @@ training budget and source/configuration fingerprint.
 
 Each Level has 100 pilot points:
 
-- 50 implementation points, split equally over required checks. For Challenges
-  1-3 these are residual components; for Challenge 4 they are data splits and
-  model construction, plus AFNO patch compatibility or PINO's PDE as applicable.
-  Symbolic comparison checks algebraic equality against the supplied equation,
-  with symbolic coefficients so zero training defaults cannot conceal a missing
-  term. It is not a proof of equivalence for all possible mathematical forms;
-  use the documented residual form. Arbitrary rescaling is not accepted.
-- Up to 50 quality points after **all** implementation checks pass. Trusted
-  course code trains with the frozen step count and seed, then evaluates using
-  the supplied independent equations and fixed held-out conditions. Each listed
-  error contributes `1 / (1 + (error / scale)**2)` and these contributions are
-  averaged. The initial scale is **1.0 for every listed metric and is not yet
-  calibrated**. These are provisional normalized contributions, not a claim
-  that the physical quantities have the same units or difficulty.
+- 100 implementation points, split equally over required checks. Challenges 1-3
+  include PDE residuals, conditions, wave speed, chip geometry, climate coefficients
+  and baseline analytic expressions where requested. Challenge 4 checks data,
+  specified model construction and PINO physics. Symbolic coefficients catch
+  missing terms hidden by zero training defaults. Use the documented residual
+  form; arbitrary rescaling is not accepted.
+- Zero numerical-quality points. After **all** components match, trusted code
+  trains with the fixed budget/seed and returns independent numerical diagnostics.
+  These errors are feedback, not optimizer-tuning competition points. Fully
+  correct implementations tie; there is no hidden runtime or submission-time
+  tiebreaker.
 
-Wrong implementations earn only their passed implementation checks and skip
-training. Unfinished or unsupported components earn zero for that component with
-feedback. A malformed Level contract receives zero for that Level.
+Wrong, well-formed implementations retain credit for their passed components
+and skip training. Missing, unfinished or unsupported functions invalidate the
+Level and receive an explicit diagnostic; no instructor fallback is used.
 Missing/nonfinite trusted metrics fail the job instead of becoming a good score.
 
 Level scores are averaged within each Challenge: 3 Wave, 3 Fluid, 2 Climate,
@@ -183,12 +185,13 @@ Ranking uses the displayed two-decimal scores and assigns joint ranks.
 Participants without a completed submission are unranked. Server failures and
 timeouts do not replace an existing best score with zero.
 
-For Fluid, the current pilot scores unweighted PDE residuals, boundary and flux
-errors; it does not use OpenFOAM error as a point component. Wave Levels 2-3 and
+For Fluid, feedback reports unweighted PDE residuals, boundary and flux errors.
+Level 1 also compares all supplied OpenFOAM points and exports matched-scale
+reference/prediction/error plots. None of these numerical errors contributes points. Wave Levels 2-3 and
 Fluid Levels 2-3 have no supplied independent solution truth. Residual checks
 alone do not establish complete physical accuracy.
 
-Challenge 4 quality uses test relative L2, physical-unit RMSE and independent
+Challenge 4 numerical feedback uses test relative L2, physical-unit RMSE and independent
 FFT PDE RMSE, not training loss. All three models use the same server-generated
 periodic reaction-diffusion dataset and the original 64x64 course model configs.
 The pilot uses **64/16/16 train/validation/test samples**, max Fourier mode 6,

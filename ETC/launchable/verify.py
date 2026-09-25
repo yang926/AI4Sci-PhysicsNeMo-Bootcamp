@@ -4,6 +4,7 @@ import sys
 
 import ipywidgets
 import torch
+from torch.utils.tensorboard import SummaryWriter
 from physicsnemo.models.mlp.fully_connected import FullyConnected
 from physicsnemo.sym.eq.phy_informer import PhysicsInformer
 from physicsnemo.sym.eq.pde import PDE
@@ -15,4 +16,5 @@ assert torch.__version__ == "2.10.0+cu128"
 assert version("torchvision") == "0.25.0+cu128"
 assert torch.cuda.is_available(), "CUDA unavailable; inspect the VM GPU and driver"
 assert ipywidgets.__version__ == "8.1.9"
+assert version("tensorboard") == "2.21.0"
 print("Course imports and CUDA availability verified:", torch.cuda.get_device_name(0))

@@ -15,12 +15,9 @@
 # limitations under the License.
 
 # PhysicsNeMo 2.2.2 explicit-loop config; no Hydra defaults.
-physics:
-  # Level 3 only: R(t)=1-exp(-(t/inlet_ramp_time)^2); inlet and flux share R.
-  # Keep this problem definition fixed when comparing training experiments.
-  inlet_ramp_time: 1.0
+# Level 3 retains the original abrupt inlet startup; no ramp parameter is used.
 training:
-  steps: 40000
+  steps: 10000
   learning_rate: 0.001
 model:
   width: 64

@@ -1,15 +1,16 @@
 """Climate Level 2: coupled atmosphere-ocean temperature PINN.
 
 This simplified PDE system models temperature transport and heat exchange.
-Heat exchange is active by default. A coupled analytic solution checks both
-fields when advection, sources, and relaxation are disabled.
+The original uncoupled baseline is the default. Then compare a nonzero heat
+exchange coefficient with the same initial data and diffusivities.
 """
 from pathlib import Path
 import math
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import torch
-from sympy import symbols, Function
+from sympy import symbols, Function, sin, exp
+from ETC.runtime.exercises import conditions, condition_tensor, physical_parameters, analytic_expression_checks
 from physicsnemo.sym.eq.pde import PDE
 from ETC.runtime.pinn import (parse_args, create_model, create_informer, residuals,
     evaluate_fields, sample_square, sample_time, evaluation_grid, save_results,
@@ -19,7 +20,7 @@ from ETC.runtime.pinn import (parse_args, create_model, create_informer, residua
 LEVEL = 2
 FIELD_NAMES = ['Ta', 'To']
 TIME_END = 2 * math.pi
-DEFAULT_PHYSICS = {'u0': 0.0, 'v0': 0.0, 'kappa_a': 1.0, 'kappa_o': 0.5, 'lam_a': 0.0, 'Q_a0': 0.0, 'Q_o0': 0.0, 'Teq_a0': 0.0, 'gamma0': 0.5}
+DEFAULT_PHYSICS = {'u0': 0.0, 'v0': 0.0, 'kappa_a': 1.0, 'kappa_o': 0.5, 'lam_a': 0.0, 'Q_a0': 0.0, 'Q_o0': 0.0, 'Teq_a0': 0.0, 'gamma0': 0.0}
 
 
 def reference_equations(x, y, t, fields, params):
@@ -37,6 +38,39 @@ def reference_equations(x, y, t, fields, params):
 def student_equations(x, y, t, fields, params):
     # FIXME: write the ADR residuals with equal and opposite atmosphere/ocean exchange terms.
     raise NotImplementedError("Complete student_equations in {} and save, or use --reference to run the completed PDE.".format(Path(__file__).name))
+
+
+def reference_conditions(x, y, t):
+    return {"initial_Ta": sin(x)*sin(y), "initial_To": sin(x)*sin(y),
+            "boundary_Ta": 0, "boundary_To": 0}
+
+
+def student_conditions(x, y, t):
+    # FIXME: return the initial_<field> and boundary_<field> targets for every field.
+    # Initial values are sin(x)*sin(y); all four edges have temperature zero.
+    raise NotImplementedError("Complete student_conditions for all initial and boundary temperatures.")
+
+
+def reference_parameters():
+    return {'u0': 0.0, 'v0': 0.0, 'kappa_a': 1.0, 'kappa_o': 0.5, 'lam_a': 0.0, 'Q_a0': 0.0, 'Q_o0': 0.0, 'Teq_a0': 0.0, 'gamma0': 0.0}
+
+
+def student_parameters():
+    # FIXME: specify the original diffusion-only validation coefficients.
+    # Set advection, sources, relaxation and heat exchange to zero; kappa_a=1, kappa_o=.5.
+    raise NotImplementedError("Complete student_parameters with every coefficient named in DEFAULT_PHYSICS.")
+
+
+def reference_solution(x, y, t, params):
+    # Original no-advection/source/relaxation (and no-coupling) validation case.
+    return {"Ta": sin(x)*sin(y)*exp(-2*params["kappa_a"]*t),
+            "To": sin(x)*sin(y)*exp(-2*params["kappa_o"]*t)}
+
+
+def student_solution(x, y, t, params):
+    # FIXME: derive the baseline sine-mode exact solution for Ta and To.
+    # This exercise is checked independently; it never replaces the held-out truth.
+    raise NotImplementedError("Complete student_solution for the original diffusion-only baseline.")
 
 
 class ClimatePDE(PDE):
@@ -83,27 +117,33 @@ def exact_reference(coordinates, time, params):
     return initial * amplitudes
 
 
-def loss_terms(model, informer, config, device):
+def loss_terms(model, informer, config, device, exercise=None):
+    exercise = conditions(reference_conditions) if exercise is None else exercise
     count = config["samples"]
     xy = sample_square(count["interior"], device)
     pde = residuals(model, informer, xy, sample_time(len(xy), TIME_END, device), FIELD_NAMES)
     losses = {"pde_" + name: value.square().mean() for name, value in pde.items()}
     initial_xy = sample_square(count["initial"], device)
     fields = evaluate_fields(model, initial_xy, torch.zeros(len(initial_xy), 1, device=device), FIELD_NAMES)
-    target = torch.sin(initial_xy[:, :1]) * torch.sin(initial_xy[:, 1:2])
     for name, value in fields.items():
+        target = condition_tensor(exercise, "initial_" + name, initial_xy)
         losses["initial_" + name] = (value - target).square().mean()
     boundary_xy = sample_square(count["boundary"], device, boundary=True)
-    boundary = evaluate_fields(model, boundary_xy, sample_time(len(boundary_xy), TIME_END, device), FIELD_NAMES)
+    boundary_t = sample_time(len(boundary_xy), TIME_END, device)
+    boundary = evaluate_fields(model, boundary_xy, boundary_t, FIELD_NAMES)
     for name, value in boundary.items():
-        losses["boundary_" + name] = value.square().mean()
+        target = condition_tensor(exercise, "boundary_" + name, boundary_xy, boundary_t)
+        losses["boundary_" + name] = (value - target).square().mean()
     return losses
 
 
 def main():
     args, config = parse_args(__file__, __doc__, "config_coupled.yaml")
     params = {**DEFAULT_PHYSICS, **config.get("physics", {})}
-    pde = ClimatePDE(reference=args.reference, params=params)
+    exercise = conditions(reference_conditions if args.reference else student_conditions)
+    training_params = params if args.reference else physical_parameters(student_parameters, DEFAULT_PHYSICS)
+    solution_checks = analytic_expression_checks(reference_solution if args.reference else student_solution, reference_solution, DEFAULT_PHYSICS)
+    pde = ClimatePDE(reference=args.reference, params=training_params)
     informer = create_informer(pde, args.device)
     evaluation_informer = create_evaluation_informer(ClimatePDE, args.device, params=params)
     model = create_model(3, len(FIELD_NAMES), config, args.device)
@@ -117,14 +157,16 @@ def main():
     history = [heldout_row(0, "heldout_before_training", initial)]
     for step in range(1, args.steps + 1):
         optimizer.zero_grad(set_to_none=True)
-        losses = loss_terms(model, informer, config, args.device)
+        losses = loss_terms(model, informer, config, args.device, exercise)
         total = record_step(step, losses, history)
         total.backward()
         optimizer.step()
     final = heldout_losses(loss_terms, model, evaluation_informer, config, args.device, args.seed)
     history.append(heldout_row(args.steps, "heldout_after_training", final))
     metrics = {name + "_rmse": float(value.sqrt()) for name, value in final.items()}
-    metrics.update({"physics": params, "initial_reference_error": before_error,
+    metrics.update({"physics": params, "training_physics": training_params,
+                    "analytic_exercise": solution_checks,
+                    "evaluation_conditions": "provided_reference_conditions", "initial_reference_error": before_error,
                     "final_reference_error": reference_errors(model, xy, time, FIELD_NAMES, reference),
                     "evaluation_equations": "provided_reference_equations",
                     "reference_over_time": reference_errors_over_time(
@@ -133,7 +175,7 @@ def main():
     save_results(args, config, model, history, xy, time, FIELD_NAMES, metrics, reference=reference, notes=[
         "Reference uses the exact coupled sine mode with no advection, source, or relaxation; gamma0=0 also remains valid.",
         "Held-out residuals use the provided equations, independently of student_equations. These are local practice metrics, not an official competition score.",
-        "Heat exchange is active by default. Compare gamma0=0 with the default gamma0=0.5 while holding other settings fixed."])
+        "Original baseline gamma0=0. Compare gamma0=.5 as a separate local experiment; submission checks the stated baseline."])
 
 
 if __name__ == "__main__":

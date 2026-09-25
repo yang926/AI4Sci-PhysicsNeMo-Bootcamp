@@ -36,11 +36,11 @@ def bounded_cpu_threads():
     torch.set_num_threads(previous)
 
 
-def test_default_coupling_is_active_and_matches_the_notebook_config():
+def test_original_uncoupled_baseline_matches_the_notebook_config():
     config_path = ROOT / "02_challenges/03_climate/conf/config_coupled.yaml"
     config = yaml.safe_load(config_path.read_text())
     assert config["physics"] == climate.DEFAULT_PHYSICS
-    assert climate.DEFAULT_PHYSICS["gamma0"] == .5
+    assert climate.DEFAULT_PHYSICS["gamma0"] == 0.
 
 
 @pytest.mark.parametrize("kappa_a,kappa_o,gamma", [
@@ -70,7 +70,7 @@ def test_coupled_solution_satisfies_both_pdes_initial_and_boundary(kappa_a, kapp
 
 
 def test_eigendecomposition_agrees_with_independent_matrix_exponential():
-    params = climate.DEFAULT_PHYSICS.copy()
+    params = {**climate.DEFAULT_PHYSICS, "gamma0": .5}
     xy = torch.tensor([[.3, .8], [1.2, 2.1], [2.4, .7]], dtype=torch.float64)
     time = torch.tensor([[0.], [.7], [climate.TIME_END]], dtype=torch.float64)
     generator = torch.tensor([[-2.5, .5], [.5, -1.5]], dtype=torch.float64)
@@ -96,7 +96,7 @@ def test_zero_coupling_limit_recovers_independent_decay_without_singularity():
 def test_exchange_moves_both_fields_toward_each_other():
     xy = torch.full((1, 2), math.pi / 2, dtype=torch.float64)
     time = torch.tensor([[.6]], dtype=torch.float64)
-    coupled = climate.exact_reference(xy, time, climate.DEFAULT_PHYSICS)
+    coupled = climate.exact_reference(xy, time, {**climate.DEFAULT_PHYSICS, "gamma0": .5})
     uncoupled = climate.exact_reference(
         xy, time, {**climate.DEFAULT_PHYSICS, "gamma0": 0.})
     # Atmosphere diffuses faster; the warmer ocean supplies heat to it.
@@ -121,7 +121,7 @@ def test_nonphysical_exchange_and_diffusion_parameters_are_rejected(params, erro
 
 
 def test_evaluation_detects_omitted_exchange_even_if_student_training_residual_is_zero():
-    params = climate.DEFAULT_PHYSICS.copy()
+    params = {**climate.DEFAULT_PHYSICS, "gamma0": .5}
     uncoupled = {**params, "gamma0": 0.}
     xy = torch.tensor([[.7, 1.1], [1.2, 1.4]], dtype=torch.float64)
     time = torch.tensor([[.4], [.8]], dtype=torch.float64)

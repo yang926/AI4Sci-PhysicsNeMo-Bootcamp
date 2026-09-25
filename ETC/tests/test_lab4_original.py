@@ -149,10 +149,12 @@ def test_original_training_rejects_missing_observations_before_optimizer():
 
 
 def test_original_and_synthetic_configurations_stay_separate():
-    original = yaml.safe_load((CONF / "config.yaml").read_text())
+    original = yaml.safe_load((CONF / "upstream.yaml").read_text())
+    efficient = yaml.safe_load((CONF / "config.yaml").read_text())
     synthetic = yaml.safe_load((CONF / "synthetic_fixture.yaml").read_text())
     assert original == {"steps": 50000, "batch_size": 2048, "learning_rate": .001,
                         "layer_size": 256, "num_layers": 6}
+    assert efficient == {**original, "steps": 3000}
     assert synthetic == {"steps": 3000, "batch_size": 128, "learning_rate": .001,
                          "layer_size": 64, "num_layers": 3}
     manifest = json.loads((ROOT / "ETC/course_materials/course_manifest.json").read_text())
@@ -212,7 +214,7 @@ def test_default_main_selects_original_input_and_records_original_recipe(tmp_pat
     def save(args, cfg, model, history, arrays, metrics, plot):
         observed.update(arrays=arrays, metrics=metrics)
 
-    monkeypatch.setattr(sys, "argv", ["navier_stokes.py", "--device", "cpu", "--steps", "1",
+    monkeypatch.setattr(sys, "argv", ["navier_stokes.py", "--recipe", "upstream", "--device", "cpu", "--steps", "1",
                                        "--output-dir", str(tmp_path / "out")])
     monkeypatch.setenv("AI4SCI_SMOKE_DATA", "1")  # The retired UI switch must have no effect.
     monkeypatch.setattr(flow, "setup", setup)
@@ -226,7 +228,7 @@ def test_default_main_selects_original_input_and_records_original_recipe(tmp_pat
     monkeypatch.setattr(flow, "evaluate", evaluate)
     monkeypatch.setattr(flow, "save_run", save)
     flow.main()
-    assert observed["default_config"] == CONF / "config.yaml"
+    assert observed["default_config"] == CONF / "upstream.yaml"
     assert observed["configured_values"]["steps"] == 50000
     assert observed["architecture"] == "upstream_silu_weight_norm"
     assert observed["read_data"] and observed["original_optimizer"]

@@ -10,6 +10,7 @@ import pytest
 from ETC.judge.catalog import CHALLENGES, lesson_path
 from ETC.judge.store import Store
 from ETC.judge.worker import work_once
+from ETC.tests.test_judge import answer
 
 
 @pytest.mark.parametrize("challenge", ("1", "2", "3"))
@@ -19,18 +20,22 @@ def test_real_submission_training_all_levels(challenge, tmp_path):
     identifier = store.authenticate(token)["id"]
     sources = {}
     for filename in CHALLENGES[challenge]["files"]:
-        source = lesson_path(challenge, filename).read_text()
-        function = next(n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name == "reference_equations")
-        sources[filename] = ast.get_source_segment(source, function).replace("def reference_equations(", "def student_equations(", 1)
+        sources[filename] = answer(challenge, filename)
     store.submit(identifier, challenge, sources)
     assert work_once(store)
     row = store.history(identifier)[0]
     logs = "\n".join(p.read_text()[-8000:] for p in store.directory.glob("runs/*/runner.log"))
     assert row["status"] == "completed", logs
-    assert 50 < row["score"] <= 100
+    assert row["score"] == 100
     assert all(level["status"] == "evaluated" for level in row["result"]["levels"].values())
     for metrics_path in store.directory.glob("runs/*/artifacts/*/metrics.json"):
         metrics = json.loads(metrics_path.read_text())
         assert metrics["reference_implementation"] is False
         assert metrics["steps"] == 2
     assert len(list(store.directory.glob("runs/*/artifacts/*/metrics.json"))) == len(sources)
+    if challenge == "2":
+        plots = list(store.directory.glob("runs/*/artifacts/*/openfoam_comparison.png"))
+        assert len(plots) == 1 and plots[0].parent.name == "chip_2d_l1"
+        assert plots[0].stat().st_size > 10000
+        metrics = json.loads((plots[0].parent / "metrics.json").read_text())
+        assert metrics["openfoam_evaluation_points"] == 56942

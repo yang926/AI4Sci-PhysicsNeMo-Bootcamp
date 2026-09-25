@@ -1,5 +1,10 @@
 # Lab 4 restoration, 2026-09-25
 
+This is the historical restoration record. The subsequent measured class preset
+uses 3,000 multiscale Adam updates; the original 50,000-update recipe below remains
+available with `--recipe upstream`. See [the efficiency comparison](LAB4_EFFICIENCY.md)
+for the current default and the unresolved initial-fit/physics tradeoff.
+
 ## What was wrong
 
 The student notebook defaulted to an analytical Taylor–Green test while the

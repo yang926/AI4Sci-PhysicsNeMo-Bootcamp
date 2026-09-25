@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 from .store import BusyError, NicknameConflict, NicknameRequired
+from .contracts import CONTRACT_VERSION
 
 ASSETS = Path(__file__).parent / "static"
 
@@ -68,7 +69,8 @@ def create_server(store, port=8090):
             elif path == "/api/me":
                 person = self.participant()
                 if person:
-                    self.send(200, {"nickname": person["nickname"], "submissions": store.history(person["id"])})
+                    self.send(200, {"nickname": person["nickname"], "submissions": store.history(person["id"]),
+                                    "submission_contract": CONTRACT_VERSION})
             else:
                 self.send(404, {"error": "Not found"})
 

@@ -91,8 +91,9 @@ def level_points(checks, metrics, names, settings):
             if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
                 raise RuntimeError("Trusted evaluator produced an invalid metric: " + name)
             errors[name] = value
-        scale = settings["quality_error_scale"]
-        quality = settings["quality_points"] * sum(1 / (1 + (v / scale) ** 2) for v in errors.values()) / len(errors)
+        if settings["quality_points"]:
+            scale = settings["quality_error_scale"]
+            quality = settings["quality_points"] * sum(1 / (1 + (v / scale) ** 2) for v in errors.values()) / len(errors)
     return {"score": round(implementation + quality, 6), "implementation_points": implementation,
             "quality_points": quality, "components": checks, "evaluation_errors": errors}
 
@@ -118,7 +119,10 @@ def evaluate(challenge, sources, settings, directory, device):
             continue
         module = load_lesson(challenge, filename)
         try:
+            from .contracts import check_setup
+            setup_functions, setup_checks = check_setup(module, sources[filename], challenge)
             student, checks = check_equations(module, sources[filename], challenge)
+            checks = {**checks, **setup_checks}
         except SubmissionError as exc:
             results[filename] = {"status": "invalid", "score": 0, "message": str(exc)}
             continue
@@ -127,6 +131,8 @@ def evaluate(challenge, sources, settings, directory, device):
             # Only trusted course main() is called. No code from the uploaded
             # module, defaults, annotations, or imports is executed.
             module.student_equations = student
+            for name, function in setup_functions.items():
+                setattr(module, name, function)
             output = directory / filename.removesuffix(".py")
             previous = sys.argv
             sys.argv = [str(lesson_path(challenge, filename)), "--steps", str(settings["steps"]),
@@ -139,9 +145,9 @@ def evaluate(challenge, sources, settings, directory, device):
             if metrics.get("reference_implementation") is not False:
                 raise RuntimeError("Trusted runner unexpectedly selected reference mode")
         result = level_points(checks, metrics, quality_metrics(challenge, filename), settings)
-        result["status"] = "evaluated" if all(checks.values()) else "incorrect_equations"
+        result["status"] = "evaluated" if all(checks.values()) else "incorrect_implementation"
         if not all(checks.values()):
-            result["message"] = "Review failed residual components. Training is skipped until all match."
+            result["message"] = "Review failed PDE, condition, geometry or parameter components. Training is skipped until the complete stated problem matches."
         results[filename] = result
     score = round(sum(level["score"] for level in results.values()) / len(results), 2)
     return {"kind": "pilot_not_official", "challenge": challenge, "score": score,
