@@ -4,6 +4,7 @@ Only bounded symbolic/data functions are interpreted. The web process checks
 signatures; the isolated evaluator checks values before running trusted code.
 """
 import inspect
+import textwrap
 
 from .expressions import SubmissionError, build, extract
 
@@ -45,7 +46,14 @@ def check_setup(module, source, challenge):
     for name in function_names(challenge)[1:]:
         reference = getattr(module, name.replace("student_", "reference_", 1))
         parameters = {name: p.default for name, p in inspect.signature(reference).parameters.items()}
-        function = build(source, parameters, name=name, data=True)
+        exact_numbers = name in {"student_conditions", "student_speed", "student_solution"}
+        function = build(source, parameters, name=name, data=True, exact_numbers=exact_numbers)
+        if exact_numbers:
+            # Compare both sides using the written decimal coefficients, not
+            # Python float artifacts. Only trusted reference source is read;
+            # the same restricted interpreter handles it without exec/import.
+            reference = build(textwrap.dedent(inspect.getsource(reference)), parameters,
+                              name=reference.__name__, data=True, exact_numbers=True)
         functions[name] = function
         try:
             if name == "student_conditions":

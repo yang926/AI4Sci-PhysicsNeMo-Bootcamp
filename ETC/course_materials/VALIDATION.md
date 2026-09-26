@@ -1,5 +1,35 @@
 # Validation record: PhysicsNeMo 2.2.2
 
+## 2026-09-26 follow-up: decimal answers and reciprocal expansion
+
+Independent re-audit found two gaps in the initial fix below. An expanded Wave 3
+Gaussian could lose condition credit due to binary floating-point coefficients,
+and negative powers undercounted denominator expansion. Existing test passes did
+not cover these cases.
+
+The setup grader now interprets the written decimal coefficients in conditions,
+wave speed and analytic solutions as exact decimal rationals on both submitted
+and trusted-reference sides, before arithmetic. The original lesson functions,
+data, optimizers and FP32 training settings are unchanged. This does not broaden
+the accepted Python language or apply a numerical tolerance to symbolic answers.
+Geometry and physical-parameter checks retain their existing numeric semantics.
+
+Regression tests cover the original, expanded, fractional and scientific-notation
+Gaussian; real two-step CPU evaluation awards the expanded answer 100 for Level 3.
+Tiny real errors remain incorrect, including digits Python floats would round
+away. Decimal token length and exponent limits precede rational allocation.
+
+Reciprocal denominators now count toward the same pre-expansion budget as positive
+powers. Both reported bypasses, including nested function variants, are rejected
+before rewrite or expansion; bounded reciprocal identities remain accepted.
+These limits are intentionally conservative, not a general-purpose CAS solver.
+
+Focused cases live in `ETC/tests/test_decimal_grading.py` and
+`ETC/tests/test_symbolic_expansion_budget.py`. The separate judge carries matching
+regressions and must pin this course revision. A changed grading fingerprint
+requires a new scoring state; preserve older databases and do not mix their scores.
+This maintenance work does not add a GPU convergence or event-capacity claim.
+
 ## 2026-09-26: bug fixes without changing the exercises
 
 This maintenance pass leaves the Lab and Challenge equations, data, model

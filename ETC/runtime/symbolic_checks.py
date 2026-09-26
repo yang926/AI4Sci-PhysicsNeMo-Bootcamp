@@ -73,7 +73,10 @@ def _check_expansion_cost(expression):
         elif node.is_Pow:
             base_terms, base_width = cost(node.base)
             power = int(node.exp)
-            terms = base_terms ** power if power > 0 else 1
+            # expand() also distributes powers inside reciprocal denominators.
+            # Count those terms even though the outer reciprocal is one term;
+            # treating a negative power as an atom would hide that expansion.
+            terms = base_terms ** abs(power)
             width = 1 + abs(power) * base_terms * base_width
         elif node.func in (sp.sin, sp.cos, sp.exp):
             arg_terms, arg_width = parts[0]

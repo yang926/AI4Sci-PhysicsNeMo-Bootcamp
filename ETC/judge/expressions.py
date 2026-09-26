@@ -5,6 +5,7 @@ other source, imports, decorators and default expressions are NOT executed.
 This deliberately excludes arbitrary Python, even inside that function.
 """
 import ast
+from decimal import Decimal, InvalidOperation
 import math
 import operator
 
@@ -41,7 +42,7 @@ def extract(source, name="student_equations", parameters=None):
     return validate_function(node, parameters)
 
 
-def build(source, parameters, *, name="student_equations", data=False):
+def build(source, parameters, *, name="student_equations", data=False, exact_numbers=False):
     """Return a callable interpreted by trusted code, not a compiled function."""
     node = extract(source, name, parameters)
     names = [arg.arg for arg in node.args.args]
@@ -52,16 +53,20 @@ def build(source, parameters, *, name="student_equations", data=False):
         env = dict(parameters)
         env.update(zip(names, args))
         env.update(kwargs)
-        return Interpreter(env, data=data).run(node.body)
+        return Interpreter(env, data=data, exact_numbers=exact_numbers, source=source).run(node.body)
     return equations
 
 
 class Interpreter:
-    def __init__(self, environment, *, data=False):
+    def __init__(self, environment, *, data=False, exact_numbers=False, source=None):
         import sympy
         self.sp = sympy
+        self.exact_numbers = exact_numbers
+        self.source = source
         def convert(value):
             if type(value) in (int, float):
+                if exact_numbers:
+                    return self.decimal_number(str(value))
                 return sympy.sympify(value)
             if isinstance(value, dict):
                 return {key: convert(part) for key, part in value.items()}
@@ -69,6 +74,24 @@ class Interpreter:
         self.env = {key: convert(value) for key, value in environment.items()}
         self.budget = 400
         self.data = data
+
+    def decimal_number(self, literal):
+        """Exact decimal coefficients, before arithmetic can round them.
+
+        Decimal reads only numeric literal text, never Python/SymPy expressions.
+        Bound digits and exponent before constructing potentially large integers.
+        """
+        if not isinstance(literal, str) or len(literal) > 128:
+            raise SubmissionError("Numeric literal is too long.")
+        try:
+            number = Decimal(literal.replace("_", ""))
+        except InvalidOperation as exc:
+            raise SubmissionError("Invalid decimal coefficient.") from exc
+        if (not number.is_finite() or number.copy_abs() > 10000
+                or abs(number.as_tuple().exponent) > 400):
+            raise SubmissionError("Decimal coefficient exceeds the supported numeric bounds.")
+        numerator, denominator = number.as_integer_ratio()
+        return self.sp.Rational(numerator, denominator)
 
     def checked(self, value):
         if isinstance(value, self.sp.Expr):
@@ -130,6 +153,11 @@ class Interpreter:
         sp = self.sp
         if isinstance(node, ast.Constant):
             if type(node.value) in (int, float) and math.isfinite(node.value) and abs(node.value) <= 10000:
+                if self.exact_numbers:
+                    if type(node.value) is int:
+                        return sp.Integer(node.value)
+                    literal = ast.get_source_segment(self.source, node) if self.source is not None else str(node.value)
+                    return self.decimal_number(literal)
                 return sp.sympify(node.value)  # Numeric objects only, never a string parser.
             if isinstance(node.value, str) and len(node.value) <= 40:
                 return node.value

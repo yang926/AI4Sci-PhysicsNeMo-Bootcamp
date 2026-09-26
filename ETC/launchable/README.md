@@ -138,7 +138,7 @@ environment change needs the installation path. If installation subsequently
 fails, the log reports the source revision separately; do not interpret a
 downloaded revision as a completed environment installation.
 
-The checked-in CUDA lock pins all 181 packages, including widgets. Environments
+The checked-in CUDA lock pins the course packages, including widgets. Environments
 are named by that lock's fingerprint. A new lock gets a separate environment;
 the previous one is retained. This lock reproduces the local WSL package set,
 not a claim that a clean Brev VM has already passed rehearsal.
