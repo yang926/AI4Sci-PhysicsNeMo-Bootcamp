@@ -8,6 +8,8 @@ import math
 import sympy as sp
 import torch
 
+from .symbolic_checks import equivalent_expression
+
 
 def conditions(builder, *, wave=False):
     x, y, t = sp.symbols("x y t")
@@ -137,4 +139,4 @@ def analytic_expression_checks(builder, reference, parameters):
         raise ValueError("student_solution must return exactly: " + ", ".join(expected))
     if any(not isinstance(value, sp.Expr) or sp.count_ops(value) > 180 for value in actual.values()):
         raise ValueError("Exact solutions must be bounded symbolic expressions")
-    return {name: sp.expand(actual[name] - expected[name]) == 0 for name in expected}
+    return {name: equivalent_expression(actual[name], expected[name]) for name in expected}

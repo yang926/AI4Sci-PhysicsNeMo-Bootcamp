@@ -1,5 +1,36 @@
 # Validation record: PhysicsNeMo 2.2.2
 
+## 2026-09-26: bug fixes without changing the exercises
+
+This maintenance pass leaves the Lab and Challenge equations, data, model
+settings, training budgets and notebook code cells unchanged. Lab 4 still uses
+the original array. No new physical problem or simpler substitute is introduced.
+The remaining numerical limitations in [Lab 4](LAB4_EFFICIENCY.md) and
+[the Challenges](CHALLENGE_EFFICIENCY.md) are not resolved by these fixes.
+
+- Answer checks now recognize bounded, exact alternate trigonometric forms for
+  conditions, wave speed and Climate solutions. Approximate answers do not earn
+  credit, and oversized expressions are rejected before symbolic expansion.
+- The validation runner accepts the existing 20,000-50,000-update budgets when
+  explicitly requested. It does not increase any lesson or test default.
+- Reports distinguish original-data execution, synthetic Taylor-Green
+  regression, reduced Operator regression and recorded lesson-error checks.
+  `passed` concerns the selected checks; `course_readiness_certified` is false.
+  A synthetic or reduced test pass is not an accuracy result for the student
+  lesson. No new Lab 4 accuracy threshold is invented here.
+- Introduction and guide text now follows the actual optimizer, fixed-grid
+  sampling, original uncoupled Climate baseline and complete exercise functions.
+
+Reproduce the course tests with `python -m pytest ETC/tests -q -ra`. The optional
+browser tests require `AI4SCI_TEST_CHROMIUM`; long convergence runs and actual
+VTK-reader checks have separate prerequisites. The separate judge must also run
+its own tests against the same approved course revision. Its notebook bridge
+must cover nickname registration, all eleven levels, personal results and the
+selected-Challenge board, not only the embedded development judge.
+
+These checks do not establish a deployed event API, automatic personal Brev
+credentials, 110-person capacity, or full-lesson convergence.
+
 ## 2026-09-25: original tasks and teaching workflows
 
 The earlier execution checks did not establish preservation of the original

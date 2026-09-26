@@ -38,6 +38,7 @@ def check_setup(module, source, challenge):
     """Return interpreted setup functions and independently checked components."""
     import sympy as sp
     from ETC.runtime.exercises import block_geometry, conditions, physical_parameters, analytic_expression_checks
+    from ETC.runtime.symbolic_checks import equivalent_expression
 
     source_nodes(source, challenge)
     functions, checks = {}, {}
@@ -53,13 +54,13 @@ def check_setup(module, source, challenge):
                 if set(actual) != set(expected):
                     raise SubmissionError("student_conditions must return exactly: " + ", ".join(expected))
                 for key in expected:
-                    checks["condition." + key] = sp.expand(actual[key] - expected[key]) == 0
+                    checks["condition." + key] = equivalent_expression(actual[key], expected[key])
             elif name == "student_speed":
                 x, y = sp.symbols("x y")
                 actual, expected = function(x, y), reference(x, y)
                 if not isinstance(actual, dict) or set(actual) != {"c"} or not isinstance(actual["c"], sp.Expr):
                     raise SubmissionError("student_speed must return {'c': speed_expression}")
-                checks["parameter.wave_speed"] = sp.expand(actual["c"] - expected["c"]) == 0
+                checks["parameter.wave_speed"] = equivalent_expression(actual["c"], expected["c"])
             elif name == "student_solution":
                 checks.update({"solution." + key: value for key, value in
                     analytic_expression_checks(function, reference, module.DEFAULT_PHYSICS).items()})

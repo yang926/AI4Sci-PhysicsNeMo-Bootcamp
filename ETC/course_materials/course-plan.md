@@ -13,7 +13,7 @@ Follow [Start Here](../../Start_Here.ipynb) and the [course guide](README.md). T
 | Lab 4 | Incompressible Navier–Stokes | [Open notebook](../../01_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb) | Start from the original ERA5-derived array, inspect predicted flow over 60 hours, and play the sequence in ParaView. |
 | Challenge 1 | Wave dynamics | [Open notebook](../../02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb) | Level 1–3: constant speed, variable speed, circular Robin boundary. |
 | Challenge 2 | Fluid flow | [Open notebook](../../02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb) | Level 1–3: one fixed obstacle, multiple fixed obstacles, time-dependent flow. |
-| Challenge 3 | Educational climate PDEs | [Open notebook](../../02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb) | Level 1–2: temperature transport and active atmosphere–ocean exchange, with analytical comparisons for the default cases. |
+| Challenge 3 | Educational climate PDEs | [Open notebook](../../02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb) | Level 1–2: temperature transport and atmosphere–ocean equations. Level 2 defaults to the original uncoupled case (`gamma0=0`); nonzero exchange is a separate local experiment. |
 | Challenge 4 | Neural operators | [Open notebook](../../02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb) | Level 1–3: FNO, AFNO and PINO on the same periodic reaction–diffusion problem. |
 
 The instructor has confirmed the current exercise sequence. The shared event sheet and external slides have **not** been changed by this local update.
@@ -56,10 +56,10 @@ Use the Introduction to establish coordinates, predictions, derivatives and loss
 | Lab 1 | Distinguish forward, parameterized and inverse problems; explain the first problem's boundary conditions and analytical curve. |
 | Labs 2–3 | Identify initial versus interface conditions, and compare predictions with the applicable analytical solution. |
 | Lab 4 | Identify the original wind at time zero, inspect evolving predicted flow, and distinguish initial-data/PDE errors from unavailable future-weather errors. |
-| Challenges 1–3 | Select student mode, edit and save the linked function, rerun safely, and interpret individual condition errors. |
+| Challenges 1–3 | Select student mode, complete and save all required functions for the level, rerun safely, and interpret individual condition errors. |
 | Challenge 4 | Explain input-field → solution-field learning and compare FNO/AFNO/PINO using the same held-out data. |
 
-Record explanation, editing, execution, result interpretation and questions separately in rehearsal. L40 execution speed alone cannot establish that every learner will finish. Do not silently drop levels or turn hands-on work into demonstrations to fit the time slots.
+Record explanation, editing, execution, result interpretation and questions separately in rehearsal. L4 execution speed alone cannot establish that every learner will finish. Do not silently drop levels or turn hands-on work into demonstrations to fit the time slots.
 
 ## Instructor decisions
 
@@ -68,7 +68,7 @@ Record explanation, editing, execution, result interpretation and questions sepa
 | Public materials | Align the external agenda and Main material link with the agreed, published course revision; local edits are not a GitHub release. |
 | Participants | Plan for 110 individual participants, not teams. Labs are practice; the four afternoon Challenges are intended for individual ranking. |
 | Assessment | Follow the [evaluation guide](ASSESSMENT.md). Local error metrics are practice feedback; point conversion and official submission rules are not yet finalized. |
-| Event environment | Participant training resources are undecided. An eight-GPU Brev judge has been requested separately; no instance or scoreboard is created by this material update. |
+| Event environment | The plan is one Brev L4 instance per participant and a separate eight-GPU judge. Availability and concurrent startup capacity still require confirmation; no instance is provisioned by this material update. |
 | Instructor roles | Mingyu Yang: Introduction, Labs and Challenge 1. Hyungon Ryu: Challenges 2–4. Agree on support responsibilities during each segment. |
 | Rehearsal | Measure the full introduction, four Labs and eleven Challenge levels, including editing and result interpretation. |
 | Slides | Confirm the event deck and map it to the notebook checkpoints and current explicit training loops. Slide files are outside this repository update. |

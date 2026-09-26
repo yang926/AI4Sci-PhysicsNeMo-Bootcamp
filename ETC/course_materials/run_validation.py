@@ -2,8 +2,9 @@
 """Run reproducible PhysicsNeMo course validation without downloads or remote access.
 
 unit: pytest tests; smoke: all 18 actual lesson runs and artifact checks;
-convergence: analytical cases with required held-out improvement; all seven
-Lab modes also require their absolute physical lesson-accuracy limits.
+convergence: selected analytical cases with required held-out improvement;
+Labs 1-3 also require their recorded absolute lesson-error limits. Lab 4 uses
+a separate synthetic regression, not a quality gate for the student data.
 A smoke pass never certifies convergence. These checks establish only their
 recorded criteria, not full physical or numerical convergence.
 Request each lesson's full training budget explicitly; the default 500-step
@@ -34,7 +35,25 @@ MANIFEST = ROOT / "ETC/course_materials/course_manifest.json"
 LAB1_CASE_MODES = {"pinn_forward": "forward", "pinn_parameterized": "parameterized", "pinn_inverse": "inverse"}
 LAB_CASES = (*LAB1_CASE_MODES, "projectile", "diffusion", "diffusion_parameterized", "navier_stokes")
 CONVERGENCE_CASES = (*LAB_CASES, "wave_l1", "operators_l1", "operators_l2", "operators_l3")
+MAX_VALIDATION_STEPS = 50_000  # Covers the existing course and upstream budgets; not a default.
 REQUIRED_ARTIFACTS = ("metrics.json", "loss.csv", "model.pt", "predictions.npz", "preview.png")
+
+
+def quality_check_scope(case_id, suite):
+    """Describe what a passing check can establish, without changing the lesson."""
+    if suite == "unit":
+        return "unit_tests_only"
+    if suite == "smoke":
+        return "execution_only"
+    if case_id == "navier_stokes":
+        return "synthetic_regression_only_not_original_data_accuracy"
+    if case_id.startswith("operators_"):
+        return "reduced_model_and_data_regression_not_full_lesson_accuracy"
+    if case_id not in CONVERGENCE_CASES:
+        return "no_convergence_check_available"
+    if case_id in LAB_CASES:
+        return "recorded_absolute_error_and_improvement_checks"
+    return "relative_improvement_only_not_absolute_accuracy"
 
 
 def now():
@@ -423,8 +442,8 @@ def main(argv=None):
                         help="Improvement requires after <= ratio * before; default at least 1 percent")
     parser.add_argument("--timeout", type=int, default=1200, help="Maximum seconds for each subprocess")
     args = parser.parse_args(argv)
-    if not 2 <= args.steps <= 10000 or not 2 <= args.convergence_steps <= 10000:
-        parser.error("steps and convergence-steps must be between 2 and 10000")
+    if not 2 <= args.steps <= MAX_VALIDATION_STEPS or not 2 <= args.convergence_steps <= MAX_VALIDATION_STEPS:
+        parser.error(f"steps and convergence-steps must be between 2 and {MAX_VALIDATION_STEPS}")
     if not 0 < args.improvement_ratio < 1 or args.timeout < 1:
         parser.error("improvement-ratio must be between 0 and 1 and timeout must be positive")
     manifest = json.loads(MANIFEST.read_text())
@@ -443,8 +462,10 @@ def main(argv=None):
     output.mkdir(parents=True)
     report = {"started_at": now(), "suite": args.suite, "device": args.device,
               "seed": args.seed, "scope": {"smoke": "Execution, finite artifacts and checkpoint checks only",
-              "convergence": "Held-out improvement plus absolute lesson-accuracy limits for all seven Lab modes; Navier-Stokes synthetic fixture only; not full convergence certification",
+              "convergence": "Selected improvement checks; Labs 1-3 have absolute error limits, Lab 4 is a synthetic regression, Operators use reduced models/data; not full lesson certification",
               "unit": "All repository tests; --case filters training cases only"},
+              "course_readiness_certified": False,
+              "quality_check_scope": {case: quality_check_scope(case, args.suite) for case in selected},
               "environment": versions(), "source": source_snapshot(output), "runs": [], "passed": False}
     report_path = output / "report.json"
 
@@ -490,6 +511,7 @@ def main(argv=None):
                     command.extend(["--data-dir", str(data_dir), "--config", str(configs[case["level"]])])
                 record = execute(command, output, label, args.timeout)
                 record.update(case=case_id, suite=suite, steps=steps,
+                              quality_check_scope=quality_check_scope(case_id, suite),
                               script_sha256=sha256(ROOT / case["script"]))
                 if case_id == "navier_stokes":
                     record["data_scope"] = ("separate synthetic Taylor-Green regression" if suite == "convergence"
@@ -514,6 +536,7 @@ def main(argv=None):
     report["finished_at"] = now()
     save_report()
     print(json.dumps({"report": str(report_path), "passed": report["passed"],
+                      "course_readiness_certified": False,
                       "failed": [run["label"] for run in report["runs"] if not run["passed"]],
                       "error": report.get("error")}), flush=True)
     return 0 if report["passed"] else 1
