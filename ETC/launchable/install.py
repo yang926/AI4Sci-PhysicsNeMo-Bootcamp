@@ -200,6 +200,13 @@ def load_jupyter_setup():
     return module
 
 
+def configure_event_enrollment(event_id):
+    spec = importlib.util.spec_from_file_location("ai4sci_event_enrollment", Path(__file__).with_name("enrollment.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.install_receiver(event_id)
+
+
 def managed_server_python(service, home):
     """Accept only the verified user's virtualenv, never mutate system Python."""
     argv = service.argv
@@ -273,6 +280,7 @@ def main():
     parser.add_argument("--course-dir", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--configure-jupyter", action="store_true", help="Configure the existing Brev Jupyter service for this course")
     parser.add_argument("--refresh", action="store_true", help="Reuse matching verified dependencies without importing CUDA or reinstalling the kernel")
+    parser.add_argument("--enroll-event", choices=("ai4science-korea-2026",), help="Install the event's restricted SSH enrollment receiver; no interactive shell access")
     args = parser.parse_args()
     if sys.platform != "linux" or os.geteuid() == 0:
         parser.error("Use a Linux NVIDIA GPU VM as the same non-root user as Brev Jupyter.")
@@ -293,11 +301,14 @@ def main():
         result = module.configure_jupyter(course, prefix, Path.home())
         if result["status"] == "unchanged":
             print("Managed Jupyter already matches the course. Running kernels were left untouched.")
-    # No judge credentials are embedded in this public template. Personal
-    # provisioning remains separate and local practice works without a judge.
+    if args.enroll_event:
+        configure_event_enrollment(args.enroll_event)
+    # Personal credentials arrive through the restricted event connection,
+    # never through this public template. Local practice remains independent.
     print("Course kernel ready. Use Brev's managed Jupyter; no second server was started.")
     print("Kernel:", KERNEL_NAME)
-    print("Judge connection is separate; never share one participant token in a Launchable.")
+    print("Judge enrollment is automatic for this opted-in event; local practice works while waiting."
+          if args.enroll_event else "Judge connection is separate; never share one participant token in a Launchable.")
 
 
 if __name__ == "__main__":

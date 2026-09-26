@@ -200,6 +200,7 @@ def main():
     parser.add_argument("--update", action="store_true", help="Create a separate updated checkout; retain all earlier student work")
     parser.add_argument("--launchable", action="store_true", help="Use the canonical course folder and configure managed Jupyter for students")
     parser.add_argument("--refresh", action="store_true", help="Update the existing course, preserving learner work and reusing its environment")
+    parser.add_argument("--enroll-event", choices=("ai4science-korea-2026",), help="Opt in to the event's restricted judge enrollment connection")
     args = parser.parse_args()
     if os.geteuid() == 0:
         parser.error("Run as the Brev/Jupyter user, not root or sudo.")
@@ -211,6 +212,8 @@ def main():
     else:
         course = prepare_checkout(args.repo, args.ref, args.destination, args.update or args.ref != "main")
     command = [sys.executable, str(course / "ETC/launchable/install.py"), "--course-dir", str(course)]
+    if args.enroll_event:
+        command.extend(["--enroll-event", args.enroll_event])
     if args.launchable or args.refresh:
         command.append("--configure-jupyter")
         if (existing or args.refresh) and supports_refresh(course):

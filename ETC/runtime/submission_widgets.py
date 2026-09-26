@@ -34,10 +34,15 @@ def history_html(account, challenge):
 
 
 class SubmissionPanel:
+    POLL_INTERVAL_SECONDS = 5
+    MAX_POLL_ATTEMPTS = 180
+
     def __init__(self, challenge, lesson_dir, *, levels=(1,), reference=False, judge_url="", client=None):
         import ipywidgets as widgets
         self.challenge, self.lesson_dir, self.reference = str(challenge), lesson_dir, reference
         self.client = client
+        self._environment_client = client is None
+        self._judge_url = judge_url
         self.closed = self.busy = self.pending = False
         self.connected = False
         self.nickname = None
@@ -66,32 +71,27 @@ class SubmissionPanel:
             self.levels, widgets.HBox([self.submit_button, self.refresh_button]), self.status, self.history,
             widgets.HTML("<small>Scores are provisional. No file download, website upload or separate judge login is needed here.</small>"),
         ])
-        if self.client is None:
-            try:
-                self.client = JudgeClient.from_environment(judge_url)
-            except JudgeConnectionError as exc:
-                self.identity.value = f"<p>{escape(str(exc))}</p>"
-                self.refresh_button.disabled = True
         self.submit_button.on_click(lambda _: self._dispatch(submit=True))
         self.refresh_button.on_click(lambda _: self._dispatch())
         self.nickname_button.on_click(lambda _: self._dispatch(save_nickname=True))
         self.nickname_input.observe(lambda _: self._update_controls(), names="value")
-        if self.client is not None:
-            self._dispatch()
+        self._dispatch()
 
     def _update_controls(self):
-        unavailable = self.closed or self.busy or self.client is None
+        unavailable = self.closed or self.busy
         dirty = self.nickname_input.value.strip() != self.nickname
         self.nickname_input.disabled = unavailable
         self.nickname_button.description = "Save nickname" if self.nickname else "Register nickname"
-        self.nickname_button.disabled = unavailable or not self.nickname_input.value.strip() or not dirty
+        self.nickname_button.disabled = (unavailable or self.client is None
+                                         or not self.nickname_input.value.strip() or not dirty)
         self.refresh_button.disabled = unavailable
         self.submit_button.disabled = (unavailable or not self.connected or not self.nickname or dirty
                                        or self.reference is not False or self.pending)
 
     def _apply_account(self, account, *, saved_nickname=False):
         draft = self.nickname_input.value
-        if saved_nickname or not self._account_loaded or draft.strip() == (self.nickname or ""):
+        if (saved_nickname or (not self._account_loaded and not draft.strip())
+                or (self._account_loaded and draft.strip() == (self.nickname or ""))):
             self.nickname_input.value = account["nickname"] or ""
         self.nickname = account["nickname"]
         self._account_loaded = True
@@ -102,7 +102,7 @@ class SubmissionPanel:
                            for item in account["submissions"])
 
     def _dispatch(self, *, submit=False, save_nickname=False):
-        if self.closed or self.busy or self.client is None:
+        if self.closed or self.busy:
             return
         if self._task is not None and not self._task.done():
             return
@@ -114,12 +114,20 @@ class SubmissionPanel:
             self._task = loop.create_task(self._perform(submit=submit, save_nickname=save_nickname))
 
     async def _perform(self, *, submit=False, save_nickname=False):
-        if self.closed or self.busy or self.client is None:
+        if self.closed or self.busy:
             return
         self.busy = True
         self._update_controls()
         healthy = False
         try:
+            # Launchable provisioning may finish after this cell is opened. Only
+            # read-only refreshes reload private configuration; never retry a POST.
+            if not submit and not save_nickname and self._environment_client and not self.connected:
+                self.client = await asyncio.to_thread(JudgeClient.from_environment, self._judge_url)
+                if self.closed:
+                    return
+            if self.client is None:
+                raise JudgeConnectionError("Judge connection not configured yet. Waiting for automatic workspace connection.")
             if submit:
                 if not self.nickname or self.nickname_input.value.strip() != self.nickname:
                     raise JudgeConnectionError("Register or save your nickname before submitting code.")
@@ -146,7 +154,6 @@ class SubmissionPanel:
                 self.status.value = "<p>Results refreshed. Updates every 5 seconds while evaluation is pending.</p>"
             if self.reference is not False:
                 self.status.value = "<p>Instructor demonstration: submission disabled. Set USE_REFERENCE = False and rerun this cell.</p>"
-            self._start_polling()
         except (JudgeConnectionError, SubmissionError) as exc:
             self.status.value = f"<p>{escape(str(exc))}</p><p>Previously displayed results may be outdated.</p>"
         except Exception:
@@ -156,22 +163,30 @@ class SubmissionPanel:
             self.busy = False
             self.connected = healthy
             if not self.closed:
+                if not healthy:
+                    self.identity.value = ("<p>Judge connection not configured yet. Waiting for automatic workspace connection.</p>"
+                                           if self.client is None else "<p>Judge connection unavailable. Checking again automatically.</p>")
+                    self.status.value += "<p>Local practice is still available. Refresh results retries the connection; it never sends code.</p>"
                 self._update_controls()
+                self._start_polling()
 
     def _start_polling(self):
-        if self.pending and (self._poll_task is None or self._poll_task.done()):
+        if (self.pending or not self.connected) and (self._poll_task is None or self._poll_task.done()):
             self._poll_task = asyncio.create_task(self._poll())
 
     async def _poll(self):
         # Bounded read-only polling. Never automatically retry a POST.
-        for _ in range(180):
-            await asyncio.sleep(5)
-            if self.closed or not self.pending:
+        for _ in range(self.MAX_POLL_ATTEMPTS):
+            await asyncio.sleep(self.POLL_INTERVAL_SECONDS)
+            if self.closed or (self.connected and not self.pending):
                 return
             if not self.busy:
                 await self._perform()
-        if not self.closed and self.pending:
-            self.status.value = "<p>Automatic refresh paused after 15 minutes. Click Refresh results to continue.</p>"
+            if self.connected and not self.pending:
+                return
+        if not self.closed and (self.pending or not self.connected):
+            self.identity.value = (self.identity.value if self.connected else "<p>Judge connection unavailable. Automatic checks are paused.</p>")
+            self.status.value = "<p>Automatic refresh paused. Click Refresh results to continue. Local practice is still available.</p>"
 
     def close(self):
         self.closed = True
