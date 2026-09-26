@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Opt-in event enrollment: a forced SSH receiver, never an interactive shell."""
 import argparse
+from contextlib import ExitStack
 import fcntl
 import json
 import os
@@ -35,6 +36,43 @@ def check_directory(path, *, private=False):
     if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
             or info.st_mode & (0o077 if private else 0o022)):
         raise ValueError("Enrollment requires real, user-owned directories with safe permissions.")
+
+
+def prepare_install_directories(home):
+    """Tighten only Brev's known group-writable defaults during explicit opt-in.
+
+    Never repair these permissions while receiving credentials. Validate the
+    complete existing set before changing anything, reject foreign ownership
+    or world writes, and leave every other directory/file permission alone.
+    """
+    home = Path(home).absolute()
+    for ancestor in (*reversed(home.parents), home):
+        if ancestor.is_symlink():
+            raise ValueError("Enrollment paths must not contain symlinks.")
+    primary_gid = pwd.getpwuid(os.getuid()).pw_gid
+    targets = (home, home / ".local", home / ".local/lib", home / ".config")
+    with ExitStack() as opened:
+        directories = []
+        for path in targets:
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                if path == home:
+                    raise
+                continue
+            if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+                    or info.st_gid != primary_gid or info.st_mode & stat.S_IWOTH):
+                raise ValueError("Enrollment installation requires student-owned, primary-group directories without world writes or symlinks.")
+            descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+            opened.callback(os.close, descriptor)
+            current = os.fstat(descriptor)
+            if ((current.st_dev, current.st_ino, current.st_uid, current.st_gid, current.st_mode)
+                    != (info.st_dev, info.st_ino, info.st_uid, info.st_gid, info.st_mode)):
+                raise ValueError("An enrollment directory changed during inspection; permissions were not changed.")
+            directories.append((descriptor, current))
+        for descriptor, info in directories:
+            if info.st_mode & stat.S_IWGRP:
+                os.fchmod(descriptor, stat.S_IMODE(info.st_mode) & ~stat.S_IWGRP)
 
 
 def directory_below(home, *parts):
@@ -98,6 +136,9 @@ def install_receiver(event_id, *, home=None):
     if event_id != EVENT_ID:
         raise ValueError("This installer supports only the approved Ai4Science Korea event.")
     home = user_home() if home is None else Path(home)
+    prepare_install_directories(home)
+    # Prepare the private destination without creating or changing credentials.
+    directory_below(home, ".config", "ai4sci")
     receiver_dir = directory_below(home, ".local", "lib", "ai4sci-enrollment")
     receiver = receiver_dir / "receiver.py"
     line = enrollment_key_line(receiver).encode()

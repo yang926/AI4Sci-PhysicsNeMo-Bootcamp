@@ -57,7 +57,96 @@ def test_receiver_installs_private_and_preserves_existing_ssh_keys(tmp_path, cap
     assert CONFIG["token"] not in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("location", [".local", ".local/lib", ".local/lib/ai4sci-enrollment", ".ssh"])
+@pytest.mark.parametrize("with_lib", [False, True])
+def test_brev_group_writable_defaults_are_hardened_only_at_opt_in(tmp_path, with_lib):
+    home = tmp_path / "ubuntu"
+    home.mkdir()
+    paths = [home, home / ".local", home / ".config"]
+    for path in paths[1:]:
+        path.mkdir()
+    if with_lib:
+        paths.append(home / ".local/lib")
+        paths[-1].mkdir()
+    for path in paths:
+        path.chmod(0o775)
+    unrelated = home / "student-work"
+    unrelated.mkdir(mode=0o775)
+    unrelated.chmod(0o775)
+    learner_file = unrelated / "exercise.py"
+    learner_file.write_text("preserve learner work\n")
+    learner_file.chmod(0o664)
+    original = b"ssh-ed25519 STUDENT_KEY preserved\n"
+    keys = private_file(home / ".ssh/authorized_keys", original)
+
+    receiver = enrollment.install_receiver(enrollment.EVENT_ID, home=home)
+    assert all(path.stat().st_mode & 0o777 == 0o755 for path in paths)
+    assert unrelated.stat().st_mode & 0o777 == 0o775
+    assert learner_file.stat().st_mode & 0o777 == 0o664
+    assert learner_file.read_text() == "preserve learner work\n"
+    assert receiver.stat().st_mode & 0o777 == 0o600
+    assert (home / ".config/ai4sci").stat().st_mode & 0o777 == 0o700
+    assert not (home / ".config/ai4sci/judge.json").exists()
+    first_keys = keys.read_bytes()
+    enrollment.install_receiver(enrollment.EVENT_ID, home=home)
+    assert keys.read_bytes() == first_keys and first_keys.startswith(original)
+    assert all(path.stat().st_mode & 0o777 == 0o755 for path in paths)
+    enrollment.save_configuration(CONFIG, home)
+    assert json.loads((home / ".config/ai4sci/judge.json").read_text()) == CONFIG
+
+
+@pytest.mark.parametrize("location", ["", ".local", ".local/lib", ".config"])
+@pytest.mark.parametrize("unsafe", ["world_write", "foreign_owner", "foreign_group"])
+def test_install_hardening_rejects_unsafe_set_before_any_chmod(tmp_path, monkeypatch, location, unsafe):
+    home = tmp_path / "ubuntu"
+    home.mkdir()
+    (home / ".local/lib").mkdir(parents=True)
+    (home / ".config").mkdir()
+    paths = [home, home / ".local", home / ".local/lib", home / ".config"]
+    for path in paths:
+        path.chmod(0o775)
+    target = home / location
+    if unsafe == "world_write":
+        target.chmod(0o777)
+    else:
+        original_lstat = Path.lstat
+
+        def foreign_stat(path, *args, **kwargs):
+            result = original_lstat(path, *args, **kwargs)
+            if path == target:
+                values = list(result)
+                values[4 if unsafe == "foreign_owner" else 5] += 1
+                return os.stat_result(values)
+            return result
+
+        monkeypatch.setattr(Path, "lstat", foreign_stat)
+    before = {path: path.stat().st_mode for path in paths}
+    with pytest.raises(ValueError, match="student-owned"):
+        enrollment.install_receiver(enrollment.EVENT_ID, home=home)
+    assert {path: path.stat().st_mode for path in paths} == before
+    assert not (home / ".config/ai4sci").exists()
+    assert not (home / ".ssh").exists()
+
+
+def test_receiver_never_repairs_group_writable_home(tmp_path):
+    tmp_path.chmod(0o775)
+    with pytest.raises(ValueError, match="safe permissions"):
+        enrollment.save_configuration(CONFIG, tmp_path)
+    assert tmp_path.stat().st_mode & 0o777 == 0o775
+    assert not (tmp_path / ".config").exists()
+
+
+def test_install_hardening_preserves_non_group_write_permission_bits(tmp_path):
+    (tmp_path / ".local/lib").mkdir(parents=True)
+    (tmp_path / ".config").mkdir()
+    targets = [tmp_path, tmp_path / ".local", tmp_path / ".local/lib", tmp_path / ".config"]
+    modes = [0o775, 0o2775, 0o750, 0o770]
+    for path, mode in zip(targets, modes):
+        path.chmod(mode)
+    enrollment.prepare_install_directories(tmp_path)
+    assert [path.stat().st_mode & 0o7777 for path in targets] == [mode & ~0o020 for mode in modes]
+
+
+@pytest.mark.parametrize("location", [".local", ".local/lib", ".local/lib/ai4sci-enrollment", ".ssh", ".config"])
 def test_install_rejects_symlinked_directories(tmp_path, location):
     home, outside = tmp_path / "student", tmp_path / "outside"
     home.mkdir(mode=0o700)
