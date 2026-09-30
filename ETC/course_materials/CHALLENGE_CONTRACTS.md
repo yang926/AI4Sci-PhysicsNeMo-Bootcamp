@@ -1,86 +1,44 @@
-# Challenge task and submission mapping
+# Challenge 과제와 제출 코드의 연결
 
-Reference: OpenHackathons source commit `9cae27f8303268cdaf7528fe963ce12ba439377f`.
-This table records what students implement, where that answer is used, and what
-the v3 completion pilot checks. It is not a claim that every old API blank was
-copied verbatim.
+비교 기준: OpenHackathons 원본 커밋 `9cae27f8303268cdaf7528fe963ce12ba439377f`.
+아래 표는 수강생이 구현하는 내용, 해당 답안이 사용되는 위치, v3 과제 완성도 시범 채점에서 검사하는 항목을 정리합니다. 이전 API의 모든 빈칸을 그대로 옮겼다는 뜻은 아닙니다.
 
-| Level | Original mathematical task | Current learner function and use |
+| 레벨 | 원본의 수학적 과제 | 현재 수강생 함수와 사용처 |
 |---|---|---|
-| Wave 1 | Wave residual, constant speed, displacement/velocity initial data, edge condition | `student_equations`, `student_speed`, `student_conditions`; speed enters the PDE, conditions enter training losses |
-| Wave 2 | Variable-speed expression, PDE, changed initial velocity, edge condition | Same functions, with a separately checked spatial speed expression |
-| Wave 3 | Wave residual, Gaussian initial data, full Robin residual on a disk | `student_conditions` returns `initial_u`, `initial_ut`, `boundary`; the boundary expression includes learner-written normal derivatives |
-| Fluid 1 | Steady incompressible flow, inlet/outlet/wall conditions | `student_equations`, `student_conditions`, `student_geometry`; all condition targets and the original single chip reach training |
-| Fluid 2 | Three rectangular cutouts and channel subtraction, with steady constraints | `student_geometry` returns three `(xmin, xmax, top)` cutouts; interior, wall, SDF and flux sampling all consume them |
-| Fluid 3 | Time-dependent equations and rest initial values, with inlet/outlet/wall constraints | `student_equations` includes time derivatives; conditions include all three initial fields; geometry returns to one chip |
-| Climate 1 | ADR residual, six coefficients, initial/boundary values, exact baseline temperature | `student_equations`, `student_parameters`, `student_conditions`, `student_solution` |
-| Climate 2 | Both residuals, nine coefficients, both fields' conditions and exact baseline solutions | Same four functions; exchange signs are checked symbolically even though the original baseline has `gamma0=0` |
-| Operators 1–3 | Wrap the supplied train/validation/test tensors, construct the specified model, implement PINO physics | `build_datasets` preserves tensors unchanged; the trainer owns normalization; `build_model` passes every `model_config` key; PINO uses `ReactionDiffusionPDE` |
+| Wave 1 | 파동 잔차, 상수 속도, 변위·속도 초기값, 가장자리 조건 | `student_equations`, `student_speed`, `student_conditions`; 속도는 PDE에, 조건은 학습 손실에 사용됩니다. |
+| Wave 2 | 공간에 따라 변하는 속도 식, PDE, 변경된 초기 속도, 가장자리 조건 | 같은 함수들을 사용하며, 공간 속도 식은 별도로 검사합니다. |
+| Wave 3 | 파동 잔차, 가우스 초기값, 원판의 완전한 Robin 경계 잔차 | `student_conditions`는 `initial_u`, `initial_ut`, `boundary`를 반환합니다. 경계 식에는 수강생이 작성한 법선 미분이 포함됩니다. |
+| Fluid 1 | 정상 비압축성 유동, 입구·출구·벽 조건 | `student_equations`, `student_conditions`, `student_geometry`; 모든 조건의 목표값과 원본의 단일 칩 형상이 학습에 사용됩니다. |
+| Fluid 2 | 직사각형 3개를 잘라 낸 채널 형상과 정상 조건 | `student_geometry`가 세 개의 `(xmin, xmax, top)` 절삭 영역을 반환합니다. 내부·벽·SDF·유량 샘플링 모두 이 값을 사용합니다. |
+| Fluid 3 | 시간 의존 방정식, 정지 상태 초기값, 입구·출구·벽 조건 | `student_equations`에 시간 미분을 포함합니다. 조건에는 세 초기장이 모두 들어가며, 형상은 다시 단일 칩을 사용합니다. |
+| Climate 1 | ADR 잔차, 계수 6개, 초기·경계값, 기준 온도의 정확한 해 | `student_equations`, `student_parameters`, `student_conditions`, `student_solution` |
+| Climate 2 | 두 잔차, 계수 9개, 두 장의 조건과 정확한 기준 해 | 같은 네 함수를 사용합니다. 원본 기준 설정이 `gamma0=0`이어도 교환항의 부호는 기호식으로 검사합니다. |
+| Operators 1–3 | 제공된 학습·검증·시험 텐서로 데이터셋 구성, 지정 모델 생성, PINO 물리식 구현 | `build_datasets`는 텐서를 변경하지 않고 감쌉니다. 정규화는 학습 코드가 담당합니다. `build_model`은 `model_config`의 모든 키를 전달하며, PINO는 `ReactionDiffusionPDE`를 사용합니다. |
 
-The tensor-loop adaptation supplies framework assembly, including model input
-wiring, geometry sampling, zero residual targets and constraint batching.
-Students return mathematical expressions and bounded geometry data instead of
-constructing legacy `Domain`, `Constraint`, `Node` and `Solver` objects. Those
-API construction blanks are not represented as arbitrary executable submissions.
+텐서 기반 학습 루프로 옮기면서 모델 입력 연결, 형상 샘플링, 잔차의 목표값 0, 조건별 배치 구성 등 프레임워크 조립 부분은 제공했습니다. 수강생은 이전의 `Domain`, `Constraint`, `Node`, `Solver` 객체를 생성하는 대신 수학식과 제한된 형상 데이터를 반환합니다. 이전 API의 조립 빈칸을 임의의 실행 코드 제출로 대체한 것은 아닙니다.
 
-## Local run versus judge
+## 로컬 실행과 채점기의 차이
 
-All local Challenge runs use the learner's saved functions. The student distribution has no completed answer mode. Local preflight checks syntax and completeness only; the judge checks correctness. PINN held-out residuals use the learner's equations, conditions and geometry. Climate comparisons use `student_solution` and explicitly record that the expression was not independently checked; the judge never accepts it as trusted scoring truth.
+모든 로컬 Challenge 실행은 수강생이 저장한 함수를 사용합니다. 수강생 배포본에는 완성된 답안으로 실행하는 모드가 없습니다. 로컬 사전 검사는 문법과 작성 완료 여부만 확인하며, 정답 여부는 채점기가 판단합니다. PINN의 별도 검증점 잔차도 수강생의 방정식·조건·형상을 사용합니다. Climate 비교는 `student_solution`을 사용하고, 그 식을 독립적으로 검증하지 않았음을 기록합니다. 채점기는 이 식을 신뢰할 수 있는 채점 정답으로 취급하지 않습니다.
 
-Use supplied parameter symbols in PDEs, including terms with zero default
-coefficients; do not replace `c`, `nu`, `rho` or Climate `params[...]` with
-numbers. Preserve each residual's displayed sign and exact dictionary keys.
-This task checks the stated symbolic residual, not all algebraically equivalent
-zero sets: multiplying the whole equation by another constant changes the
-submitted residual. A wrong component loses that component's points, not
-automatically every point in the Level. Wrong keys can invalidate its format.
+PDE에서는 기본 계수가 0인 항을 포함해 제공된 매개변수 기호를 사용하세요. `c`, `nu`, `rho`, Climate의 `params[...]`를 숫자로 치환하지 마세요. 표시된 각 잔차의 부호와 딕셔너리 키를 정확하게 유지하세요. 이 과제는 주어진 기호 잔차를 검사하며, 해집합이 같은 모든 식을 허용하는 것은 아닙니다. 방정식 전체에 다른 상수를 곱하면 제출한 잔차가 달라집니다. 한 구성 요소가 틀리면 그 항목의 점수를 잃으며, 해당 레벨의 모든 점수가 자동으로 사라지는 것은 아닙니다. 다만 키가 틀리면 형식이 유효하지 않을 수 있습니다.
 
-For Operators, the trainer computes statistics from the training split only;
-`build_datasets` wraps the supplied tensors unchanged. Use every `model_config`
-key, even when a value equals a library default. Model/data factories allow local
-assignments, a final return, and bounded comprehensions over the supplied short
-sequences. `for`/`while` statements and `else` branches are not supported. PINO
-assigns `self.equations` once as a dictionary, not by item mutation.
+Operators에서는 학습 코드가 학습 분할만으로 통계를 계산합니다. `build_datasets`는 제공된 텐서를 변경하지 않고 감싸야 합니다. 라이브러리 기본값과 같더라도 `model_config`의 모든 키를 사용하세요. 모델·데이터 생성 함수는 지역 변수 할당, 마지막 반환문, 제공된 짧은 시퀀스에 대한 제한된 컴프리헨션을 허용합니다. `for`/`while` 문과 `else` 분기는 지원하지 않습니다. PINO에서는 딕셔너리 항목을 나중에 수정하지 말고, `self.equations`에 딕셔너리를 한 번 대입하세요.
 
-The notebook collects every required function from the saved file. The server
-does not import submitted files: it interprets a small bounded language, checks
-each setup component, and installs only those interpreted functions into trusted
-lesson code. Missing functions are an explicit format error, not a request to
-fill in instructor defaults. Old PDE-only submissions must be completed again
-under the new contract.
+노트북은 저장된 파일에서 필요한 함수를 모두 모읍니다. 서버는 제출 파일을 import하지 않습니다. 제한된 작은 언어로 해석하고, 각 설정 요소를 검사한 뒤 해석된 함수만 신뢰된 실습 코드에 연결합니다. 함수가 빠지면 명시적인 형식 오류이며, 강사 기본값으로 채워 달라는 의미가 아닙니다. 이전 PDE 전용 답안도 새 제출 규약에 맞게 나머지 함수를 완성해야 합니다.
 
-Before sending code, the notebook checks the server's advertised submission
-contract version. An older judge cannot silently ignore the added setup
-functions: the notebook stops and asks the instructor to update both sides.
+코드를 보내기 전에 노트북은 서버가 제공하는 제출 규약 버전을 확인합니다. 이전 채점기가 추가된 설정 함수를 조용히 무시할 수는 없습니다. 버전이 맞지 않으면 노트북이 중단되고 강사에게 양쪽을 업데이트하도록 안내합니다.
 
-All Levels start selected. Ctrl/Cmd-click to remove unfinished Levels. Select
-only finished Levels: a selected unfinished function prevents sending the whole
-attempt. Submit all completed Levels together. Omitted Levels score zero; Levels
-from different attempts are never combined.
+처음에는 모든 레벨이 선택되어 있습니다. Ctrl/Cmd를 누른 채 클릭해 미완성 레벨을 해제하세요. 완성한 레벨만 선택하세요. 선택한 함수가 미완성이면 전체 제출을 보낼 수 없습니다. 완성한 레벨은 한 번의 제출에 모두 포함하세요. 빠진 레벨은 0점이며, 서로 다른 제출의 레벨 점수를 합치지 않습니다.
 
-Each Level has 100 pilot completion points split equally among its checks. A
-wrong but well-formed component earns no credit for that check; other correct
-components retain partial credit. An unfinished, missing or malformed function
-invalidates that Level. Training feedback runs only after all components pass.
-Numerical errors earn no extra points; fully correct submissions tie. This is a
-completion workshop, not a model/optimizer tuning competition. No hidden
-submission-time tiebreaker is used.
+각 레벨의 시범 완성도 점수는 100점이며 검사 항목에 동일하게 배분합니다. 형식은 맞지만 내용이 틀린 항목은 해당 검사에서 점수를 받지 못하고, 다른 올바른 항목의 부분 점수는 유지됩니다. 미완성·누락·잘못된 형식의 함수가 있으면 해당 레벨은 유효하지 않습니다. 모든 항목을 통과한 뒤에만 학습 피드백을 실행합니다. 수치 오차로 추가 점수를 받지는 않으며, 모두 정확한 답안은 동점입니다. 이 행사는 과제 완성도 워크숍이지 모델·최적화 설정 조정 대회가 아닙니다. 제출 시각으로 동점을 나누는 숨은 규칙도 없습니다.
 
-Use a fresh judge state for `bootcamp-task-completion-pilot-v3`. Old databases and
-their results are not rewritten or silently mixed with v3 scores.
+`bootcamp-task-completion-pilot-v3`에는 새 채점 상태를 사용하세요. 이전 데이터베이스와 결과를 다시 쓰거나 v3 점수에 조용히 섞지 않습니다.
 
-## Original conditions restored
+## 복원한 원본 조건
 
-- Wave 3 uses the original sum of two Gaussians, without the added envelope.
-  Its initial Robin compatibility is not exact at the circular boundary.
-- Fluid 3 uses the original nonzero parabolic inlet and unit flux with a rest
-  initial state, without the added ramp. Incompressibility requires `Q=1` through
-  every fluid cross-section for `t>0`, while the rest state has `Q=0`. This startup
-  incompatibility is channel-wide, not confined to the inlet corner; it does not
-  assert a jump in every velocity component at every point.
-- Climate 2 uses the original uncoupled baseline, `gamma0=0`. Nonzero coupling
-  remains a separately labelled experiment; the baseline learner-solution comparison is disabled for nonzero coupling.
+- Wave 3은 추가 포락선 없이 원본의 가우스 함수 두 개의 합을 사용합니다. 원형 경계에서 초기값이 Robin 조건과 정확하게 양립하지는 않습니다.
+- Fluid 3은 추가 램프 없이 원본의 0이 아닌 포물선 입구 유속·단위 유량과 정지 초기 상태를 사용합니다. 비압축성 조건은 `t>0`인 모든 유체 단면에서 `Q=1`을 요구하지만 정지 상태는 `Q=0`입니다. 이 시동 시점의 불일치는 입구 모서리에만 국한되지 않고 채널 전체에 걸쳐 있습니다. 모든 점의 모든 속도 성분이 불연속이라는 뜻은 아닙니다.
+- Climate 2는 원본의 비결합 기준 설정 `gamma0=0`을 사용합니다. 0이 아닌 결합은 별도로 표시한 실험이며, 결합을 켜면 기준 수강생 해와의 비교는 비활성화됩니다.
 
-These limitations are taught explicitly rather than hidden by changing the
-problem. Correct implementation and converged numerical results are separate
-questions; consult the numerical rehearsal record before choosing class timings.
+문제를 바꿔 이런 한계를 감추지 않고 수업에서 명시적으로 설명합니다. 구현이 올바른지와 수치 결과가 수렴했는지는 별개의 질문입니다. 수업 시간을 정하기 전에 수치 실행 검증 기록을 확인하세요.

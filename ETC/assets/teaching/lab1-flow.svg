@@ -1,56 +1,56 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="950" viewBox="0 0 1200 950" role="img" aria-labelledby="title desc">
-<title id="title">Lab 1 · where the equation enters learning</title><desc id="desc">Coordinates enter BasicPINN. The Poisson1D PDE object stores symbolic equations and is separate from the network. PhysicsInformer computes numerical residuals using predicted fields and coordinates. Boundary and inverse observation losses join the physics loss. Full batch L-BFGS updates the network weights. Analytical functions are used for evaluation; inverse solution observations are also supplied as training data.</desc>
+<title id="title">실습 1 · 방정식이 학습에 들어가는 지점</title><desc id="desc">좌표를 BasicPINN에 입력합니다. Poisson1D PDE 객체는 기호 방정식을 저장하며 신경망과 별개입니다. PhysicsInformer는 예측한 장과 좌표를 사용하여 수치 잔차를 계산합니다. 경계 및 역문제 관측 손실을 물리 손실에 더합니다. 전체 배치 L-BFGS가 신경망 가중치를 갱신합니다. 해석적 함수는 평가에 사용하며, 역문제 해의 관측값은 학습 데이터로도 제공합니다.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs>
 <rect width="1200" height="950" fill="#ffffff"/>
-<g font-family="DejaVu Sans, Arial, sans-serif">
-<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 1 · where the equation enters learning</text>
-<text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<g font-family="DejaVu Sans, Arial, Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">실습 1 · 방정식이 학습에 들어가는 지점</text>
+<text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">코드 연결도 · 학습 결과가 아닌 개략도</text>
 <rect x="38" y="116" width="245" height="171" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Inputs</text>
-<text x="60" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">x; add length in</text>
-<text x="60" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">family mode.</text>
-<text x="60" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Fixed grid points.</text>
+<text x="60" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">입력</text>
+<text x="60" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">x; 매개변수화 시</text>
+<text x="60" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">길이 추가.</text>
+<text x="60" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">고정 격자점.</text>
 <rect x="334" y="116" width="454" height="171" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
 <text x="356" y="152" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">BasicPINN</text>
-<text x="356" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Forward/family: FullyConnected.</text>
-<text x="356" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse: two FourierMLPs.</text>
+<text x="356" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">순방향/매개변수화: FullyConnected.</text>
+<text x="356" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">역문제: FourierMLP 두 개.</text>
 <text x="356" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">forward() → u; source() → f</text>
 <rect x="837" y="116" width="325" height="171" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="859" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Predicted tensors</text>
-<text x="859" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">u(x), or u(x, length)</text>
-<text x="859" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse also predicts f(x).</text>
-<text x="859" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Not SymPy placeholders.</text>
+<text x="859" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">예측 텐서</text>
+<text x="859" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">u(x) 또는 u(x, length)</text>
+<text x="859" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">역문제는 f(x)도 예측.</text>
+<text x="859" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">SymPy 기호가 아님.</text>
 <path d="M 284 198 H 334" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
 <path d="M 788 198 H 837" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
 <rect x="38" y="348" width="414" height="151" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
 <text x="60" y="384" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">Poisson1D(PDE)</text>
-<text x="60" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">self.equations stores symbols.</text>
-<text x="60" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">It is not a network layer.</text>
-<text x="60" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">u_xx − f; f = 1 unless inverse.</text>
+<text x="60" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">self.equations에 기호 저장.</text>
+<text x="60" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">신경망 층이 아님.</text>
+<text x="60" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">u_xx − f; 역문제 외에는 f = 1.</text>
 <rect x="512" y="348" width="650" height="151" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
 <text x="534" y="384" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">informer(...) → PhysicsInformer</text>
-<text x="534" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">coordinates + predicted fields → numerical residual</text>
-<text x="534" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Autodiff evaluates the spatial derivative u_xx.</text>
-<text x="534" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">loss_terms() squares and averages the residual.</text>
+<text x="534" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">coordinates + 예측한 장 → 수치 잔차</text>
+<text x="534" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">자동 미분으로 공간 도함수 u_xx 계산.</text>
+<text x="534" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">loss_terms()에서 잔차를 제곱하고 평균.</text>
 <path d="M 452 423 H 512" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
 <path d="M 995 287 V 348" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
 <rect x="38" y="571" width="615" height="174" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
-<text x="60" y="607" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">loss_terms(): total training objective</text>
-<text x="60" y="644" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Physics + 10 × boundary penalty.</text>
-<text x="60" y="673" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse: add weighted solution-observation loss.</text>
-<text x="60" y="702" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse endpoints are exact in BasicPINN.forward.</text>
-<text x="60" y="731" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Source targets are evaluation-only.</text>
+<text x="60" y="607" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">loss_terms(): 전체 학습 목적함수</text>
+<text x="60" y="644" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">물리 손실 + 10 × 경계 페널티.</text>
+<text x="60" y="673" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">역문제: 가중치를 둔 해 관측 손실 추가.</text>
+<text x="60" y="702" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">역문제 끝점은 BasicPINN.forward에서 정확히 강제.</text>
+<text x="60" y="731" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">소스항 목표값은 평가에만 사용.</text>
 <rect x="713" y="571" width="449" height="174" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
 <text x="735" y="607" font-size="24" fill="#7658a3" font-weight="600" text-anchor="start">optimize_lab()</text>
-<text x="735" y="644" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">PyTorch L-BFGS only.</text>
-<text x="735" y="673" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">1,000 optimizer.step(closure) calls.</text>
+<text x="735" y="644" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">PyTorch L-BFGS만 사용.</text>
+<text x="735" y="673" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">optimizer.step(closure) 1,000회 호출.</text>
 <text x="735" y="702" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">closure: zero_grad → loss → backward</text>
-<text x="735" y="731" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The optimizer updates model weights.</text>
+<text x="735" y="731" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">최적화기가 모델 가중치를 갱신.</text>
 <path d="M 807 499 V 533 H 347 V 571" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
 <path d="M 653 658 H 713" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
-<text x="38" y="800" font-size="21" fill="#526573" font-weight="400" text-anchor="start">Boundary checks call the model at x = 0 and x = length; they bypass PhysicsInformer.</text>
-<text x="38" y="836" font-size="21" fill="#526573" font-weight="400" text-anchor="start">Inverse observations constrain the solution network; the PDE links that solution to the source network.</text>
+<text x="38" y="800" font-size="21" fill="#526573" font-weight="400" text-anchor="start">경계 검사는 x = 0과 x = length에서 모델을 호출하며 PhysicsInformer를 거치지 않음.</text>
+<text x="38" y="836" font-size="21" fill="#526573" font-weight="400" text-anchor="start">역문제 관측값이 해 신경망을 제약하고, PDE가 그 해를 소스항 신경망과 연결.</text>
 <rect x="38" y="864" width="1124" height="61" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="900" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">evaluate() → solution, PDE and boundary errors; inverse also checks f.</text>
+<text x="60" y="900" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">evaluate() → 해, PDE, 경계 오차; 역문제는 f도 검사.</text>
 
 </g></svg>

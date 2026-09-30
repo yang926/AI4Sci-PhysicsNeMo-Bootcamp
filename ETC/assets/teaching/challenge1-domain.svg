@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
-<title id="title">Wave domains: square in Levels 1 and 2, unit disk in Level 3</title>
-<desc id="desc">Schematic training sample locations. Blue dots are interior samples and orange squares are boundary samples. Levels 1 and 2 use the square from zero to pi in each axis and time zero to two pi. Level 3 uses the unit disk and time zero to three. Initial points are sampled in the same spatial domain at time zero.</desc>
+<title id="title">파동 영역: 레벨 1·2의 정사각형, 레벨 3의 단위원 내부</title>
+<desc id="desc">학습 표본 위치를 나타낸 개략도입니다. 파란 점은 내부 표본, 주황색 정사각형은 경계 표본입니다. 레벨 1과 2는 각 축이 0부터 pi인 정사각형과 0부터 2pi인 시간을 사용합니다. 레벨 3은 단위원 내부와 0부터 3인 시간을 사용합니다. 초기점은 같은 공간 영역에서 시간 0에 샘플링합니다.</desc>
 <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#526573"/></marker></defs>
 <rect width="1200" height="680" fill="#ffffff"/>
-<g font-family="Arial, sans-serif" fill="#172c3c">
-<text x="36" y="45" font-size="30" font-weight="bold">Where are the training points?</text>
-<text x="36" y="80" font-size="22" fill="#526573">spatial_sample() chooses the geometry; sample_time() chooses the time.</text>
-<text x="90" y="130" font-size="26" font-weight="bold">Levels 1 and 2: square</text>
-<text x="660" y="130" font-size="26" font-weight="bold">Level 3: unit disk</text>
+<g font-family="Noto Sans CJK KR, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, DejaVu Sans, Arial, sans-serif" fill="#172c3c">
+<text x="36" y="45" font-size="30" font-weight="bold">학습점은 어디에 있나요?</text>
+<text x="36" y="80" font-size="22" fill="#526573">spatial_sample()은 기하를, sample_time()은 시간을 선택합니다.</text>
+<text x="90" y="130" font-size="26" font-weight="bold">레벨 1·2: 정사각형</text>
+<text x="660" y="130" font-size="26" font-weight="bold">레벨 3: 단위원 내부</text>
 <rect x="130" y="168" width="290" height="290" fill="#edf5fb" stroke="#2269a8" stroke-width="2"/>
 <circle cx="850" cy="313" r="145" fill="#edf5fb" stroke="#2269a8" stroke-width="2"/>
 <g fill="none" stroke="#526573" stroke-width="1.5" marker-end="url(#arrow)">
@@ -196,8 +196,8 @@
 <text x="660" y="530">sample_circle(): x² + y² ≤ 1</text>
 <text x="660" y="566">TIME_END = 3</text>
 </g>
-<circle cx="43" cy="614" r="5" fill="#2269a8"/><text x="60" y="622" font-size="22">Interior: PDE</text>
-<rect x="272" y="609" width="10" height="10" fill="#bd6416"/><text x="295" y="622" font-size="22">Boundary: boundary=True</text>
-<text x="700" y="622" font-size="22">Initial conditions: same space, t = 0</text>
-<text x="36" y="660" font-size="19" fill="#526573">Schematic locations, not a simulation result. YAML samples sets the point counts, not the domain bounds.</text>
+<circle cx="43" cy="614" r="5" fill="#2269a8"/><text x="60" y="622" font-size="22">내부: PDE</text>
+<rect x="272" y="609" width="10" height="10" fill="#bd6416"/><text x="295" y="622" font-size="22">경계: boundary=True</text>
+<text x="700" y="622" font-size="22">초기조건: 같은 공간, t = 0</text>
+<text x="36" y="660" font-size="19" fill="#526573">위치 개략도이며 시뮬레이션 결과가 아닙니다. YAML samples는 영역 범위가 아닌 점 개수를 정합니다.</text>
 </g></svg>

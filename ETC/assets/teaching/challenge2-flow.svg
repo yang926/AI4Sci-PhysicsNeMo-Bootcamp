@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="966" viewBox="0 0 1200 966" role="img" aria-labelledby="title desc">
-<title id="title">Challenge 2 · From your code to the loss</title>
-<desc id="desc">Student geometry controls fluid samples; student equations populate a PDE object consumed by PhysicsInformer; student conditions enter separate boundary and integral losses. The sum trains a FullyConnected neural network with PyTorch Adam.</desc>
+<title id="title">챌린지 2 · 작성한 코드에서 손실까지</title>
+<desc id="desc">학생이 작성한 기하는 유체 표본을 결정하고, 방정식은 PhysicsInformer가 사용하는 PDE 객체를 채우며, 조건은 별도의 경계·적분 손실로 전달됩니다. 합산 손실로 PyTorch Adam을 사용하여 FullyConnected 신경망을 학습합니다.</desc>
 <defs>
 <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
 <path d="M0,0 L8,4 L0,8Z" fill="#526573"/>
 </marker>
 </defs>
 <rect width="1200" height="966" fill="#ffffff"/>
-<g font-family="DejaVu Sans, Arial, sans-serif">
-<text x="40" y="52" font-size="34" fill="#172c3c" text-anchor="start" font-weight="650">Challenge 2 · From your code to the loss</text>
-<text x="40" y="91" font-size="24" fill="#526573" text-anchor="start" font-weight="400">Three student functions enter three different parts of the training program.</text>
+<g font-family="Noto Sans CJK KR, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, DejaVu Sans, Arial, sans-serif">
+<text x="40" y="52" font-size="34" fill="#172c3c" text-anchor="start" font-weight="650">챌린지 2 · 작성한 코드에서 손실까지</text>
+<text x="40" y="91" font-size="24" fill="#526573" text-anchor="start" font-weight="400">직접 작성한 세 함수가 학습 프로그램의 서로 다른 세 부분으로 연결됩니다.</text>
 <rect x="40" y="130" width="345" height="128" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
 <text x="60" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_geometry</text>
-<text x="60" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">rectangle descriptions</text>
+<text x="60" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">직사각형 정보</text>
 <text x="60" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ block_geometry</text>
 <rect x="425" y="130" width="350" height="128" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
 <text x="445" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_equations</text>
@@ -20,47 +20,47 @@
 <text x="445" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ self.equations</text>
 <rect x="815" y="130" width="345" height="128" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
 <text x="835" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_conditions</text>
-<text x="835" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">inlet / outlet / walls / flux</text>
-<text x="835" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Level 3: initial state too</text>
+<text x="835" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">입구 / 출구 / 벽면 / 유량</text>
+<text x="835" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">레벨 3: 초기 상태도 포함</text>
 <path d="M210 258V293" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <path d="M600 258V293" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <path d="M986 258V512" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <rect x="40" y="295" width="345" height="152" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="331" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Sample the fluid</text>
+<text x="60" y="331" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">유체 샘플링</text>
 <text x="60" y="367" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">sample_interior / sample_walls</text>
 <text x="60" y="399" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">sample_inlet / sample_flux</text>
-<text x="60" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Level 3: time_sample</text>
+<text x="60" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">레벨 3: time_sample</text>
 <rect x="425" y="295" width="350" height="152" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
 <text x="445" y="331" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">create_informer</text>
 <text x="445" y="367" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PhysicsNeMo PhysicsInformer</text>
-<text x="445" y="399" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">spatial derivatives</text>
-<text x="445" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">and symbolic PDE residuals</text>
+<text x="445" y="399" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">공간 도함수</text>
+<text x="445" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">및 기호 PDE 잔차</text>
 <rect x="40" y="490" width="345" height="160" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
 <text x="60" y="526" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">create_model</text>
 <text x="60" y="562" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PhysicsNeMo FullyConnected</text>
-<text x="60" y="594" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L1/2: (x, y) → (u, v, p)</text>
-<text x="60" y="626" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L3: (x, y, t) → (u, v, p)</text>
+<text x="60" y="594" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">레벨 1·2: (x, y) → (u, v, p)</text>
+<text x="60" y="626" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">레벨 3: (x, y, t) → (u, v, p)</text>
 <path d="M212 447V488" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <path d="M385 565H407V419H423" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
-<text x="43" y="689" font-size="21" fill="#526573" text-anchor="start" font-weight="400">residuals supplies fields;</text>
-<text x="43" y="719" font-size="21" fill="#526573" text-anchor="start" font-weight="400">PyTorch supplies time derivatives.</text>
+<text x="43" y="689" font-size="21" fill="#526573" text-anchor="start" font-weight="400">residuals는 장을 제공하고,</text>
+<text x="43" y="719" font-size="21" fill="#526573" text-anchor="start" font-weight="400">PyTorch는 시간 도함수를 제공합니다.</text>
 <rect x="425" y="515" width="350" height="135" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
-<text x="445" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">PDE losses</text>
+<text x="445" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">PDE 손실</text>
 <text x="445" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">residuals → informer.forward</text>
-<text x="445" y="619" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">SDF-weighted residual squares</text>
+<text x="445" y="619" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">SDF 가중치를 적용한 잔차 제곱</text>
 <path d="M600 447V512" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <rect x="815" y="515" width="345" height="135" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
-<text x="835" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Condition losses</text>
-<text x="835" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">condition_tensor targets</text>
-<text x="835" y="619" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">compare with model fields</text>
+<text x="835" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">조건 손실</text>
+<text x="835" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">condition_tensor 목표값</text>
+<text x="835" y="619" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">모델의 장과 비교</text>
 <path d="M385 620H407V470H794V606H813" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <rect x="425" y="755" width="735" height="132" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
-<text x="445" y="791" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">loss_terms → record_step → total loss</text>
+<text x="445" y="791" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">loss_terms → record_step → 전체 손실</text>
 <text x="445" y="827" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PyTorch: zero_grad → backward → Adam.step</text>
-<text x="445" y="859" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Update network weights, not PDE expressions.</text>
+<text x="445" y="859" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PDE 식이 아닌 신경망 가중치를 갱신합니다.</text>
 <path d="M600 650V750" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <path d="M989 650V750" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <path d="M425 823H20V570H38" fill="none" stroke="#7658a3" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#arrow)"/>
-<text x="40" y="933" font-size="22" fill="#526573" text-anchor="start" font-weight="400">Solid shape chooses where to train. Conditions and equations choose what to enforce.</text>
+<text x="40" y="933" font-size="22" fill="#526573" text-anchor="start" font-weight="400">고체 형상은 학습 위치를 정합니다. 조건과 방정식은 강제할 내용을 정합니다.</text>
 </g>
 </svg>

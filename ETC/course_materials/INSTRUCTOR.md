@@ -1,102 +1,110 @@
-# Instructor guide
+<a id="instructor-guide"></a>
+# 강사 안내
 
-Teach the introduction, Labs 1–4 and all eleven levels of Challenges 1–4 in the [course guide](README.md). Use the [schedule](course-plan.md) for event timing. Slides should follow the actual equations and program sequence in this repository.
+[강좌 안내](README.md)의 소개, 실습 1–4, 도전 과제 1–4의 레벨 열한 개를 모두 가르치세요. 행사 시간은 [일정](course-plan.md)을 따르세요. 슬라이드는 이 저장소의 실제 방정식과 프로그램 순서에 맞춰야 합니다.
 
-## Preparation
+<a id="preparation"></a>
+## 준비
 
-1. Create the PhysicsNeMo 2.2.2 environment using the [deployment guide](../environment/SETUP.md), then run the environment-check notebook.
-2. Review the hardware, versions and scope in the [validation record](VALIDATION.md). Rehearse completed implementations in a separate instructor workspace on the event hardware; do not distribute answers in the student checkout.
-3. Ask participants to complete the marked exercise code: equations, wave speed and conditions in Wave; equations, conditions and chip geometry in Fluid; equations, coefficients, conditions and analytic solutions in Climate; dataset/model functions and PINO's PDE in Operators. See the [task mapping](CHALLENGE_CONTRACTS.md). The student distribution provides no completed answer mode.
-4. For training exercises, inspect constraint-specific losses in `loss.csv`, before/after evaluation in `metrics.json`, and plots in `preview.png`. For Lab 4, prepare the model/data cache before class and inspect the forecast, ERA5 reference, persistence baseline and lead-time errors. Lab 4 has no optimizer or training budget to adjust.
-5. Agree on teaching and support responsibilities between Mingyu Yang and the co-instructor, then rehearse the 09:30–17:30 agenda with participant editing and questions included.
+1. [배포 안내](../environment/SETUP.md)에 따라 PhysicsNeMo 2.2.2 환경을 만든 뒤 환경 확인 노트북을 실행합니다.
+2. [검증 기록](VALIDATION.md)에서 하드웨어, 버전, 검증 범위를 확인합니다. 행사 하드웨어의 별도 강사 작업 공간에서 완성된 구현으로 리허설하세요. 학생 체크아웃에 정답을 배포하지 마세요.
+3. 참가자에게 표시된 연습 코드를 완성하도록 안내합니다. 파동에서는 방정식, 파동 속도, 조건을, 유체에서는 방정식, 조건, 칩 형상을, 기후에서는 방정식, 계수, 조건, 해석해를, 연산자에서는 데이터셋/모델 함수와 PINO의 PDE를 구현합니다. [과제 대응표](CHALLENGE_CONTRACTS.md)를 참고하세요. 학생용 배포본에는 완성된 정답 모드가 없습니다.
+4. 학습 연습에서는 `loss.csv`의 제약별 손실, `metrics.json`의 학습 전후 평가, `preview.png`의 그래프를 살펴봅니다. 실습 4는 수업 전에 모델/데이터 캐시를 준비하고 예보, ERA5 기준 자료, 지속성 기준 예측, 선행 시간별 오차를 확인합니다. 실습 4에는 조정할 최적화기나 학습 실행량이 없습니다.
+5. Mingyu Yang과 공동 강사의 강의 및 지원 역할을 합의한 뒤, 참가자의 편집과 질문 시간을 포함하여 09:30–17:30 일정을 리허설합니다.
 
-Recommended background is basic Python functions and arrays, first and second derivatives, and initial/boundary conditions. This is a guided intermediate workshop, not an introduction to Python or a derivation of every PDE from first principles. Use the [final teaching review and pacing notes](FINAL_TEACHING_REVIEW.md) to prepare the dense morning block and the harder Fluid and Neural Operators sessions.
+권장 선수 지식은 기본적인 Python 함수와 배열, 1차 및 2차 미분, 초기/경계 조건입니다. 이 수업은 안내를 따라 진행하는 중급 워크숍이며, Python 입문이나 모든 PDE를 기본 원리부터 유도하는 과정은 아닙니다. [최종 수업 검토 및 진행 속도 참고 사항](FINAL_TEACHING_REVIEW.md)을 활용하여 내용이 많은 오전 시간과 더 어려운 유체 및 신경 연산자 세션을 준비하세요.
 
-## Student implementation and reruns
+<a id="student-implementation-and-reruns"></a>
+## 학생 구현과 재실행
 
-All Challenge notebooks run the saved exercise functions. There is no mode toggle or completed answer implementation in the student workflow. Preserve the **EDIT HERE** blocks and required signatures while learners implement their solutions. Challenges 1–3 use 5,000 Adam updates per level; the three Operators retain 3,000. These budgets are not accuracy thresholds.
+모든 도전 과제 노트북은 저장된 연습 함수를 실행합니다. 학생 작업 흐름에는 모드 전환이나 완성된 정답 구현이 없습니다. 학습자가 해법을 구현하는 동안 **EDIT HERE** 블록과 필수 함수 시그니처를 유지하세요. 도전 과제 1–3은 레벨당 Adam 갱신 5,000회를 사용하고, 세 연산자는 3,000회를 유지합니다. 이 실행량은 정확도 기준이 아닙니다.
 
-Each execution uses a fresh result directory. Rerun training and then its result cell after editing; failed attempts must not display older results as new. Commands use Python `-u` to expose training progress while running. **Check saved code** checks syntax and completeness only; correctness is evaluated by the judge.
+각 실행은 새로운 결과 디렉터리를 사용합니다. 수정 후에는 학습과 그 결과 셀을 순서대로 다시 실행하세요. 실패한 시도에서 이전 결과를 새 결과처럼 보여 주면 안 됩니다. 명령은 Python `-u`를 사용하여 실행 중 학습 진행 상황을 표시합니다. **Check saved code**는 문법과 완성 여부만 확인하며, 정확성은 채점기가 평가합니다.
 
-## Explain the implementation
+<a id="explain-the-implementation"></a>
+## 구현 설명하기
 
-For a PINN, `FullyConnected` predicts the solution, `PDE` expresses the equations, and `PhysicsInformer` evaluates residuals. The explicit PyTorch loop combines those residuals with initial-condition, boundary-condition and data losses. FNO and AFNO learn an operator from paired data; PINO adds a physics residual. Lab 4 uses AFNO weights already trained by NVIDIA: students perform inference and verification, not another optimization exercise.
+PINN에서 `FullyConnected`는 해를 예측하고, `PDE`는 방정식을 표현하며, `PhysicsInformer`는 잔차를 평가합니다. 명시적인 PyTorch 반복문은 이 잔차를 초기 조건, 경계 조건, 데이터 손실과 결합합니다. FNO와 AFNO는 짝지어진 데이터로 연산자를 학습하고, PINO는 물리 잔차를 추가합니다. 실습 4는 NVIDIA가 이미 학습한 AFNO 가중치를 사용합니다. 학생은 또 다른 최적화 연습이 아니라 추론과 검증을 수행합니다.
 
-Use the [PhysicsNeMo workflow walkthrough](PHYSICSNEMO_WORKFLOW.md) to explain the boundary between library APIs and course code. `create_model`, `create_informer` and `residuals` are helpers in `ETC/runtime/pinn.py`, not PhysicsNeMo API names. Show their definitions once before asking learners to use them. Do not present these three helpers as the execution path for every Lab or for the Neural Operators.
+[PhysicsNeMo 작업 흐름 따라가기](PHYSICSNEMO_WORKFLOW.md)를 활용하여 라이브러리 API와 강좌 코드의 경계를 설명하세요. `create_model`, `create_informer`, `residuals`는 `ETC/runtime/pinn.py`의 보조 함수이며 PhysicsNeMo API 이름이 아닙니다. 학습자에게 사용을 요청하기 전에 정의를 한 번 보여 주세요. 이 세 보조 함수를 모든 실습이나 신경 연산자의 실행 경로로 설명하지 마세요.
 
-### Walk through one training step
+<a id="walk-through-one-training-step"></a>
+### 학습 단계 하나 따라가기
 
-Keep Wave Level 1 and `ETC/runtime/pinn.py` open side by side. This is a reading walkthrough of the existing program, not an additional training run or a change to its recipe.
+파동 레벨 1과 `ETC/runtime/pinn.py`를 나란히 열어 두세요. 이는 기존 프로그램을 읽으며 따라가는 설명이며, 추가 학습 실행이나 학습 설정 변경이 아닙니다.
 
-1. Find `create_model(3, 1, config, args.device)` in `main()`. Follow it to `FullyConnected` and explain why the input is `(x, y, t)` and the output is one displacement field.
-2. Follow `student_equations` through `WaveEquation2D` into `create_informer`. A `PDE` stores the SymPy residual expressions; it does not train a model or solve the equation by itself.
-3. Open `residuals`. It enables coordinate gradients, predicts the fields, computes time derivatives with PyTorch, and calls `PhysicsInformer.forward`. Spatial derivatives use `autodiff`. The returned `wave` tensor is an equation residual, not an error against the analytical solution.
-4. Return to `loss_terms`. Show the separate PDE, initial-displacement, initial-velocity and boundary losses. Point sampling and condition losses here are course code, not an automatic consequence of declaring a `PDE`.
-5. Find `zero_grad`, `backward` and `step` in `main()`. Distinguish derivatives with respect to coordinates from gradients with respect to trainable parameters. Both participate in the graph, but answer different questions.
+1. `main()`의 `create_model(3, 1, config, args.device)`를 찾습니다. `FullyConnected`까지 따라가며 입력이 `(x, y, t)`이고 출력이 하나의 변위장인 이유를 설명합니다.
+2. `student_equations`에서 `WaveEquation2D`를 거쳐 `create_informer`까지 따라갑니다. `PDE`는 SymPy 잔차 표현식을 저장하며, 스스로 모델을 학습하거나 방정식을 풀지는 않습니다.
+3. `residuals`를 엽니다. 이 함수는 좌표 기울기를 활성화하고, 장을 예측하고, PyTorch로 시간 미분을 계산한 뒤 `PhysicsInformer.forward`를 호출합니다. 공간 미분에는 `autodiff`를 사용합니다. 반환되는 `wave` 텐서는 해석해와의 오차가 아니라 방정식 잔차입니다.
+4. `loss_terms`로 돌아옵니다. PDE, 초기 변위, 초기 속도, 경계 손실을 각각 보여 주세요. 여기의 점 샘플링과 조건 손실은 강좌 코드이며, `PDE`를 선언하면 자동으로 생기는 결과가 아닙니다.
+5. `main()`에서 `zero_grad`, `backward`, `step`을 찾습니다. 좌표에 대한 미분과 학습 가능한 매개변수에 대한 기울기를 구분하세요. 둘 다 계산 그래프에 참여하지만 서로 다른 질문에 답합니다.
 
-Ask learners to point to the line that changes for a new equation and the lines that remain reusable. In Challenges 2–3, revisit the changed fields, geometry or coefficients without repeating the entire walkthrough. In Challenge 4, contrast this coordinate-to-field path with a whole forcing field passed to FNO/AFNO, and show how PINO adds a spectral residual to its data loss after restoring physical-scale fields.
+새로운 방정식에서 바뀌는 줄과 재사용할 수 있는 줄을 학습자가 짚어 보게 하세요. 도전 과제 2–3에서는 전체 설명을 반복하지 말고 바뀐 장, 형상, 계수를 다시 살펴봅니다. 도전 과제 4에서는 좌표를 장에 대응시키는 이 경로와 전체 강제항 장을 FNO/AFNO에 전달하는 경로를 비교하고, PINO가 장을 물리적 스케일로 복원한 뒤 데이터 손실에 스펙트럴 잔차를 더하는 방식을 보여 주세요.
 
-The existing exercises remain unchanged. Use these questions to check understanding, not as new unannounced scoring requirements. A few correct return statements can pass implementation checks; they do not by themselves demonstrate that the learner understands the full workflow or that the trained solution is accurate.
+기존 연습 문제는 그대로 유지합니다. 이 질문들은 이해도를 확인하는 데 사용하고, 새로 공지하지 않은 채점 요구 사항으로 삼지 마세요. 올바른 return 문 몇 개로 구현 검사를 통과할 수 있지만, 그것만으로 학습자가 전체 흐름을 이해하거나 학습된 해가 정확하다고 볼 수는 없습니다.
 
-Use the [learning checkpoints](course-plan.md#learning-checkpoints-and-transitions) to connect lessons. Before the first Challenge, demonstrate an edit, save it, and run the changed program. Before Neural Operators, explain that the input changes from coordinates to an entire forcing field, and that training uses many input/output field pairs. Older `Domain`/`Solver` slides need a separate explanation because these lessons use explicit PyTorch loops.
+[학습 확인 지점](course-plan.md#learning-checkpoints-and-transitions)을 사용하여 수업을 연결하세요. 첫 도전 과제 전에 수정을 시연하고 저장한 뒤 변경된 프로그램을 실행하세요. 신경 연산자에 들어가기 전에 입력이 좌표에서 전체 강제항 장으로 바뀌고, 학습에는 많은 입력/출력 장 쌍을 사용한다는 점을 설명하세요. 이 수업은 명시적인 PyTorch 반복문을 사용하므로 이전 `Domain`/`Solver` 슬라이드는 별도의 설명이 필요합니다.
 
-Keep the notebook and `.py` file open side by side, with JupyterLab's table of contents available. Show how each equation becomes a loss term, then read the before/after table and plot. Expand **Full metrics and run settings** only when discussing details. Editing a Markdown example does not modify the program.
+노트북과 `.py` 파일을 나란히 열고 JupyterLab 목차를 사용할 수 있게 하세요. 각 방정식이 어떻게 손실 항이 되는지 보여 준 뒤 전후 비교 표와 그래프를 읽으세요. 세부 내용을 논의할 때만 **Full metrics and run settings**를 펼치세요. Markdown 예제를 수정해도 프로그램은 바뀌지 않습니다.
 
-With 110 individual learners, agree who handles setup and first-error triage while the other instructor presents. Before each hands-on block, show the exact file to edit, saved exercise functions and expected output. Use **Check saved code** in the final panel before a long training run; it checks syntax and completeness for selected Levels without training or a judge connection, not answer correctness. Cover all Levels in order before optional parameter experiments, and use training time to discuss the next equation or interpret an earlier result.
+개인 학습자 110명이 참여하므로 한 강사가 발표하는 동안 누가 설정과 처음 발생한 오류의 분류를 맡을지 합의하세요. 각 실습 구간 전에 수정할 정확한 파일, 저장된 연습 함수, 예상 출력을 보여 주세요. 긴 학습을 시작하기 전에 마지막 패널의 **Check saved code**를 사용하세요. 이 기능은 학습하거나 채점기에 연결하지 않고 선택한 레벨의 문법과 완성 여부를 확인하며, 정답 여부를 검사하지는 않습니다. 선택적인 매개변수 실험 전에 모든 레벨을 순서대로 다루고, 학습이 진행되는 동안 다음 방정식을 논의하거나 이전 결과를 해석하세요.
 
-## Mathematical and data interpretation
+<a id="mathematical-and-data-interpretation"></a>
+## 수학과 데이터 해석
 
-| Topic | Teaching point |
+| 주제 | 지도할 내용 |
 |---|---|
-| Wave Level 1 | Initial velocity is nonzero, so the exact solution includes a sine term in time. |
-| Wave Levels 2–3 | Level 2 changes speed and initial velocity. Level 3 uses the original Gaussian pair without tapering; its tails are not exactly Robin-compatible at the initial boundary. Students implement the Robin residual, not a supplied replacement. |
-| Parameterized PINN | Lab 1 evaluates lengths 1, 1.25, 1.5, 1.75 and 2, with aggregate and `per_length` errors. The preview and legacy `validation_rmse` still show only length 1.5. Five checks do not prove accuracy at every length. |
-| Composite bar | Verify continuity of both temperature and physical heat flux. |
-| Fluid | Obstacles are fixed. Students construct the chip cutouts. Level 3 returns to one block and viscosity 0.01. Its rest initial state has zero flow rate, while the abrupt inlet and all cross-section targets require unit flow for positive time; discuss this startup incompatibility, not only the inlet corner. |
-| Climate | These are educational temperature PDEs. Level 2 restores the original `gamma0=0` baseline. Derive its analytic solutions before a separate nonzero-coupling experiment. Local baseline comparisons use the learner's `student_solution` and are disabled for nonzero coupling; an extension needs a separate derivation. |
-| Neural Operators | Compare FNO, AFNO and PINO on the same periodic reaction–diffusion problem; generate fresh data rather than using the historical Poisson HDF5 files. |
-| Weather forecasting | Run pretrained FourCastNet from the initial ERA5 state, compare its 48-hour forecast with later ERA5 reanalysis and persistence, and inspect local as well as area-weighted errors. This is inference, not PINN training or general forecast-skill certification. |
+| 파동 레벨 1 | 초기 속도가 0이 아니므로 정확한 해에는 시간에 대한 사인 항이 포함됩니다. |
+| 파동 레벨 2–3 | 레벨 2는 속도와 초기 속도를 바꿉니다. 레벨 3은 가장자리를 감쇠시키지 않은 원래의 가우스 함수 쌍을 사용하므로, 초기 경계에서 그 꼬리 부분이 Robin 조건에 정확히 부합하지는 않습니다. 학생은 대체 구현을 제공받는 것이 아니라 Robin 잔차를 구현합니다. |
+| 매개변수화 PINN | 실습 1은 길이 1, 1.25, 1.5, 1.75, 2를 평가하고 전체 오차와 `per_length` 오차를 보고합니다. 미리 보기와 기존 `validation_rmse`는 여전히 길이 1.5만 보여 줍니다. 다섯 번의 검사로 모든 길이에서의 정확성이 입증되지는 않습니다. |
+| 복합 막대 | 온도와 물리적 열유속의 연속성을 모두 검증합니다. |
+| 유체 | 장애물은 고정되어 있습니다. 학생은 칩을 제외한 영역을 구성합니다. 레벨 3에서는 다시 블록 하나와 점성계수 0.01을 사용합니다. 정지 초기 상태의 유량은 0이지만, 갑자기 적용되는 입구 조건과 모든 단면의 목표는 양의 시간에 유량 1을 요구합니다. 입구 모서리뿐 아니라 이 시작 시점의 비양립성을 논의하세요. |
+| 기후 | 교육용 온도 PDE입니다. 레벨 2는 원래의 `gamma0=0` 기준 사례를 복원합니다. 0이 아닌 결합을 별도로 실험하기 전에 해석해를 유도하세요. 로컬 기준 비교는 학습자의 `student_solution`을 사용하며, 결합이 0이 아니면 비활성화됩니다. 확장하려면 별도의 유도가 필요합니다. |
+| 신경 연산자 | 동일한 주기적 반응–확산 문제에서 FNO, AFNO, PINO를 비교합니다. 예전 Poisson HDF5 파일을 사용하지 말고 새 데이터를 생성하세요. |
+| 일기 예보 | 초기 ERA5 상태에서 사전 학습된 FourCastNet을 실행하고, 48시간 예보를 이후 ERA5 재분석 및 지속성 예측과 비교하며, 면적 가중 오차와 국소 오차를 함께 살펴봅니다. 이는 추론이며 PINN 학습이나 일반적인 예보 성능 인증이 아닙니다. |
 
-### Lab 4: AI Weather Forecasting with FourCastNet
+<a id="lab-4-ai-weather-forecasting-with-fourcastnet"></a>
+### 실습 4: FourCastNet을 활용한 AI 일기 예보
 
-Open the [weather notebook](../../01_labs/04_weather_forecasting/Lab_4_Weather_Forecasting.ipynb). State the objective before running it: generate a 48-hour weather forecast using pretrained FourCastNet, compare it with ERA5 reanalysis, and examine how forecast errors change with lead time.
+[날씨 노트북](../../01_labs/04_weather_forecasting/Lab_4_Weather_Forecasting.ipynb)을 여세요. 실행 전에 목표를 설명하세요. 사전 학습된 FourCastNet으로 48시간 일기 예보를 생성하고 ERA5 재분석과 비교하며, 예보 오차가 선행 시간에 따라 어떻게 변하는지 살펴보는 것입니다.
 
-The input is the global atmosphere at 00 UTC on 1 September 2022: 26 surface and pressure-level variables on a 720-by-1440 grid. NVIDIA's 26-channel FourCastNet1 AFNO checkpoint predicts all 26 fields six hours later. Repeat eight times, feeding each prediction back into the model. Future ERA5 does not enter this loop. The saved checkpoint mean and standard deviation normalize inputs and restore outputs; the output is the complete next state, not a tendency to add to the previous state.
+입력은 2022년 9월 1일 00 UTC의 전 지구 대기입니다. 720×1440 격자에 지표 및 기압면 변수 26개가 주어집니다. NVIDIA의 26채널 FourCastNet1 AFNO 체크포인트는 6시간 뒤의 장 26개를 모두 예측합니다. 각 예측을 다시 모델에 입력하며 여덟 번 반복합니다. 미래 ERA5는 이 반복 과정에 들어가지 않습니다. 체크포인트에 저장된 평균과 표준편차로 입력을 정규화하고 출력을 복원합니다. 출력은 이전 상태에 더할 변화율이 아니라 완전한 다음 상태입니다.
 
-There is no training, fine-tuning or official submission in this Lab. The exercises are to select a weather variable, follow the forecast evolution, compare lead times, and explain errors. ERA5 is a reanalysis combining observations and a numerical model, not direct observations alone. Relative humidity is derived with the documented NVIDIA input conversion; the checkpoint, normalization and forecast outputs are not tuned to this case.
+이 실습에는 학습, 미세 조정, 공식 제출이 없습니다. 연습 내용은 날씨 변수를 선택하고, 예보의 변화를 따라가고, 선행 시간을 비교하고, 오차를 설명하는 것입니다. ERA5는 관측과 수치 모델을 결합한 재분석이며 직접 관측만으로 이루어진 자료가 아닙니다. 상대 습도는 문서화된 NVIDIA 입력 변환으로 유도합니다. 체크포인트, 정규화, 예보 출력은 이 사례에 맞춰 조정하지 않습니다.
 
-Show ERA5, forecast and signed-error maps side by side with fixed color ranges. Use the East Asia animation to follow the circulation; then compare 6-, 24- and 48-hour errors for surface wind, mean sea-level pressure and 2 m temperature. Ask whether a similar-looking cyclone also has the correct location and intensity. Area-weighted RMSE does not prove that a cyclone core is accurate. The persistence baseline holds the initial weather unchanged; beating it is more informative than showing an attractive animation alone.
+ERA5, 예보, 부호 있는 오차 지도를 고정 색상 범위로 나란히 보여 주세요. 동아시아 애니메이션으로 순환을 따라간 뒤 지표 바람, 평균 해면 기압, 2 m 기온의 6시간, 24시간, 48시간 오차를 비교하세요. 비슷하게 보이는 저기압이 위치와 강도도 정확한지 질문하세요. 면적 가중 RMSE만으로 저기압 중심부의 정확성이 입증되지는 않습니다. 지속성 기준 예측은 초기 날씨를 그대로 유지합니다. 이를 능가하는 것은 보기 좋은 애니메이션만 보여 주는 것보다 더 많은 정보를 줍니다.
 
-The prespecified 24- and 48-hour checks passed for the global and East Asia domains in this one historical case. That does not establish general forecast reliability or operational suitability. Read the [weather validation record](LAB4_WEATHER_VALIDATION.md) for physical-unit metrics and limitations; do not call RMSE a percentage accuracy.
+이 하나의 과거 사례에서는 전 지구와 동아시아 영역 모두 사전에 지정한 24시간 및 48시간 검사를 통과했습니다. 그것만으로 일반적인 예보 신뢰성이나 현업 적용 적합성이 입증되지는 않습니다. 물리 단위의 지표와 한계는 [날씨 검증 기록](LAB4_WEATHER_VALIDATION.md)을 읽어 보세요. RMSE를 백분율 정확도라고 부르지 마세요.
 
-Prepare the cache before students arrive. Model files total about 301 MB and compressed ERA5 source chunks about 622 MB; expanded arrays and saved outputs need additional disk space. The cache lives outside the checkout at `~/.cache/ai4sci/weather`. On a fresh Brev L4, cold download and preparation took 35 seconds; the cached notebook took about 85 seconds for all code cells, including plots and animation (90 seconds including kernel startup and notebook saving). Model computation alone took 3.21 seconds. These are single-instance measurements, not guaranteed timings or evidence of 110-person capacity. Use the remaining lesson time to compare fields, lead times and errors, not to wait for an artificial five-minute run.
+학생이 도착하기 전에 캐시를 준비하세요. 모델 파일은 총 약 301 MB이고 압축된 ERA5 원본 데이터 조각은 약 622 MB입니다. 압축을 푼 배열과 저장된 출력에는 추가 디스크 공간이 필요합니다. 캐시는 체크아웃 밖의 `~/.cache/ai4sci/weather`에 있습니다. 새 Brev L4에서 캐시 없는 다운로드와 준비는 35초가 걸렸습니다. 캐시를 사용한 노트북은 그래프와 애니메이션을 포함한 모든 코드 셀에 약 85초가 걸렸습니다(커널 시작과 노트북 저장 포함 90초). 모델 계산 자체는 3.21초였습니다. 이는 단일 인스턴스 측정값이며 보장되는 시간이나 110명 수용 능력의 근거가 아닙니다. 남는 수업 시간에는 인위적인 5분 실행을 기다리지 말고 장, 선행 시간, 오차를 비교하세요.
 
-Suggested transition: "The previous Labs used equation and condition losses to train a network. Here we use a model already trained on historical weather, then check its forecast against later reanalysis. Fast inference is useful only if we also examine where the forecast is wrong."
+다음과 같이 전환을 설명할 수 있습니다. "앞선 실습에서는 방정식과 조건 손실로 신경망을 학습했습니다. 여기서는 과거 날씨로 이미 학습한 모델을 사용하고, 이후 재분석 자료로 예보를 확인합니다. 빠른 추론은 예보가 어디에서 틀렸는지도 살펴볼 때 의미가 있습니다."
 
-The instructor explicitly approved this change in learning objective. The previous [Navier–Stokes PINN notebook](../reference_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb), its source data, ParaView workflow and six-hour experiment remain archived for reference, not part of the active Lab sequence. Historical results in [LAB4_EFFICIENCY.md](LAB4_EFFICIENCY.md) and [LAB4_SIX_HOUR.md](LAB4_SIX_HOUR.md) describe those older PINN recipes, not FourCastNet. Neither the analytical Taylor–Green regression nor the old PINN runs validate this weather model.
+강사는 이 학습 목표 변경을 명시적으로 승인했습니다. 기존 [Navier–Stokes PINN 노트북](../reference_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb), 원본 데이터, ParaView 작업 흐름, 6시간 실험은 참고용으로 보관하며 현재 실습 순서에는 포함되지 않습니다. [LAB4_EFFICIENCY.md](LAB4_EFFICIENCY.md)와 [LAB4_SIX_HOUR.md](LAB4_SIX_HOUR.md)의 과거 결과는 FourCastNet이 아니라 이전 PINN 학습 설정을 설명합니다. 해석적 Taylor–Green 회귀 검사와 이전 PINN 실행 어느 쪽도 이 날씨 모델을 검증하지 않습니다.
 
-The [migration notes](MIGRATION.md) record both the earlier unintended adaptations and the restored Wave initial displacement, Fluid startup and Climate baseline. Teach the conditions shown in the current notebooks and distinguish analytical checks from real-world validation.
+[이전 안내](MIGRATION.md)는 과거의 의도하지 않은 변경과 복원된 파동 초기 변위, 유체 시작 조건, 기후 기준 사례를 모두 기록합니다. 현재 노트북에 표시된 조건을 가르치고, 해석적 검사와 실제 세계에서의 검증을 구분하세요.
 
-## Evaluation and event operations
+<a id="evaluation-and-event-operations"></a>
+## 평가와 행사 운영
 
-Students submit from the Challenge notebook and inspect their results there.
-The projector is a read-only standings display, not an upload site. Configure
-each workspace's [private judge connection](../environment/JUDGE_CONNECTION.md)
-before the session. The event Launchable opts into automatic enrollment and a
-private tunnel; a generic installation does not. The notebook does not collect
-Brev passwords. Learners register their public nickname in the final submission
-panel, then submit saved code there. Verify enrollment, nickname registration,
-one submission and the projector display before class; repository documentation
-does not establish that the event service is currently reachable.
+학생은 도전 과제 노트북에서 제출하고 그곳에서 결과를 확인합니다.
+프로젝터는 업로드 사이트가 아니라 읽기 전용 순위 표시 화면입니다. 세션 전에
+각 작업 공간의 [비공개 채점기 연결](../environment/JUDGE_CONNECTION.md)을 설정하세요.
+행사용 Launchable은 자동 등록과 비공개 터널을 사용하도록 설정되어 있지만,
+일반 설치에서는 그렇지 않습니다. 노트북은 Brev 비밀번호를 수집하지 않습니다.
+학습자는 마지막 제출 패널에서 공개 닉네임을 등록한 뒤 저장된 코드를 제출합니다.
+수업 전에 참가 등록, 닉네임 등록, 제출 한 건, 프로젝터 표시를 검증하세요.
+저장소 문서가 존재한다는 사실만으로 현재 행사 서비스에 접속할 수 있다고
+판단할 수는 없습니다.
 
-Follow the [evaluation guide](ASSESSMENT.md). Training and fixed held-out residual evaluation consume the learner's setup. Small local residuals do not establish that the stated problem was implemented correctly. The v3 judge parses all required functions and checks individual components. An unchanged PDE cannot complete Wave 3 without Robin or Fluid 2 without its three chips. Local metrics remain editable diagnostics, not trusted submissions.
+[평가 안내](ASSESSMENT.md)를 따르세요. 학습과 고정된 별도 평가 데이터의 잔차 평가는 학습자의 환경 자원을 사용합니다. 로컬 잔차가 작다는 사실만으로 명시된 문제를 올바르게 구현했다고 할 수는 없습니다. v3 채점기는 모든 필수 함수를 파싱하고 개별 구성 요소를 검사합니다. PDE가 그대로여도 Robin 조건 없이는 파동 3을, 칩 세 개 없이는 유체 2를 완료할 수 없습니다. 로컬 지표는 수정 가능한 진단 자료이며 신뢰할 수 있는 제출물은 아닙니다.
 
-Wave 1 retains its independent analytical comparison. Climate compares against the learner's own derived expression at five times; this is not a correctness check. For Climate, read the per-field errors as well as the combined value. Operator validation/test data is reconstructed independently of the student dataset function. A missing analytical reference is not zero error, and raw losses from different problems must not be added into a ranking.
+파동 1은 독립적인 해석해 비교를 유지합니다. 기후는 학습자가 직접 유도한 식과 다섯 시각에서 비교하며, 이는 정확성 검사가 아닙니다. 기후에서는 통합 값뿐 아니라 장별 오차도 읽으세요. 연산자의 검증/테스트 데이터는 학생 데이터셋 함수와 독립적으로 재구성됩니다. 해석적 기준값이 없다고 오차가 0인 것은 아니며, 서로 다른 문제의 원시 손실을 합산해 순위를 매기면 안 됩니다.
 
-A short successful run is not a convergence result. Full-course completion requires rehearsal. The current eight-hour plan contains 330 minutes of teaching/Q&A, 90 minutes of lunch and 60 minutes of breaks.
+짧은 실행의 성공은 수렴 결과가 아닙니다. 전체 강좌를 완료하려면 리허설이 필요합니다. 현재 8시간 계획은 수업/질의응답 330분, 점심 90분, 휴식 60분으로 구성됩니다.
 
-Use a new output directory for each experiment. Require `--device cuda` for GPU checks. Verify successful container execution and GitHub publication independently.
+실험마다 새로운 출력 디렉터리를 사용하세요. GPU 검사에는 `--device cuda`를 요구하세요. 컨테이너 실행 성공과 GitHub 게시는 각각 독립적으로 검증하세요.
 
-The expected audience is 110 individual participants, each with a planned personal Brev L4 environment. Give each learner a separate writable checkout so edits and results do not conflict. The [embedded judge](../judge/README.md) provides local development and preflight checks; the separate event judge serves submissions and standings. Verify the deployed service, eight-GPU worker configuration and agreed event rules before class. The pilot awards implementation points, not points derived from error scales. Challenge 4's scoring dataset is intentionally smaller than the full lesson dataset; its numerical feedback is not a full-lesson benchmark. Single-instance measurements do not establish 110-person capacity.
+예상 참가자는 개인 110명이며 각자 개인용 Brev L4 환경을 사용할 계획입니다. 수정 내용과 결과가 충돌하지 않도록 학습자마다 별도의 쓰기 가능한 체크아웃을 제공하세요. [내장 채점기](../judge/README.md)는 로컬 개발과 사전 점검을 제공하며, 별도의 행사 채점기가 제출과 순위를 처리합니다. 수업 전에 배포된 서비스, GPU 여덟 개의 워커 설정, 합의된 행사 규칙을 검증하세요. 시범 채점은 오차 크기에서 도출한 점수가 아니라 구현 점수를 부여합니다. 도전 과제 4의 채점 데이터셋은 의도적으로 전체 수업 데이터셋보다 작으므로, 수치 피드백은 전체 수업의 성능 기준이 아닙니다. 단일 인스턴스 측정으로 110명 수용 능력을 확인할 수는 없습니다.
 
-The agreed pilot ranks original-task completion, not optimizer or model tuning. Fully correct submissions share a rank; numerical feedback does not break ties. Completed Challenge implementations are not supplied in the student workflow; local execution alone still does not prove independent work. Preserve all eleven levels and use the measured errors to prepare demonstrations, not to introduce unannounced performance points. See [class budgets and remaining errors](CHALLENGE_EFFICIENCY.md).
+합의된 시범 채점은 최적화기나 모델 튜닝이 아니라 원래 과제의 완성도를 기준으로 순위를 매깁니다. 완전히 올바른 제출은 같은 순위를 가지며, 수치 피드백으로 동점을 가르지 않습니다. 학생 작업 흐름에는 완성된 도전 과제 구현이 제공되지 않지만, 로컬 실행만으로 독립적으로 수행한 작업임이 입증되는 것은 아닙니다. 레벨 열한 개를 모두 유지하고, 측정한 오차는 시연을 준비하는 데 사용하세요. 공지하지 않은 성능 점수를 도입하지 마세요. [수업 실행량과 남은 오차](CHALLENGE_EFFICIENCY.md)를 참고하세요.

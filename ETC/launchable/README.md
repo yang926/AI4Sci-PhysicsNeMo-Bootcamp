@@ -1,263 +1,122 @@
-# Student Brev Launchable
+# 수강생용 Brev Launchable (한국어판)
 
-## Event deployment: host Jupyter installation disabled
+## Lab 4 기상 자료
 
-For new event VMs, use the [fresh-VM deployment path](FRESH_VM.md): **VM mode,
-host Jupyter installation off, and an explicit protected `jupyter:8888` Secure
-Link**. The course setup installs its own authenticated Jupyter service and the
-event enrollment receiver. Students do not open ports or run port-forwarding
-commands. This change does not alter the lessons or training settings.
+Lab 4는 사전학습 FourCastNet/AFNO로 48시간 기상 예보를 만들고 ERA5 재분석으로 검증합니다. 새 모델을 학습하지 않습니다. 설치 과정에서 버전을 고정한 약 301 MB 모델과 약 622 MB의 압축 ERA5 원본 청크를 내려받아 확인한 뒤 초기장·검증 배열을 준비합니다. 수강생이 실습을 열기 전에 수행하며, CDS 계정이나 API 키는 필요하지 않습니다.
 
-The managed-Jupyter instructions below remain for existing VMs and older
-templates. Do not combine their `--launchable` startup command with a fresh VM
-that has no Jupyter service. Existing course updates still use `update.sh`.
+캐시는 Git 작업 폴더 밖의 `~/.cache/ai4sci/weather`입니다. `AI4SCI_WEATHER_CACHE`로 변경할 수 있습니다. 설치 재실행과 노트북은 검증된 파일을 재사용합니다. 준비한 배열 약 257 MB도 캐시에 저장합니다. 일부만 내려받은 파일을 완성된 자료로 인정하지 않습니다. 네트워크 오류가 나면 연결 복구 후 같은 설치·업데이트 명령을 다시 실행하세요. 검증된 파일은 재사용합니다.
 
-## Lab 4 weather assets
+영문 행사 Launchable은 `main/ETC/launchable/bootstrap.py`를 내려받습니다. **한국어판은 별도 `ko` 브랜치와 별도 Launchable을 사용합니다.** 새 인스턴스는 선택한 브랜치의 자료를 받지만, 기존 인스턴스에는 아래 업데이트 명령이 필요합니다. GitHub 푸시나 템플릿 편집만으로 열린 수강생 작업 공간을 바꾸지 않습니다. 한 번의 배포 성공이 110명 동시 다운로드 검증을 의미하지는 않습니다.
 
-Lab 4 now uses pretrained FourCastNet/AFNO for a 48-hour weather forecast and
-ERA5 reanalysis verification. It does not train a new model. Setup downloads
-and verifies the pinned 301 MB model and about 622 MB of compressed ERA5 source
-chunks, then prepares the initial and verification arrays. This happens before
-the learner opens the lesson. No CDS account or API key is required.
+측정 장비와 시간 범위는 [Lab 4 검증 기록](../course_materials/LAB4_WEATHER_VALIDATION.md)을 확인하세요. 이전 PINN 유동 실습은 현재 네 개 Lab 순서에서 제외하고 `ETC/reference_labs`에 보존했습니다.
 
-The cache is `~/.cache/ai4sci/weather` (`AI4SCI_WEATHER_CACHE` can override it),
-outside the Git checkout. Repeated setup and the notebook reuse verified files.
-The cache also contains about 257 MB of prepared arrays. Partial downloads are
-not accepted as complete assets. If setup reports a network failure, rerun the
-same setup/update command after connectivity recovers; verified files are reused.
+기존 교재 저장소를 사용합니다. Brev가 VM과 관리형 Jupyter를 제공하고, 아래 설치 과정이 분리된 교재 커널을 설치한 뒤 기존 Jupyter 서비스에서 교재를 열도록 설정합니다. 두 번째 서버를 시작하거나 Jupyter 인증을 바꾸거나 GPU 인스턴스를 생성하거나 채점 계정을 직접 만들지 않습니다.
 
-The saved event Launchable already downloads `main/ETC/launchable/bootstrap.py`.
-This release therefore needs no new Launchable URL or changed hardware. New
-deployments receive the new Lab 4; existing VMs still need the update command
-below. Neither a GitHub push nor a template edit silently replaces an open
-learner workspace. One deployment test is not proof of 110 simultaneous downloads.
+<a id="brev-builder-settings"></a>
 
-See [Lab 4 validation](../course_materials/LAB4_WEATHER_VALIDATION.md) for the
-measured hardware and timing scope. The former PINN flow lesson is preserved
-under `ETC/reference_labs`, outside the active four-Lab sequence.
+## Brev 생성 화면 설정
 
-Use the existing course repository. Brev provides the VM and managed Jupyter;
-the setup below installs an isolated course kernel and configures the existing
-managed Jupyter service to open the course. It does not start a second server,
-change Jupyter authentication, create GPU instances or itself create judge accounts.
-
-## Older template: Brev-managed Jupyter builder settings
-
-| Setting | Value |
+| 항목 | 값 |
 | --- | --- |
-| Source | `https://github.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp.git` |
-| Software | **VM Mode** |
-| Install Jupyter on the host | **On** |
-| Hardware | One NVIDIA L4 GPU per learner, matching the [course plan](../course_materials/course-plan.md). Verify the L4 selection before deployment. |
-| Disk | Start rehearsal with 100 GiB; measure package/data/output usage before the event. |
-| Network | Keep the managed **Jupyter Secure Link**. Do not expose raw Jupyter TCP ports publicly. |
-| Access | Prefer **Only my organization** for the workshop. Visibility does not limit shared-credit spending. |
+| 소스 | 교재 저장소 `https://github.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp.git`의 `ko` 브랜치. 한국어 전용 템플릿에서는 아래 스크립트가 소스를 직접 받도록 하여 영문 `main` 선행 복제를 피합니다. |
+| 소프트웨어 | **VM Mode** |
+| 호스트에 Jupyter 설치 | **On** |
+| 하드웨어 | [강의 계획](../course_materials/course-plan.md)에 맞춰 수강생당 NVIDIA L4 1개. 배포 전에 실제 선택을 확인하세요. |
+| 디스크 | 원래 리허설 권장값은 100 GiB부터입니다. 복제한 행사 템플릿은 기존과 동일한 256 GiB를 사용합니다. 행사 전 패키지·데이터·출력 용량을 측정하세요. |
+| 네트워크 | 관리형 **Jupyter Secure Link**를 유지하세요. 원시 Jupyter TCP 포트를 인터넷에 공개하지 마세요. |
+| 접근 | 워크숍에는 **Only my organization**을 권장합니다. 공개 범위 설정은 공유 크레딧 사용 한도를 제한하지 않습니다. |
 
-L4 is the selected student GPU; availability and concurrent startup capacity
-still need confirmation. The disk value is a rehearsal recommendation, not
-measured usage. This repository does not change the existing Launchable.
+학생용 GPU는 L4로 정했지만, 가용 수량과 동시 시작 용량은 별도 확인이 필요합니다. 디스크 권장치는 실측 사용량이 아닙니다. 저장소 수정만으로 기존 Launchable이 변경되지는 않습니다.
 
-The organizer configures this once in the shared Launchable. Students deploy
-that template and open Jupyter; they do not install pip or run recovery commands.
-Use the script below for a new Launchable, or replace the earlier script in the
-existing Launchable before sharing it. GitHub changes do not edit a saved Brev
-form automatically. This repository cannot save the Brev console form for you.
+운영자가 공유 Launchable을 한 번 설정하면 수강생은 템플릿을 배포하고 Jupyter를 엽니다. 개별적으로 pip를 설치하거나 복구 명령을 실행하는 방식이 아닙니다. 새 Launchable에는 아래 스크립트를 사용하세요. GitHub 변경이 저장된 Brev 폼을 자동으로 편집하지는 않습니다.
 
-For the AI4Science Korea 2026 event, use this bootstrap in
-**Setup script → Paste Script**. Its URL stays the
-same when the implementation in GitHub changes. If the builder offers a URL
-field, do not give it an HTML `github.com/.../blob/...` page as executable code.
-The pasted bootstrap works without relying on that optional field.
-The first line must be exactly `#!/bin/bash`, with no blank line before it.
-Brev's form rejects `#!/usr/bin/env bash` even though it is a valid shell shebang.
+한국어 학습용 Launchable의 **Setup script → Paste Script**에 다음을 붙여 넣습니다. GitHub 구현이 바뀌어도 URL은 유지됩니다. URL 입력란이 있더라도 실행 코드 대신 HTML `github.com/.../blob/...` 페이지를 넣지 마세요. 붙여넣기 방식은 별도 URL 입력란에 의존하지 않습니다. 첫 줄은 앞에 빈 줄 없이 정확히 `#!/bin/bash`여야 합니다. `#!/usr/bin/env bash`도 유효한 셔뱅이지만 Brev 폼에서는 허용하지 않습니다.
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 bootstrap_file="$(mktemp -t ai4sci-bootstrap.XXXXXX)"
 curl --fail --silent --show-error --location --retry 3 \
-  https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/main/ETC/launchable/bootstrap.py \
+  https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/ko/ETC/launchable/bootstrap.py \
   --output "$bootstrap_file"
-python3 "$bootstrap_file" --launchable --enroll-event ai4science-korea-2026
+python3 "$bootstrap_file" --launchable --ref ko
 ```
 
-The event flag installs the restricted enrollment receiver used by the organizer
-to deliver a personal judge credential and connect a private tunnel. It does not
-embed a credential or start the judge service. For a generic course Launchable,
-omit `--enroll-event ai4science-korea-2026`; [setup.sh](setup.sh) is that generic
-script and does not opt in to event enrollment. For the event's File Upload
-option, save the complete script above, including the event flag.
+기존 영문 행사 템플릿은 마지막 명령에 `--enroll-event ai4science-korea-2026`도 전달합니다. 이 플래그는 운영자가 개인 채점 자격 정보를 전달하고 사설 터널을 연결할 때 사용하는 제한된 등록 수신기를 설치합니다. 자격 정보를 스크립트에 넣거나 채점 서비스를 시작하는 것은 아닙니다. 일반 학습용 한국어판은 이 플래그를 생략합니다. 새 Launchable은 기존 채점기의 허용 대상과 다르므로, 플래그를 추가하는 것만으로 자동 연결을 보장하지 않습니다. 채점 연결까지 사용하려면 운영자가 별도로 등록 대상을 확인해야 합니다. 행사 File Upload 방식에서는 이벤트 플래그를 포함한 전체 스크립트를 저장해야 합니다.
 
-Use `--launchable`, not the earlier `--update` flag. It uses the existing
-Source checkout at `~/AI4Sci-PhysicsNeMo-Bootcamp` and checks the requested GitHub
-revision. Existing checkouts use the safe update path described below; private
-commits and overlapping source edits are never overwritten. A fresh clone is staged
-until complete so a failed download can be retried without a partial course folder.
+이전 `--update` 대신 `--launchable`을 사용하세요. `~/AI4Sci-PhysicsNeMo-Bootcamp`를 표준 폴더로 사용하고 요청한 GitHub 버전을 확인합니다. 기존 작업 폴더는 아래 안전 업데이트 절차를 따릅니다. 로컬 커밋과 충돌하는 소스 수정은 덮어쓰지 않습니다. 새 복제는 완료 전까지 임시 위치에서 준비하므로, 다운로드 실패 후 불완전한 교재 폴더가 남지 않게 재시도할 수 있습니다.
 
-The script runs as Brev's default non-root user, which must also own the Jupyter
-session. It handles a setup working directory outside the checkout. Repeated
-setup uses the same canonical folder and does not create timestamped copies.
-Previous `*-updates` folders are left intact outside the new course browser root;
-they are not silently deleted, merged or selected as the active course.
+스크립트는 Jupyter 세션도 소유하는 Brev 기본 일반 사용자로 실행합니다. 설치 시작 위치가 작업 폴더 밖이어도 동작합니다. 반복 설치는 같은 표준 폴더를 사용하며 날짜별 복사본을 만들지 않습니다. 예전 `*-updates` 폴더는 새 교재 탐색기 루트 밖에 그대로 둡니다. 조용히 삭제·병합하거나 활성 교재로 선택하지 않습니다.
 
-After setup finishes, open **Jupyter** in Brev. The file browser starts at the
-course root, **Start_Here.ipynb** is the landing page, and the available/default
-kernel is **AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)**. Reload a browser that was open
-before setup completed. Do not start `jupyter lab` again in a terminal.
+설치가 끝나면 Brev에서 **Jupyter**를 여세요. 파일 탐색기는 교재 루트에서 시작하고, 첫 화면은 **Start_Here.ipynb**, 사용 가능·기본 커널은 **AI4Sci PhysicsNeMo 2.2.2 (uv / CUDA)**입니다. 설치 전에 열어 둔 브라우저는 새로고침하세요. 터미널에서 `jupyter lab`을 다시 시작하지 마세요.
 
-Setup configures the normal per-user Jupyter server configuration, preserving
-existing authentication and network settings. It identifies only Brev's existing
-`jupyter.service` and checks its owner, effective root, notebook URL and kernel
-list. If the configuration already matches, it does not rewrite it or restart
-the server, even with idle notebook kernels. A configuration change requires an
-idle server before that unit is restarted. Unknown service wrappers and conflicting
-startup arguments stop setup. No other Jupyter service is stopped.
+설치는 기존 인증·네트워크 설정을 보존하면서 사용자 Jupyter 서버 설정을 구성합니다. Brev의 기존 `jupyter.service`만 식별하고 소유자, 실제 루트, 노트북 URL, 커널 목록을 확인합니다. 이미 맞으면 유휴 커널이 있어도 설정을 다시 쓰거나 서버를 재시작하지 않습니다. 설정 변경이 필요하면 서버가 유휴 상태여야 해당 서비스만 재시작합니다. 알 수 없는 서비스 래퍼나 충돌하는 시작 인자가 있으면 중단합니다. 다른 Jupyter 서비스를 중지하지 않습니다.
 
-The kernel is installed in the user's Jupyter data directory under the unique
-name `ai4sci-physicsnemo-uv`; the host's `python3` kernel is not overwritten.
-The native kernel is retained on disk but hidden from this course server's kernel
-list. This GPU kernel supplies `AI4SCI_DEVICE=cuda`, including for the morning Labs.
-The prebuilt widgets frontend is made available in the user data directory
-without installing Python packages into Brev's managed Jupyter environment.
-A conflicting frontend/kernel is reported, never silently replaced.
+커널은 사용자 Jupyter 데이터 경로의 고유 이름 `ai4sci-physicsnemo-uv`로 설치하며 호스트의 `python3` 커널을 덮어쓰지 않습니다. 원래 커널은 디스크에 보존하되 교재 서버의 목록에서는 숨깁니다. GPU 커널은 오전 Lab을 포함해 `AI4SCI_DEVICE=cuda`를 제공합니다. 미리 빌드된 위젯 프런트엔드는 사용자 데이터 경로에 놓으며 Brev 관리형 Jupyter의 Python 환경에 패키지를 설치하지 않습니다. 충돌하는 프런트엔드·커널은 알리고, 조용히 교체하지 않습니다.
 
-The host needs Python 3, Git, curl and NVIDIA drivers, but does not need pip,
-ensurepip or a preinstalled uv. The pinned uv 0.8.17 standalone installer uses
-a private directory without modifying shell profiles or the host Python.
+호스트에는 Python 3, Git, curl, NVIDIA 드라이버가 필요합니다. pip, ensurepip, 사전 설치된 uv는 필요하지 않습니다. 고정한 uv 0.8.17 독립 설치기는 전용 폴더를 사용하며 셸 프로필이나 호스트 Python을 수정하지 않습니다.
 
-The earlier installer at revision `b9e4b48` assumed the host had pip. The corrected
-shared setup above is the student deployment path, not per-student terminal repair.
-After changing the template, the organizer rehearses a fresh deployment before
-distributing it. Existing failed VMs are not changed merely by editing the template.
+이전 `b9e4b48` 버전은 호스트에 pip가 있다고 가정했습니다. 수정한 공유 설치 과정이 학생 배포 경로이며, 학생마다 터미널에서 고치는 방식이 아닙니다. 운영자는 템플릿 변경 후 새 배포로 리허설하고 나서 공유합니다. 기존 실패 VM은 템플릿을 편집했다고 바뀌지 않습니다.
 
-## Updating the course
+## 교재 업데이트
 
-Save your work, let training finish, and close notebook/text-editor tabs that
-you are editing. Keep idle kernels and the Jupyter server running. In the
-instance terminal, run:
+작업을 저장하고 학습이 끝날 때까지 기다린 뒤, 수정 중인 노트북·텍스트 편집기 탭을 닫으세요. 유휴 커널과 Jupyter 서버는 그대로 두고 인스턴스 터미널에서 실행합니다.
 
 ```bash
 bash ~/AI4Sci-PhysicsNeMo-Bootcamp/ETC/launchable/update.sh
 ```
 
-On an older instance that does not have `update.sh` yet, the existing command
-downloads the new bootstrap and uses the same safe update path:
+`update.sh`가 없는 이전 인스턴스에서는 기존 명령이 새 bootstrap을 받아 같은 안전 업데이트 경로를 사용합니다.
 
 ```bash
 bash ~/AI4Sci-PhysicsNeMo-Bootcamp/ETC/launchable/setup.sh
 ```
 
-For ordinary notebook/Python changes, **do not manually stash files, reinstall
-packages, or restart the Jupyter server**. The update command:
+**위 명령은 이미 한국어판으로 설치한 인스턴스에서 사용합니다. 영어판 작업 공간을 한국어판으로 전환하는 명령이 아닙니다.** 한국어판의 두 스크립트는 `--ref ko`를 명시합니다.
 
-1. Checks the selected GitHub revision and the files that would change.
-2. Preserves local answers, notes and untracked files that do not overlap the
-   release. If learner source and the release both changed the same file, it
-   stops and names the conflict before changing course files.
-3. Backs up execution-only notebook changes before replacing an updated notebook.
-   Backups are private, outside the course folder, under
-   `~/.ai4sci-course-backups/`. The output prints the exact directory; each backup
-   contains the original notebook bytes and a revision/file manifest. Unknown
-   metadata, cell source, notes and attachments are treated as learner content,
-   not disposable output.
-4. Reuses the existing ready Python environment and kernel. Unchanged Jupyter
-   configuration is checked without restarting the server or stopping kernels.
+일반적인 노트북·Python 수정에는 **직접 stash하거나 패키지를 다시 설치하거나 Jupyter 서버를 재시작하지 마세요.** 업데이트 명령은 다음 순서로 처리합니다.
 
-If a notebook that will be replaced is still connected in your browser, the
-command asks you to save and close that tab (or the Jupyter browser tab), then
-rerun the **same command**. You do not need to shut down idle kernels. This keeps
-an old browser editor from saving over the newly downloaded notebook. A running
-training cell must finish before source files are updated. Jupyter's API cannot
-detect every browser text editor or a notebook that never started a kernel;
-closing editing tabs first is still necessary even if the command detects none.
+1. 선택한 GitHub 버전과 변경할 파일을 확인합니다.
+2. 새 버전과 겹치지 않는 로컬 답안·메모·미추적 파일을 보존합니다. 수강생과 새 버전이 같은 소스 파일을 수정했다면, 교재를 바꾸기 전에 충돌 파일을 알리고 중단합니다.
+3. 출력만 저장한 노트북은 교체 전에 백업합니다. 백업은 교재 폴더 밖 `~/.ai4sci-course-backups/`의 비공개 위치에 저장하고 정확한 폴더를 출력합니다. 원래 노트북 바이트와 버전·파일 목록을 함께 저장합니다. 알 수 없는 메타데이터, 셀 소스, 메모, 첨부는 버려도 되는 출력이 아닌 수강생 내용으로 취급합니다.
+4. 준비된 Python 환경과 커널을 재사용합니다. Jupyter 설정이 같으면 서버 재시작이나 커널 중지 없이 확인만 합니다.
 
-After success, reopen changed notebooks from disk. Python modules already
-imported by a kernel are not hot-reloaded; restart only that notebook's kernel
-before using the changed module. Saved results and learner answers stay on disk.
-An update does not automatically restore old Git stashes over the new files.
+교체할 노트북이 브라우저에 연결되어 있으면 해당 탭 또는 Jupyter 브라우저 탭을 저장 후 닫고 **같은 명령**을 다시 실행하라고 안내합니다. 유휴 커널을 종료할 필요는 없습니다. 이는 이전 편집기 내용이 새 파일 위에 저장되는 것을 막습니다. 실행 중인 학습 셀은 소스 업데이트 전에 끝나야 합니다. Jupyter API는 모든 텍스트 편집기나 커널을 시작하지 않은 노트북을 감지할 수 없으므로, 연결 탭이 감지되지 않아도 편집 탭을 먼저 닫아야 합니다.
 
-If the release changes Python or locked packages, the command says so **before
-updating source** and asks you to save and shut down kernels. Only that kind of
-environment change needs the installation path. If installation subsequently
-fails, the log reports the source revision separately; do not interpret a
-downloaded revision as a completed environment installation.
+성공 후 변경한 노트북을 디스크에서 다시 여세요. 커널이 이미 import한 Python 모듈은 자동으로 새로 읽지 않습니다. 바뀐 모듈을 쓰기 전에 해당 노트북 커널만 재시작하세요. 저장한 결과와 답안은 디스크에 유지됩니다. 업데이트가 이전 Git stash를 새 파일 위에 자동 적용하지는 않습니다.
 
-The checked-in CUDA lock pins the course packages, including widgets. Environments
-are named by that lock's fingerprint. A new lock gets a separate environment;
-the previous one is retained. This lock reproduces the local WSL package set,
-not a claim that a clean Brev VM has already passed rehearsal.
-An interrupted package download can be retried in the matching installer-owned
-environment. Unrecognized existing environments are never repaired by replacement.
+Python이나 고정 패키지가 바뀐 배포에서는 **소스 업데이트 전에** 이를 알리고 커널 저장·종료를 요청합니다. 이때만 설치 경로가 필요합니다. 이후 설치가 실패하면 로그는 소스 버전을 따로 기록합니다. 소스를 받았다는 것을 환경 설치 완료로 해석하지 마세요.
 
-- **New deployments:** the source/bootstrap uses GitHub `main` by default.
-- **Existing learners:** GitHub changes do not silently alter their files. The
-  explicit update above uses the canonical folder and preserves local work.
-  Ignored training outputs remain; colliding files or private commits stop updates.
-- **Manual bootstrap without `--update`:** retains its original behavior of
-  reusing the existing checkout. This is not the shared Launchable's setup command.
-- **Instructor copies:** the manual `--update` option still creates a dated copy
-  without changing earlier work. It is not used by the student Launchable and
-  does not switch the active Jupyter root to that copy.
-- **Event freeze:** set an optional Launch parameter `AI4SCI_COURSE_REF` to a
-  tested commit SHA or tag before deployment. It must include this Launchable
-  installer. An existing checkout is never silently downgraded or moved off local
-  commits; use a fresh destination for a different release. To freeze the bootstrap
-  as well, replace `main` in its raw URL with that commit SHA. Do not move the tag.
-- **Different repository:** change both Brev Source and optional
-  `AI4SCI_COURSE_REPO`. Use a public GitHub repository with this same installer
-  layout and an unused destination. Do not reuse a working folder from another repo.
+저장소의 CUDA 잠금 파일은 위젯을 포함한 교재 패키지를 고정합니다. 환경 이름은 잠금 파일의 지문으로 정합니다. 새 잠금 파일은 새 환경을 만들며 이전 환경을 보존합니다. 이 잠금 파일은 로컬 WSL 패키지 구성을 재현하는 것이지 깨끗한 Brev VM에서 리허설을 통과했다는 주장이 아닙니다. 다운로드 중단은 해당 설치기가 소유하는 환경에서 재시도할 수 있습니다. 알 수 없는 기존 환경을 교체해 복구하지는 않습니다.
 
-Updating GitHub or editing a Launchable does not update a running student's
-files. VM setup does not automatically run again when the VM restarts.
+- **새 배포:** 영어판은 기본 `main`, 한국어판은 명시한 `ko`를 사용합니다.
+- **기존 수강생:** GitHub 변경은 파일을 조용히 바꾸지 않습니다. 명시적 업데이트는 표준 폴더와 로컬 작업을 보존합니다. Git에서 제외한 학습 출력은 유지하며 충돌·로컬 커밋이 있으면 중단합니다.
+- **`--update` 없는 수동 bootstrap:** 기존 작업 폴더를 재사용하는 원래 동작을 유지합니다. 공유 Launchable 설치 명령은 이것이 아닙니다.
+- **강사용 복사본:** 수동 `--update`는 이전 작업을 그대로 두고 날짜가 붙은 사본을 만듭니다. 학생 Launchable에서는 사용하지 않으며 활성 Jupyter 루트를 새 사본으로 바꾸지도 않습니다.
+- **행사 버전 고정:** 배포 전에 `AI4SCI_COURSE_REF` 또는 명시적 `--ref`를 검증한 커밋 SHA·태그로 맞춥니다. 한국어 스크립트의 `--ref ko`를 유지하면 환경 변수보다 우선하므로, 고정할 때는 그 인자를 바꾸세요. 지정 버전에는 Launchable 설치기가 있어야 합니다. 기존 작업 폴더를 조용히 다운그레이드하거나 로컬 커밋에서 옮기지 않습니다. 다른 배포 버전은 새 대상 폴더를 쓰세요. bootstrap도 고정하려면 raw URL의 브랜치를 같은 SHA로 바꾸세요. 태그를 나중에 이동하지 마세요.
+- **다른 저장소:** Brev Source와 선택적 `AI4SCI_COURSE_REPO`를 함께 바꿉니다. 같은 설치기 구조의 공개 GitHub 저장소와 사용하지 않은 대상 폴더를 쓰세요. 다른 저장소 작업 폴더를 재사용하지 마세요.
 
-## Judge connection
+GitHub·Launchable 편집만으로 실행 중인 학생 파일이 바뀌지 않으며, VM을 재시작해도 설치가 자동으로 다시 실행되지는 않습니다.
 
-Local Labs and Challenges work without the judge. Nickname registration and
-submission are enabled only after the student's workspace has its own private
-judge connection. The projector remains a separate, read-only page.
+## 채점 연결
 
-The event setup above opts the workspace into organizer-managed enrollment.
-The receiver saves a personal credential outside the checkout and accepts a
-restricted SSH tunnel to the separate event service. The notebook uses
-`http://127.0.0.1:8090` inside that private connection; students do not start a
-local judge or create their own tunnel. The judge service and tunnel must be
-running for registration and submission to work. A successful setup alone does
-not establish current service availability or 110-person capacity.
+Lab과 Challenge는 채점기 없이도 로컬에서 실행됩니다. 닉네임 등록·제출은 개인별 비공개 채점 연결이 준비된 뒤 활성화됩니다. 프로젝터 화면은 별도의 읽기 전용 페이지입니다.
 
-Do not put a common participant token, administrator token or private roster in
-this script, the repository, a shared image or Launch parameter defaults.
-A browser-authenticated Jupyter Secure Link is not a notebook kernel's judge
-API login. Generic installations need their own private credential provisioning
-and reachable endpoint; non-loopback API connections use HTTPS. See
-[judge connection](../environment/JUDGE_CONNECTION.md) for the event and generic paths.
+영문 행사 설정은 운영자 관리 등록을 선택합니다. 수신기는 개인 자격 정보를 작업 폴더 밖에 저장하고 별도 행사 서비스로 향하는 제한된 SSH 터널을 받습니다. 노트북은 이 사설 연결 안의 `http://127.0.0.1:8090`을 사용합니다. 수강생이 로컬 채점기를 시작하거나 터널을 직접 만들지 않습니다. 등록·제출에는 채점 서비스와 터널이 실행 중이어야 합니다. 설치 성공만으로 현재 서비스 가용성이나 110명 용량을 보증하지 않습니다.
 
-## Before sharing with 110 learners
+공통 참가자 토큰, 관리자 토큰, 비공개 명단을 스크립트·저장소·공유 이미지·Launch parameter 기본값에 넣지 마세요. 브라우저에서 인증한 Jupyter Secure Link는 노트북 커널의 채점 API 로그인이 아닙니다. 일반 설치에는 별도의 개인 자격 정보 배포와 도달 가능한 주소가 필요하며, 루프백이 아닌 API 연결은 HTTPS를 씁니다. [채점 연결 안내](../environment/JUDGE_CONNECTION.md)를 확인하세요.
 
-Deploy **one** rehearsal GPU VM after approving its cost, then check:
+## 110명에게 공유하기 전
 
-1. Setup completes on the selected GPU, with sufficient disk and no dependency conflict.
-2. The managed Jupyter Secure Link opens Start Here at the course root. No source
-   or timestamp-folder choice is needed, and only the course kernel is offered.
-3. Run **00_Setup** in the course kernel; confirm CUDA and the selected GPU.
-4. In each Challenge, run only its setup and submission-control cells first.
-   The nickname input/buttons must render as widgets, not plain text. For the
-   event setup, confirm personal enrollment, nickname registration and results
-   through the private connection. With no judge provisioned,
-   registration/submission must remain disabled and practice must still work.
-   Unfilled exercises stop with a message; there is no bundled answer mode.
-5. Re-run setup: no duplicate folder or unnecessary server restart occurs.
-   Check an output-only saved notebook, an unrelated learner answer, an overlapping
-   answer, and a connected notebook tab. Backups and conflict messages must match
-   the cases above; learner work must remain recoverable.
-6. Stop/start that same VM and verify managed Jupyter, storage and course kernel
-   persist. Measure cold-start time before issuing 110 deployment links.
+요금 승인을 받은 뒤 리허설 GPU VM **한 대**를 배포하고 확인하세요.
 
-Do not present static tests or this checklist as a completed Brev deployment.
-Record the actual template revision and rehearsal results before event distribution.
+1. 선택한 GPU에서 설치가 완료되고 디스크가 충분하며 의존성 충돌이 없는지 확인합니다.
+2. 관리형 Jupyter Secure Link가 교재 루트의 Start Here를 여는지 확인합니다. 소스·날짜 폴더를 고를 필요가 없고 교재 커널만 보여야 합니다.
+3. 교재 커널에서 **00_Setup**을 실행해 CUDA와 선택한 GPU를 확인합니다.
+4. 각 Challenge에서 먼저 설정·제출 제어 셀만 실행합니다. 닉네임 입력·버튼이 일반 텍스트가 아니라 위젯으로 보여야 합니다. 행사 연결에서는 개인 등록, 닉네임 등록, 결과를 사설 연결로 확인합니다. 채점 연결이 없으면 등록·제출은 비활성 상태로 두고 실습은 가능해야 합니다. 미완성 과제는 안내와 함께 중단하며 배포본에 정답 모드는 없습니다.
+5. 설치를 다시 실행해 중복 폴더·불필요한 서버 재시작이 없는지 확인합니다. 출력만 저장한 노트북, 무관한 답안 수정, 충돌하는 답안 수정, 연결된 노트북 탭을 각각 확인합니다. 백업·충돌 안내가 위 설명과 같고 수강생 작업을 복구할 수 있어야 합니다.
+6. 같은 VM을 중지·재시작해 관리형 Jupyter, 저장소, 교재 커널이 유지되는지 확인합니다. 110명에게 배포 링크를 보내기 전에 콜드 스타트 시간을 측정하세요.
 
-Official references: [Launchables](https://docs.nvidia.com/brev/concepts/launchables),
-[setup scripts](https://docs.nvidia.com/brev/cli/instance-management),
-[Brev Jupyter port conflict](https://docs.nvidia.com/datascience/deployment/stable/cloud/nvidia/brev/),
-[widgets across separate environments](https://ipywidgets.readthedocs.io/en/stable/user_install.html),
-[uv standalone installation](https://docs.astral.sh/uv/getting-started/installation/),
-[uv unmanaged installer options](https://docs.astral.sh/uv/reference/installer/).
+정적 검사나 이 체크리스트를 실제 Brev 배포 완료로 소개하지 마세요. 행사 배포 전에 실제 템플릿 버전과 리허설 결과를 기록하세요.
+
+공식 참고 자료: [Launchables](https://docs.nvidia.com/brev/concepts/launchables), [설치 스크립트](https://docs.nvidia.com/brev/cli/instance-management), [Brev Jupyter 포트 충돌](https://docs.nvidia.com/datascience/deployment/stable/cloud/nvidia/brev/), [서로 다른 환경의 위젯](https://ipywidgets.readthedocs.io/en/stable/user_install.html), [uv 독립 설치](https://docs.astral.sh/uv/getting-started/installation/), [uv 비관리 설치 옵션](https://docs.astral.sh/uv/reference/installer/).

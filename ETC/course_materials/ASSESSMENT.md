@@ -1,80 +1,80 @@
-# Evaluating your Challenge results
+# 챌린지 결과 평가
 
-The afternoon Challenges are individual exercises. Notebook plots and metrics are practice feedback, not submitted scores. A separate [scoring service](../judge/README.md) supports all four Challenges, with provisional points and individual standings. The configured event Launchable enrolls its student workspace through a private tunnel; the service must be running to accept submissions. Deployment and successful rehearsal do not by themselves make the provisional rules approved official event rules.
+오후 챌린지는 개인 연습 과제입니다. 노트북의 그래프와 지표는 연습용 피드백이며 제출 점수가 아닙니다. 별도의 [채점 서비스](../judge/README.md)가 네 챌린지를 모두 지원하며 잠정 점수와 개인 순위를 제공합니다. 설정된 행사 Launchable은 비공개 터널을 통해 학생 워크스페이스를 등록하며, 제출을 받으려면 서비스가 실행 중이어야 합니다. 배포와 성공적인 리허설만으로 잠정 규칙이 승인된 공식 대회 규칙이 되는 것은 아닙니다.
 
-## Practice versus submission
+## 연습과 제출의 차이
 
-All four Challenges run only the saved exercise functions. Unfinished code stops with a message. **Check saved code** checks syntax and completeness only; it is not a mathematical answer check. The separate judge evaluates correctness.
+네 챌린지는 모두 저장된 연습 함수만 실행합니다. 미완성 코드는 메시지를 표시하며 중단됩니다. **Check saved code**(저장된 코드 검사)는 문법과 완성 여부만 확인하며 수학적 정답 검사가 아닙니다. 정확성은 별도의 채점 서버에서 평가합니다.
 
-The **Submit your code** section sends these saved exercise functions directly from the notebook:
+**코드 제출** 섹션은 다음의 저장된 연습 함수를 노트북에서 직접 전송합니다.
 
-| Challenge | Submitted functions |
+| 챌린지 | 제출 함수 |
 |---|---|
-| Wave | `student_equations`, `student_speed`, `student_conditions` |
-| Fluid | `student_equations`, `student_conditions`, `student_geometry` |
-| Climate | `student_equations`, `student_parameters`, `student_conditions`, `student_solution` |
-| Neural Operators | Dataset/model factories and PINO's PDE |
+| 파동 | `student_equations`, `student_speed`, `student_conditions` |
+| 유체 | `student_equations`, `student_conditions`, `student_geometry` |
+| 기후 | `student_equations`, `student_parameters`, `student_conditions`, `student_solution` |
+| 신경 연산자 | 데이터셋·모델 생성 함수와 PINO의 PDE |
 
-Before the first submission, enter a **Nickname** and click **Register nickname** in the same panel. Save the `.py` files, select Levels and click **Submit code**. Running a cell does not submit. Queue status, points and component feedback appear in that panel; there is no website upload. The workspace needs a [private judge connection](../environment/JUDGE_CONNECTION.md).
+첫 제출 전에 같은 패널에서 **Nickname**(닉네임)을 입력하고 **Register nickname**(닉네임 등록)을 클릭하세요. `.py` 파일을 저장하고 레벨을 선택한 뒤 **Submit code**(코드 제출)를 클릭하세요. 셀을 실행하는 것만으로는 제출되지 않습니다. 대기열 상태, 점수, 구성 요소별 피드백이 해당 패널에 표시되며 웹사이트에 업로드하는 절차는 없습니다. 워크스페이스에는 [비공개 채점 서버 연결](../environment/JUDGE_CONNECTION.md)이 필요합니다.
 
-All Levels start selected. Ctrl/Cmd-click to remove an unfinished Level. Select only finished Levels: a selected unfinished function blocks the whole attempt. Submit all completed Levels together. Omitted Levels score zero, and Levels from different attempts are not combined.
+처음에는 모든 레벨이 선택되어 있습니다. Ctrl/Cmd를 누른 채 미완성 레벨을 클릭하여 선택 해제하세요. 완성한 레벨만 선택하세요. 선택된 레벨에 미완성 함수가 있으면 전체 시도가 차단됩니다. 완성한 모든 레벨을 함께 제출하세요. 제출하지 않은 레벨은 0점이며 서로 다른 시도에 포함된 레벨은 합쳐지지 않습니다.
 
-Use the supplied parameter symbols in each PDE, including `rho` even when its default is 1 and Climate coefficients whose default is zero. Keep each residual's displayed sign and exact dictionary keys. The judge compares the stated symbolic residual, not merely its zero set. Wrong but well-formed components lose their own points; malformed functions or wrong keys may invalidate the Level. Climate's local `analytic_exercise` metadata marks the expression as learner-supplied and not independently checked; the judge checks the expression. Restore the stated physical coefficients before submitting.
+각 PDE에서는 제공된 매개변수 기호를 사용하세요. 기본값이 1인 `rho`와 기본값이 0인 기후 계수도 포함해야 합니다. 각 잔차에 표시된 부호와 정확한 딕셔너리 키를 유지하세요. 채점 서버는 영점 집합만이 아니라 제시된 기호 잔차를 비교합니다. 형식이 올바르지만 틀린 구성 요소는 해당 점수를 잃습니다. 함수 형식이나 키가 잘못되면 레벨 전체가 무효 처리될 수 있습니다. 기후의 로컬 `analytic_exercise` 메타데이터는 학습자가 제공한 식이며 독립적으로 검증되지 않았음을 나타내고, 채점 서버가 그 식을 검사합니다. 제출 전에 물리 계수를 제시된 값으로 복원하세요.
 
-The selected approach is original-task completion, not an optimizer-tuning competition. Each Level has 100 pilot points divided across its required implementation checks. Initial/boundary conditions, speed, geometry, coefficients and analytic expressions count where requested; correct PDEs alone cannot earn full credit. Fixed-budget numerical errors are separate feedback, with **zero numerical-quality points**. Fully correct submissions tie; submission time is not a hidden tiebreaker. The pilot remains labelled not official until event acceptance.
+현재 채점 방식은 옵티마이저 튜닝 대회가 아니라 원래 과제의 완성도 평가입니다. 각 레벨에는 필수 구현 검사에 나누어 배정된 시범 점수 100점이 있습니다. 요청된 초기·경계조건, 속도, 기하, 계수, 해석식도 점수에 반영되므로 PDE만 맞아서는 만점을 받을 수 없습니다. 고정된 학습 횟수에서의 수치 오차는 별도 피드백이며 **수치적 품질에 배정된 점수는 0점**입니다. 완전히 올바른 제출은 동점이 되며 제출 시간은 숨겨진 동점 처리 기준이 아닙니다. 행사 승인을 받을 때까지 시범 채점에는 비공식이라는 표시를 유지합니다.
 
-The server owns training/evaluation and does not trust local `metrics.json`. It retains one best complete submission per Challenge; Levels from different attempts are not merged. Omitted Levels count as zero. The four-Challenge total is 400 pilot points. Format v3 rejects older PDE-only submissions with an update message. Existing score databases are preserved, not mixed with the changed rubric; start a new v3 state.
+서버는 학습과 평가를 관리하며 로컬 `metrics.json`을 신뢰하지 않습니다. 챌린지마다 한 번에 제출한 답안 중 최고 점수 하나를 유지하고, 서로 다른 시도의 레벨은 합치지 않습니다. 제출하지 않은 레벨은 0점으로 계산합니다. 네 챌린지의 총점은 시범 점수 400점입니다. 형식 v3는 이전의 PDE만 제출한 답안을 거부하고 갱신 안내를 표시합니다. 기존 점수 데이터베이스는 보존하며 변경된 채점 기준과 섞지 않습니다. 새 v3 상태로 시작하세요.
 
-Challenge 4 retains the course model configurations and 64x64 grid, but its judge pilot uses a fixed 64/16/16 dataset rather than the full lesson dataset. It checks implementation, test prediction errors and independent FFT PDE error. PINO's PhysicsInformer residual is also checked against FFT. This smaller evaluation is not a claim of full-data convergence or event throughput.
+챌린지 4는 수업 모델 설정과 64x64 격자를 유지하지만 채점 서버의 시범 평가는 전체 수업 데이터셋 대신 고정된 64/16/16 데이터셋을 사용합니다. 구현, 테스트 예측 오차, 독립적인 FFT PDE 오차를 검사합니다. PINO의 PhysicsInformer 잔차도 FFT와 대조합니다. 이 소규모 평가는 전체 데이터에서의 수렴이나 행사 처리량을 입증하지 않습니다.
 
-## Before comparing two runs
+## 두 실행을 비교하기 전에
 
-Use the same problem, coefficients, geometry, data split and evaluation settings. Save your Python file and rerun training before opening results. Challenges 1–3 default to 5,000 updates per Level; the three Operators retain 3,000.
+문제, 계수, 기하, 데이터 분할, 평가 설정을 같게 유지하세요. Python 파일을 저장하고 학습을 다시 실행한 뒤 결과를 여세요. 챌린지 1–3의 기본값은 레벨당 5,000회 갱신이며 세 신경 연산자는 3,000회를 유지합니다.
 
-Training loss tells the optimizer what to reduce. In Challenges 1–3, fixed held-out residual checks use the same learner-written equations, conditions, coefficients and geometry as training. They measure self-consistency on other samples, not independent correctness. A wrong implementation can have a small residual. Wave 1 adds its independent analytical comparison and Fluid 1 adds the supplied OpenFOAM comparison. Climate plots and legacy `reference_over_time` keys compare against the learner's own `student_solution`; that expression is not trusted ground truth for scoring.
+학습 손실은 옵티마이저에 무엇을 줄여야 하는지 알려 줍니다. 챌린지 1–3의 고정된 별도 평가점 잔차 검사는 학습과 동일한 학습자 작성 방정식, 조건, 계수, 기하를 사용합니다. 다른 표본에서 구현 내부의 일관성을 측정하며 독립적인 정확성 검사는 아닙니다. 잘못된 구현에서도 잔차가 작을 수 있습니다. 파동 레벨 1에는 독립적인 해석해 비교가, 유체 레벨 1에는 제공된 OpenFOAM 비교가 추가됩니다. 기후 그래프와 기존 `reference_over_time` 키는 학습자 자신의 `student_solution`과 비교합니다. 이 식은 채점에서 신뢰하는 정답이 아닙니다.
 
-For Neural Operators, the trainer computes statistics from the training split only; `build_datasets` wraps the supplied tensors unchanged. Validation and test loaders are constructed independently from the course data. Student dataset outputs are checked against the supplied tensors and split order. Pass every `model_config` key in the model factory, even if a value equals a library default. These local checks help catch implementation errors; the separate service remains responsible for accepted submissions.
+신경 연산자에서 학습기는 학습 분할에서만 통계를 계산하며 `build_datasets`는 제공된 텐서를 변경하지 않고 감쌉니다. 검증·테스트 로더는 수업 데이터에서 독립적으로 구성됩니다. 학생이 작성한 데이터셋의 출력은 제공된 텐서와 분할 순서에 맞춰 검사됩니다. 모델 생성 함수에서 `model_config`의 모든 키를 전달하세요. 값이 라이브러리 기본값과 같아도 마찬가지입니다. 이 로컬 검사는 구현 오류를 찾는 데 도움이 되며, 제출 수락 여부는 별도 서비스가 담당합니다.
 
-## What each level checks
+## 레벨별 확인 사항
 
-| Challenge / Level | Check your implementation | Read the result |
+| 챌린지 / 레벨 | 구현에서 확인할 내용 | 결과에서 확인할 내용 |
 |---|---|---|
-| Wave 1 | Constant-speed wave equation, nonzero initial velocity | Analytical error over five times; initial displacement, initial velocity and boundary errors |
-| Wave 2 | Spatially varying speed in the specified non-divergence equation | Learner-equation residual, zero initial velocity and boundary errors; no analytical error is claimed |
-| Wave 3 | Wave equation on the disk; implement the Robin residual and original Gaussian initial pulses | Learner-equation and Robin errors; Gaussian tails are not exactly compatible with Robin at the initial boundary |
-| Fluid 1 | Steady incompressible momentum and continuity | Unweighted PDE errors, inlet/no-slip/outlet conditions, section flux and the supplied OpenFOAM comparison |
-| Fluid 2 | Construct all three chip cutouts, as well as the steady PDE and conditions | PDE, boundary and flux errors; the one-block OpenFOAM data is not a reference for this level |
-| Fluid 3 | Time derivatives, single-chip geometry, rest initial state and original abrupt inlet | PDE, initial and flux errors; `Q=1` through every section for `t>0` is incompatible with rest-state `Q=0`, not only at the inlet corner |
-| Climate 1 | ADR residual, physical coefficients, initial/boundary targets and baseline analytic solution | Comparison with your own derived solution at five times; the judge checks its correctness |
-| Climate 2 | Both residuals and their opposite exchange signs, coefficients, conditions and baseline analytic solutions | Original `gamma0=0` baseline with learner-derived comparisons; a nonzero-coupling experiment disables the baseline comparison |
-| Operators 1 / FNO | Wrap the supplied splits unchanged and construct FNO with every model setting; trainer owns normalization | Canonical test relative L2, RMSE and independent spectral PDE error |
-| Operators 2 / AFNO | The same data with the specified AFNO architecture | The same test metrics as FNO; compare prediction quality, not model names |
-| Operators 3 / PINO | FNO plus the reaction–diffusion residual in physical units | The same test metrics, with the physics residual checked independently |
+| 파동 1 | 일정한 속도의 파동 방정식, 0이 아닌 초기 속도 | 다섯 시점의 해석해 오차, 초기 변위·초기 속도·경계 오차 |
+| 파동 2 | 지정된 비발산형 방정식의 공간 가변 속도 | 학습자가 작성한 방정식의 잔차, 0인 초기 속도와 경계 오차. 해석해 오차는 제시하지 않음 |
+| 파동 3 | 원판의 파동 방정식, 로빈 잔차와 원래 가우스 초기 펄스 구현 | 학습자가 작성한 방정식 및 로빈 오차. 가우스 꼬리는 초기 시점의 경계에서 로빈 조건과 정확히 양립하지 않음 |
+| 유체 1 | 정상 비압축성 운동량 및 연속 방정식 | 가중치 없는 PDE 오차, 입구·점착·출구 조건, 단면 유량, 제공된 OpenFOAM 비교 |
+| 유체 2 | 정상 PDE와 조건에 더해 제외할 칩 세 개를 모두 구성 | PDE·경계·유량 오차. 블록 하나의 OpenFOAM 데이터는 이 레벨의 기준값이 아님 |
+| 유체 3 | 시간 도함수, 단일 칩 기하, 정지 초기 상태, 원래의 급격한 유입 조건 | PDE·초기·유량 오차. `t>0`일 때 모든 단면의 `Q=1`은 정지 상태의 `Q=0`과 양립하지 않으며 입구 모서리만의 문제가 아님 |
+| 기후 1 | ADR 잔차, 물리 계수, 초기·경계 목표값, 기준 설정의 해석해 | 직접 유도한 해와 다섯 시점에서 비교. 정확성은 채점 서버가 검사 |
+| 기후 2 | 두 잔차와 반대 부호의 교환 항, 계수, 조건, 기준 설정의 해석해 | 학습자가 유도한 식으로 원래 `gamma0=0` 기준 설정과 비교. 결합이 0이 아닌 실험에서는 기준해 비교 비활성화 |
+| 연산자 1 / FNO | 제공된 분할을 변경하지 않고 감싸고 모든 모델 설정을 전달하여 FNO 구성. 정규화는 학습기가 관리 | 표준 테스트 상대 L2, RMSE, 독립적인 스펙트럼 PDE 오차 |
+| 연산자 2 / AFNO | 같은 데이터에 지정된 AFNO 구조 사용 | FNO와 같은 테스트 지표. 모델 이름이 아니라 예측 품질을 비교 |
+| 연산자 3 / PINO | FNO에 물리 단위의 반응–확산 잔차 추가 | 같은 테스트 지표와 독립적으로 검증한 물리 잔차 |
 
-## Reading the saved files
+## 저장된 파일 해석
 
-The result cell displays a before/after table and the saved plot. **Full metrics and run settings** contains the complete record, including field-specific errors and evaluation settings. A missing entry is unavailable, not zero. After changing code or settings, rerun training; an old artifact is not a successful new attempt.
+결과 셀에는 학습 전후 표와 저장된 그래프가 표시됩니다. **Full metrics and run settings**(전체 지표와 실행 설정)에는 장별 오차와 평가 설정을 포함한 전체 기록이 들어 있습니다. 항목이 없으면 0이 아니라 사용할 수 없다는 뜻입니다. 코드나 설정을 바꾸면 학습을 다시 실행하세요. 이전 산출물은 성공한 새 시도가 아닙니다.
 
-- `metrics.json`: evaluation errors and run settings. `assessment.kind` is `local_practice_feedback`; `official_score` is null and `ranking_ready` is false.
-- Operators additionally record `training_seconds`: optimizer-loop wall time including batch transfers and logging, with CUDA synchronized at both ends. Setup, held-out evaluation and artifact export are excluded; older runs may not contain this field.
-- `loss.csv`: training minibatch losses and, for PINNs, the fixed before/after evaluation rows. Both use your equation implementation; only the sample points differ.
-- `preview.png`: a view of the prediction, not proof of accuracy over the whole domain. Wave and Climate previews show one time slice. Wave 1 has an independent analytical comparison; Climate `reference_over_time` uses your own derived expression and is not a correctness check.
-- `model.pt` and `predictions.npz`: this run's model and predictions. Keep them with the settings; an old file is not the result of a failed new run.
+- `metrics.json`: 평가 오차와 실행 설정입니다. `assessment.kind`는 `local_practice_feedback`이고 `official_score`는 null, `ranking_ready`는 false입니다.
+- 신경 연산자는 `training_seconds`도 기록합니다. 배치 전송과 로그 기록을 포함한 옵티마이저 반복문의 실제 경과 시간이며 시작과 끝에서 CUDA를 동기화합니다. 설정, 별도 평가, 산출물 내보내기는 제외됩니다. 이전 실행에는 이 필드가 없을 수 있습니다.
+- `loss.csv`: 학습 미니배치 손실과 PINN의 고정된 학습 전후 평가 행입니다. 둘 다 직접 작성한 방정식 구현을 사용하며 표본점만 다릅니다.
+- `preview.png`: 예측을 보여 주는 그림이며 전체 영역에서의 정확성을 입증하지는 않습니다. 파동과 기후 미리보기는 한 시점의 단면입니다. 파동 레벨 1에는 독립적인 해석해 비교가 있습니다. 기후의 `reference_over_time`은 직접 유도한 식을 사용하므로 정확성 검사가 아닙니다.
+- `model.pt`와 `predictions.npz`: 이번 실행의 모델과 예측입니다. 설정과 함께 보관하세요. 이전 파일은 실패한 새 실행의 결과가 아닙니다.
 
-For `reference_over_time`, read aggregate `relative_l2`, `per_field`, and the displayed `per_time` table together. In the default decaying Climate runs, the aggregate denominator is dominated by reference energy at `t=0`; late-time errors still contribute to its numerator. Compare each time's RMSE with the reference temperature amplitude: a small absolute error can still be large relative to a nearly decayed field. An empty reference result means no analytical comparison is available, not a perfect solution.
+`reference_over_time`에서는 통합 `relative_l2`, `per_field`, 표시된 `per_time` 표를 함께 읽어 보세요. 기본 감쇠 기후 실행에서는 통합 지표의 분모가 `t=0`에서의 기준해 에너지에 크게 좌우되지만 후반 시점의 오차도 분자에는 반영됩니다. 각 시점의 RMSE를 기준 온도 진폭과 비교하세요. 작은 절대 오차도 거의 감쇠한 장에 비하면 클 수 있습니다. 기준 결과가 비어 있으면 완벽한 해라는 뜻이 아니라 사용할 해석해 비교가 없다는 뜻입니다.
 
-Climate 2 defaults to `gamma0=0`, so derive the two uncoupled solutions yourself. This run cannot test exchange signs; the judge checks them symbolically. A separate `gamma0=0.5` experiment activates coupling and disables the baseline solution comparison. Restore the original nine coefficients before submission.
+기후 레벨 2의 기본값은 `gamma0=0`이므로 두 비결합 해를 직접 유도하세요. 이 실행으로는 교환 항의 부호를 시험할 수 없으며 채점 서버가 기호적으로 검사합니다. 별도의 `gamma0=0.5` 실험은 결합을 활성화하고 기준해 비교를 비활성화합니다. 제출 전에 원래 계수 아홉 개를 복원하세요.
 
-PINO includes a physics term in its training objective; FNO and AFNO do not. Do not rank their training-loss values. Do not add raw Wave, Fluid and Climate RMSE values: they measure different quantities on different scales.
+PINO의 학습 목적에는 물리 항이 포함되지만 FNO와 AFNO에는 없습니다. 학습 손실값으로 순위를 매기지 마세요. 파동, 유체, 기후의 RMSE 원값을 더하지 마세요. 서로 다른 척도의 서로 다른 양을 측정합니다.
 
-## Improve one thing at a time
+## 한 번에 하나씩 개선하기
 
-Check the equation and conditions before increasing training length. Keep a baseline run, change one permitted setting, and compare the same evaluation measures. Inspect which condition remains inaccurate rather than choosing the smallest total loss alone. A short successful run checks execution, not convergence.
+학습 횟수를 늘리기 전에 방정식과 조건을 확인하세요. 기준 실행을 보관하고 허용된 설정 하나를 바꾼 뒤 같은 평가 지표를 비교하세요. 전체 손실이 가장 작은 결과만 고르지 말고 어떤 조건이 여전히 부정확한지 살펴보세요. 짧은 실행이 성공하면 실행 가능성을 확인한 것이며 수렴을 확인한 것은 아닙니다.
 
-## Instructor: event acceptance
+## 강사용: 행사 승인
 
-The workshop uses individual task completion. Review component weights and ties before publishing official event points. Do not advertise faster training or smaller residuals as a way to increase the current score: model/optimizer changes are not submitted. An optimization competition would require a separately agreed contract. Numerical rehearsal is still required to show meaningful plots in class, even though numerical error no longer contributes points.
+워크숍은 개인별 과제 완성도를 평가합니다. 공식 대회 점수를 공개하기 전에 구성 요소별 가중치와 동점 처리를 검토하세요. 더 빠른 학습이나 더 작은 잔차를 현재 점수를 높이는 방법으로 안내하지 마세요. 모델·옵티마이저 변경 사항은 제출되지 않습니다. 최적화 대회를 열려면 별도로 합의한 규약이 필요합니다. 수치 오차가 더 이상 점수에 반영되지 않더라도 수업에서 의미 있는 그래프를 보여 주기 위한 수치 리허설은 여전히 필요합니다.
 
-An official evaluator must own its equations, data and configuration and recompute metrics from accepted submissions. Local files remain editable, so local JSON cannot prove a valid competition entry. Validate independent reference solutions or residual-based acceptance criteria for levels without analytical truth. Keep practice feedback, submission acceptance and final points distinct.
+공식 평가기는 자체 방정식, 데이터, 설정을 관리하고 수락된 제출에서 지표를 다시 계산해야 합니다. 로컬 파일은 수정 가능하므로 로컬 JSON만으로 유효한 대회 참가 답안임을 입증할 수 없습니다. 독립적인 기준해를 검증하거나, 해석적 참값이 없는 레벨에는 잔차 기반 수락 기준을 검증하세요. 연습용 피드백, 제출 수락, 최종 점수는 구분하여 다루세요.
 
-[Start Here](../../Start_Here.ipynb) · [Instructor guide](INSTRUCTOR.md) · [Schedule](course-plan.md)
+[시작 안내](../../Start_Here.ipynb) · [강사 안내](INSTRUCTOR.md) · [일정](course-plan.md)

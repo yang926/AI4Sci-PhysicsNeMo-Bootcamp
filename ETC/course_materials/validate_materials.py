@@ -87,6 +87,8 @@ def notebook_output_messages(notebook, relative, allow_executed=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--language", choices=("en", "ko"), default="en",
+                        help="Language policy for the edition being checked; filenames stay unchanged.")
     parser.add_argument("--allow-executed-notebooks", action="store_true",
                         help="Check a working checkout without rejecting saved learner outputs; does not validate those results. Publication checks should omit this flag.")
     args = parser.parse_args()
@@ -148,10 +150,10 @@ def main():
         if path.suffix in {".json", ".ipynb"}:
             text = json.dumps(json.loads(text), ensure_ascii=False)
         relative = str(path.relative_to(ROOT))
-        check(not hangul.search(relative) and (not requires_english_content(path) or not hangul.search(text)),
+        check(not hangul.search(relative) and (args.language == "ko" or not requires_english_content(path) or not hangul.search(text)),
               "English-only course: Hangul found in " + relative)
         language_files.append(relative)
-    report["english_only_scan"] = {"files": len(language_files), "scope": "course text, decoded JSON and all filenames; Python test content permits Unicode fixtures; mathematical symbols are allowed"}
+    report["language_scan"] = {"language": args.language, "files": len(language_files), "scope": "ASCII filenames; English text only when --language en; Korean edition preserves executable sources with ETC/localization/validate_ko.py"}
     documents = []
     for path in sorted(p for p in ROOT.rglob("*.py") if is_active(p)):
         relative = str(path.relative_to(ROOT))
@@ -217,7 +219,7 @@ def main():
     schedule = {"minutes": 0, "education": 0, "lunch": 0, "break": 0, "rows": 0, "categories": {}}
     for line in course.splitlines():
         if line.startswith("## "):
-            active = bool(re.match(r"## 8-hour", line))
+            active = bool(re.match(r"## (?:8-hour|8시간|노트북에 맞춘 8시간)", line))
         if not active:
             continue
         row = re.match(r"\|\s*(\d\d):(\d\d)[–—-](\d\d):(\d\d)\s*\|\s*(\d+)\s*\|\s*([^|]+)\|", line)
@@ -231,12 +233,13 @@ def main():
             schedule["minutes"] += minutes
             schedule["rows"] += 1
             schedule["categories"][category] = schedule["categories"].get(category, 0) + minutes
-            schedule[{"Lunch":"lunch", "Break":"break"}.get(category, "education")] += minutes
-        if "**Total**" in line:
-            total = re.search(r"\*\*Total\*\*\s*\|\s*\*\*(\d+)\*\*", line)
+            schedule[{"Lunch":"lunch", "Break":"break", "점심":"lunch", "점심시간":"lunch", "휴식":"break"}.get(category, "education")] += minutes
+        if "**Total**" in line or "**합계**" in line:
+            total = re.search(r"\*\*(?:Total|합계)\*\*\s*\|\s*\*\*(\d+)\*\*", line)
             check(total is not None and int(total.group(1)) == schedule["minutes"], "8h summary total mismatch")
             for category, field in (("Teaching", "education"), ("Lunch", "lunch"), ("Break", "break")):
-                declared = re.search(category + r"\s+(\d+)", line)
+                translated = {"Teaching": "교육|수업", "Lunch": "점심|점심시간", "Break": "휴식"}[category]
+                declared = re.search("(?:" + category + "|" + translated + r")\s+(\d+)", line)
                 check(declared is not None and int(declared.group(1)) == schedule[field], f"8h summary category mismatch: {category}")
     check(schedule["minutes"] == 480, "Instructor 8h schedule must total 480 minutes")
     check((schedule["education"], schedule["lunch"], schedule["break"]) == (330, 90, 60), "Instructor 8h schedule must contain education 330, lunch 90, break 60 minutes")

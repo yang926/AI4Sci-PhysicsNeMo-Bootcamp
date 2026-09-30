@@ -1,98 +1,45 @@
-# Connect the notebook to the judge
+# 노트북과 채점기 연결 · 한국어판
 
-Students submit inside the Challenge notebook. They save their exercise files,
-run the last cell and enter a **Nickname**, then click **Register nickname**.
-This name is saved on their personal judge account and reused across Challenges
-1-4 and the public scoreboard. Select Levels and click **Submit code**. The panel shows their queue status, score and evaluation details.
-While a job is pending it refreshes every five seconds, for up to 15 minutes.
-**Refresh results** resumes checks. Rerunning the cell closes its previous panel.
-Run All never registers a name or submits work. There is no separate judge login
-or website upload. Nicknames must contain 1-40 visible characters and be unique;
-case, full-width characters and extra spaces do not create distinct names.
-**Save nickname** changes the public name without changing the account or scores.
-Submission is disabled until the name is saved. Do not use private information
-as a public nickname. If the judge is not connected, both registration and
-submission are unavailable, but local practice remains usable.
+채점 연결 상태는 각 도전 과제의 마지막 제출 패널에서 확인하세요. 연결된 작업 공간에서는 아래 안내에 따라 닉네임을 등록하고 코드를 제출할 수 있습니다. 연결 없이도 로컬 실습과 **Check saved code**(저장된 코드 검사)는 사용할 수 있습니다. 연결이 필요하면 주최 측에 해당 작업 공간의 등록 상태를 확인해 달라고 요청하세요.
 
-The projector only shows standings. Closing the projector does not stop the
-judge. The notebook's Python kernel sends code to the API; the student's browser
-does not need an SSH tunnel to the judge.
+학생은 도전 과제 노트북 안에서 제출합니다. 연습 파일을 저장하고 마지막 셀을 실행한 뒤 **Nickname(닉네임)**을 입력하고 **Register nickname(닉네임 등록)**을 클릭합니다. 이 이름은 개인 채점 계정에 저장되며 도전 과제 1–4와 공개 순위표에서 공통으로 사용합니다. 단계를 선택하고 **Submit code(코드 제출)**를 클릭하면 패널에 대기 상태, 점수, 평가 세부 내용이 표시됩니다.
+작업이 진행 중인 동안 최대 15분간 5초마다 갱신합니다. **Refresh results(결과 새로고침)**로 확인을 재개할 수 있습니다. 셀을 다시 실행하면 이전 패널이 닫힙니다. Run All(모두 실행)은 이름 등록이나 제출을 수행하지 않습니다. 별도의 채점기 로그인이나 웹사이트 업로드는 없습니다. 닉네임은 표시 가능한 문자 1–40자로 구성하며 중복될 수 없습니다. 대소문자, 전각 문자, 불필요한 공백만으로는 다른 이름으로 구분되지 않습니다.
+**Save nickname(닉네임 저장)**은 계정과 점수를 유지한 채 공개 이름만 변경합니다. 이름을 저장하기 전에는 제출할 수 없습니다. 공개 닉네임에 개인정보를 사용하지 마세요. 채점기가 연결되지 않으면 등록과 제출 모두 사용할 수 없지만 로컬 연습은 계속할 수 있습니다.
 
-## Event connection
+프로젝터 화면은 순위만 표시하며, 화면을 닫아도 채점기는 멈추지 않습니다. 노트북의 Python 커널이 API로 코드를 보내므로 학생의 브라우저에서 채점기로 SSH 터널을 연결할 필요는 없습니다.
 
-The [event Launchable setup](../launchable/README.md#brev-builder-settings) uses
-`--enroll-event ai4science-korea-2026`. This explicit opt-in installs a restricted
-SSH receiver. The organizer's enrollment service delivers a different personal
-judge credential to each workspace and connects a private tunnel. The receiver
-saves `~/.config/ai4sci/judge.json` with owner-only permissions, outside the course
-and Jupyter root. The installer itself does not create a judge account or embed
-a participant credential in the shared template.
+<a id="event-connection"></a>
 
-The notebook connects to `http://127.0.0.1:8090` on its own instance through that
-tunnel. The SSH receiver is restricted to enrollment and the judge connection;
-it does not provide an interactive shell. Students open the notebook controls,
-choose a nickname and submit saved code without creating a tunnel themselves.
-A nickname is a public display name, not proof of identity or an API credential.
+## 행사 연결
 
-The separate [event judge repository](https://github.com/yang926/ai4sci-physicsnemo-judge)
-provides the event service. The course's [embedded judge](../judge/README.md) is
-a local development pilot; students should not start it in their workspace.
-The event service and private connection must be running to accept submissions.
-The implemented enrollment path does not by itself certify current availability,
-110-person capacity or approval of the provisional scoring rules. If the panel
-reports a connection problem, ask the organizer to check enrollment and the
-tunnel; local practice remains available.
+기존 영문판의 [행사 Launchable 설정](../launchable/README.md#brev-builder-settings)은 `--enroll-event ai4science-korea-2026`을 사용합니다. 이 명시적 참여 옵션은 기능이 제한된 SSH 수신기를 설치합니다. 주최 측 등록 서비스는 작업 공간마다 서로 다른 개인 채점 자격 증명을 전달하고 비공개 터널을 연결합니다. 수신기는 강의 및 Jupyter 루트 밖의 `~/.config/ai4sci/judge.json`에 소유자만 접근할 수 있는 권한으로 저장합니다. 설치 프로그램 자체는 채점 계정을 만들거나 공유 템플릿에 참가자 자격 증명을 넣지 않습니다.
 
-## Generic private provisioning (instructor)
+노트북은 이 터널을 통해 자신의 인스턴스에 있는 `http://127.0.0.1:8090`에 연결합니다. SSH 수신기는 등록과 채점기 연결만 허용하며 대화형 셸을 제공하지 않습니다. 학생은 직접 터널을 만들 필요 없이 노트북의 제어 패널을 열고 닉네임을 선택한 뒤 저장된 코드를 제출합니다. 닉네임은 공개 표시 이름이며 신원 증명이나 API 자격 증명이 아닙니다.
 
-For installations outside the event enrollment path, provision a different
-judge credential for each participant. On the judge,
-`add-participant` without a name creates an unnamed private account; it does not
-assign a random public nickname. The student chooses the name in Jupyter.
-Optional instructor-assigned names are still supported. The notebook reads
-an owner-only JSON file at `~/.config/ai4sci/judge.json`, outside the course and
-Jupyter's served directory. Its two fields are `url` and `token`. An explicit
-`AI4SCI_JUDGE_CONFIG` can select another owner-only file. Do not put this file in
-the course checkout, a shared image, GitHub, slide decks or notebook outputs.
-The configuration belongs to the same OS user that runs Jupyter.
+별도의 [행사 채점기 저장소](https://github.com/yang926/ai4sci-physicsnemo-judge)가 행사 서비스를 제공합니다. 강의의 [내장 채점기](../judge/README.md)는 로컬 개발용 시범 구현이며, 학생은 자신의 작업 공간에서 이를 실행하면 안 됩니다. 제출을 받으려면 행사 서비스와 비공개 연결이 작동 중이어야 합니다. 등록 경로가 구현되어 있다는 사실만으로 현재 서비스 가용성, 110명 수용 능력, 잠정 채점 규칙의 승인이 입증되지는 않습니다. 패널에 연결 문제가 표시되면 주최 측에 등록 상태와 터널 확인을 요청하세요. 로컬 연습은 계속 사용할 수 있습니다.
 
-A launch setup can receive `AI4SCI_JUDGE_URL` and a **personal**
-`AI4SCI_JUDGE_TOKEN` through private provisioning, then run this command from the
-course root using the course Python environment:
+<a id="generic-private-provisioning-instructor"></a>
+
+## 일반 비공개 설정 배포 (강사용)
+
+행사 등록 경로를 사용하지 않는 설치에서는 참가자마다 서로 다른 채점 자격 증명을 배포하세요. 채점기에서 이름 없이 `add-participant`를 실행하면 이름 없는 개인 계정이 만들어집니다. 공개 닉네임을 임의로 지정하지 않으며, 학생이 Jupyter에서 이름을 선택합니다. 강사가 이름을 미리 지정하는 선택지도 계속 지원합니다. 노트북은 강의 및 Jupyter 서비스 디렉터리 밖에 있는 `~/.config/ai4sci/judge.json`을 읽으며, 이 JSON 파일에는 소유자만 접근할 수 있습니다. 필드는 `url`과 `token` 두 개입니다. `AI4SCI_JUDGE_CONFIG`를 명시하면 소유자만 접근 가능한 다른 파일을 선택할 수 있습니다. 이 파일을 강의 작업 디렉터리, 공유 이미지, GitHub, 발표 자료, 노트북 출력에 넣지 마세요. 설정 파일의 소유자는 Jupyter를 실행하는 OS 사용자와 같아야 합니다.
+
+시작 설정은 비공개 배포를 통해 `AI4SCI_JUDGE_URL`과 **개인용** `AI4SCI_JUDGE_TOKEN`을 받은 뒤, 강의 Python 환경을 사용하여 강의 루트에서 다음 명령을 실행할 수 있습니다.
 
 ```bash
 python -m ETC.runtime.judge_client
 ```
 
-This saves the two values with file mode 600 in a mode-700 directory. It refuses
-to overwrite existing configuration. It does not print credentials, create a
-judge account, discover a Brev identity, contact the server or allocate GPUs.
-Do not enable shell tracing or print the setup environment. For a local rehearsal,
-the client can also read these environment variables directly; a notebook URL
-override must match the configured URL before credentials are sent.
+이 명령은 권한 700인 디렉터리 안에 두 값을 파일 권한 600으로 저장합니다. 기존 설정은 덮어쓰지 않습니다. 자격 증명 출력, 채점 계정 생성, Brev 신원 탐색, 서버 접속, GPU 할당은 수행하지 않습니다. 셸 추적을 켜거나 설정 환경을 출력하지 마세요. 로컬 리허설에서는 클라이언트가 이 환경 변수를 직접 읽을 수도 있습니다. 노트북에서 URL을 재지정하면 설정된 URL과 일치해야 자격 증명이 전송됩니다.
 
-Persisting configuration is needed for VM-mode Launchables: their launch
-parameters reach the setup process, not automatically every future Jupyter
-kernel. See [Brev launch parameters](https://docs.nvidia.com/brev/concepts/launchables).
-The setup hook must run as the Jupyter user before submission controls are used. Preparing
-the environment and assigning a personal credential are different operations.
+VM 모드 Launchable은 시작 매개변수가 설정 프로세스에만 전달되고 이후의 모든 Jupyter 커널에 자동으로 전달되지는 않으므로 설정을 파일로 저장해야 합니다. [Brev 시작 매개변수](https://docs.nvidia.com/brev/concepts/launchables)를 참고하세요. 제출 제어 기능을 사용하기 전에 Jupyter 사용자로 설정 훅을 실행해야 합니다. 환경 준비와 개인 자격 증명 할당은 서로 다른 작업입니다.
 
-## Connection requirements
+<a id="connection-requirements"></a>
 
-A generic judge API must be reachable by student **instances**, use HTTPS for
-non-loopback connections and accept scoped personal credentials without browser
-login redirects. The event path uses loopback HTTP inside its private SSH tunnel.
-A browser-only Brev Secure Link is not by itself an API login.
-Do not disable server Host/Origin checks, publish the pilot HTTP listener or
-give learners administrative SSH access to make the connection work.
+## 연결 요구 사항
 
-The shared Launchable must not contain one common participant token or a
-judge/admin API key. Keep identity mapping, credential issuance/revocation and
-service operations under the organizer's control. A typed name, instance name
-or email is not proof of identity.
+일반 채점 API는 학생 **인스턴스**에서 접근할 수 있어야 하며, 루프백 이외의 연결에는 HTTPS를 사용하고 브라우저 로그인 리디렉션 없이 권한 범위가 제한된 개인 자격 증명을 받아야 합니다. 행사 연결은 비공개 SSH 터널 안에서 루프백 HTTP를 사용합니다. 브라우저 전용 Brev Secure Link 자체가 API 로그인 수단은 아닙니다. 연결을 위해 서버의 Host/Origin 검사를 끄거나, 시범 HTTP 리스너를 공개하거나, 학생에게 관리자 SSH 접근 권한을 부여하지 마세요.
 
-The client only allows plain HTTP for loopback endpoints, including the event tunnel.
-It verifies HTTPS normally, rejects redirects and does not use ambient proxy
-settings. A disconnected panel keeps previous results with a warning and never
-automatically retries a submission. An identical retry is deduplicated by the
-judge while the job is queued, running or completed.
+공유 Launchable에 공통 참가자 토큰이나 채점기·관리자 API 키를 넣으면 안 됩니다. 신원 매핑, 자격 증명 발급과 폐기, 서비스 운영은 주최 측이 관리해야 합니다. 입력한 이름, 인스턴스 이름, 이메일은 신원 증명이 아닙니다.
+
+클라이언트는 행사 터널을 포함한 루프백 엔드포인트에서만 일반 HTTP를 허용합니다. HTTPS는 정상적으로 검증하고 리디렉션을 거부하며, 주변 환경의 프록시 설정을 사용하지 않습니다. 연결이 끊긴 패널은 경고와 함께 이전 결과를 유지하고 제출을 자동으로 재시도하지 않습니다. 작업이 대기 중이거나 실행 중이거나 완료된 상태에서 동일한 제출을 재시도하면 채점기가 중복을 제거합니다.

@@ -23,9 +23,10 @@ def test_documented_paste_script_matches_brev_form_and_valid_shell_syntax():
     assert script.splitlines()[0] == "#!/bin/bash"
     generic_script = Path(install.__file__).with_name("setup.sh").read_text()
     event_flag = " --enroll-event ai4science-korea-2026"
-    assert script.count(event_flag) == 1
+    assert script.count(event_flag) == 0
     assert event_flag not in generic_script
-    assert script.replace(event_flag, "") == generic_script
+    assert script == generic_script
+    assert "--ref ko" in script
     subprocess.run(["bash", "-n"], input=script, text=True, check=True)
     subprocess.run(["bash", "-n"], input=generic_script, text=True, check=True)
 
@@ -54,13 +55,13 @@ def test_shared_launchable_fetches_fresh_course_without_student_repair(tmp_path,
     result = subprocess.run(["bash", str(script)], env=environment, capture_output=True, text=True)
     calls = [json.loads(line) for line in calls_file.read_text().splitlines()]
     assert calls[0][0] == "curl"
-    assert "https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/main/ETC/launchable/bootstrap.py" in calls[0]
+    assert "https://raw.githubusercontent.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp/ko/ETC/launchable/bootstrap.py" in calls[0]
     if download_exit:
         assert result.returncode != 0 and len(calls) == 1
     else:
         assert result.returncode == 0, result.stderr
         assert len(calls) == 2
-        assert calls[1][0] == "python3" and calls[1][-1] == "--launchable"
+        assert calls[1][0] == "python3" and calls[1][-3:] == ["--launchable", "--ref", "ko"]
         assert calls[1][1] == calls[0][calls[0].index("--output") + 1]
 
 

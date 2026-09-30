@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="755" viewBox="0 0 1200 755" role="img" aria-labelledby="title desc">
-<title id="title">Lab 2 · time is the input; the trajectory is the output</title><desc id="desc">The network is trained at times from zero to five seconds, not at points in a two dimensional space. The trajectory sketch illustrates the initial velocity of forty metres per second at sixty degrees and gravity downward. Evaluation between five and eight seconds is extrapolation, not a training domain.</desc>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs><rect width="1200" height="755" fill="#ffffff"/><g font-family="DejaVu Sans, Arial, sans-serif">
-<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 2 · time is the input; the trajectory is the output</text><text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<title id="title">실습 2 · 입력은 시간, 출력은 궤적</title><desc id="desc">신경망은 2차원 공간의 점이 아니라 0초부터 5초까지의 시각에서 학습합니다. 궤적 개략도는 60도 방향의 초속 40미터 초기 속도와 아래로 작용하는 중력을 나타냅니다. 5초부터 8초 사이의 평가는 학습 영역이 아닌 외삽입니다.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs><rect width="1200" height="755" fill="#ffffff"/><g font-family="DejaVu Sans, Arial, Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">실습 2 · 입력은 시간, 출력은 궤적</text><text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">코드 연결도 · 학습 결과가 아닌 개략도</text>
 <rect x="38" y="114" width="1124" height="193" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="150" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Training domain: one-dimensional time</text>
+<text x="60" y="150" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">학습 영역: 1차원 시간</text>
 <text x="60" y="187" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">loss_terms(): t = 5 × torch.rand(...)</text>
-<text x="60" y="220" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Initial conditions are evaluated at t = 0. Evaluation also visits 5 &lt; t ≤ 8 s.</text>
+<text x="60" y="220" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">초기 조건은 t = 0에서 평가. 평가에는 5 &lt; t ≤ 8 s도 포함.</text>
 <line x1="155" y1="260" x2="746" y2="260" stroke="#2269a8" stroke-width="6"/><line x1="746" y1="260" x2="1099" y2="260" stroke="#bd6416" stroke-width="4" stroke-dasharray="8 6"/>
 <circle cx="155" cy="260" r="5" fill="#2269a8"/>
 <circle cx="181.86363636363637" cy="260" r="5" fill="#2269a8"/>
@@ -34,23 +34,22 @@
 <text x="738" y="292" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">5 s</text>
 <text x="1075" y="292" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">8 s</text>
 <rect x="38" y="338" width="540" height="362" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="374" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Coordinate transformation</text>
-<text x="60" y="411" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">t → 2t / 5 − 1 → network → (x, y)</text>
-<text x="60" y="444" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">One time input; two position outputs.</text>
-<text x="60" y="477" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The outputs are rescaled by 100.</text>
-<text x="62" y="536" font-size="23" fill="#bd6416" font-weight="600" text-anchor="start">At t = 0</text>
-<text x="62" y="578" font-size="22" fill="#172c3c" font-weight="400" text-anchor="start">Position: (0, 0)</text>
-<text x="62" y="616" font-size="22" fill="#172c3c" font-weight="400" text-anchor="start">Velocity: 40 m/s at 60°</text>
-<text x="62" y="657" font-size="21" fill="#526573" font-weight="400" text-anchor="start">There is no sampled rectangle in (x, y).</text>
+<text x="60" y="374" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">좌표 변환</text>
+<text x="60" y="411" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">t → 2t / 5 − 1 → 신경망 → (x, y)</text>
+<text x="60" y="444" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">시간 입력 하나, 위치 출력 두 개.</text>
+<text x="60" y="477" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">출력에 100을 곱해 스케일 복원.</text>
+<text x="62" y="536" font-size="23" fill="#bd6416" font-weight="600" text-anchor="start">t = 0에서</text>
+<text x="62" y="578" font-size="22" fill="#172c3c" font-weight="400" text-anchor="start">위치: (0, 0)</text>
+<text x="62" y="616" font-size="22" fill="#172c3c" font-weight="400" text-anchor="start">속도: 60° 방향으로 40 m/s</text>
+<text x="62" y="657" font-size="21" fill="#526573" font-weight="400" text-anchor="start">(x, y) 직사각형에서 샘플링하지 않음.</text>
 <path d="M 656 660 H 1118 M 670 676 V 375" stroke="#526573" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
 <path d="M 670 650 Q 887 259 1100 650" stroke="#2269a8" stroke-width="4" fill="none" stroke-dasharray="8 5"/>
 <path d="M 670 650 L 733 543" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
 <text x="740" y="553" font-size="23" fill="#bd6416" font-weight="400" text-anchor="start">v₀</text>
 <text x="706" y="638" font-size="22" fill="#172c3c" font-weight="400" text-anchor="start">60°</text>
 <path d="M 1080 388 V 465" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
-<text x="838" y="385" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">gravity: 9.81 m/s²</text>
+<text x="838" y="385" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">중력: 9.81 m/s²</text>
 <text x="1113" y="690" font-size="23" fill="#172c3c" font-weight="400" text-anchor="start">x</text>
 <text x="646" y="378" font-size="23" fill="#172c3c" font-weight="400" text-anchor="start">y</text>
-<text x="865" y="711" font-size="19" fill="#526573" font-weight="400" text-anchor="middle">Trajectory sketch, not the sampling domain</text>
-<text x="38" y="742" font-size="21" fill="#526573" font-weight="400" text-anchor="start">Analytical trajectories are evaluation targets, not labels used by the training loss.</text></g></svg>
-
+<text x="865" y="711" font-size="19" fill="#526573" font-weight="400" text-anchor="middle">샘플링 영역이 아닌 궤적 개략도</text>
+<text x="38" y="742" font-size="21" fill="#526573" font-weight="400" text-anchor="start">해석적 궤적은 평가 대상이며 학습 손실에 사용하는 정답이 아님.</text></g></svg>

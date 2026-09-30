@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
-<title id="title">Lab 1 · one equation, three learning tasks</title><desc id="desc">Forward and inverse solve on the interval zero to one. Forward uses 256 fixed points including endpoints. Parameterized training uses seventeen lengths between one and two with thirty-two positions per length. Inverse also uses one hundred solution observations; the source is learned, not supplied.</desc>
+<title id="title">실습 1 · 하나의 방정식, 세 가지 학습 과제</title><desc id="desc">순방향 문제와 역문제는 0부터 1까지의 구간에서 풉니다. 순방향 문제는 양 끝점을 포함한 고정 점 256개를 사용합니다. 매개변수화 학습은 1과 2 사이의 길이 17개와 길이마다 위치 32개를 사용합니다. 역문제는 해의 관측값 100개도 사용합니다. 소스항은 제공되지 않으며 학습으로 구합니다.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs>
 <rect width="1200" height="780" fill="#ffffff"/>
-<g font-family="DejaVu Sans, Arial, sans-serif">
-<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 1 · one equation, three learning tasks</text>
-<text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<g font-family="DejaVu Sans, Arial, Noto Sans KR, Noto Sans CJK KR, Malgun Gothic, Apple SD Gothic Neo, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">실습 1 · 하나의 방정식, 세 가지 학습 과제</text>
+<text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">코드 연결도 · 학습 결과가 아닌 개략도</text>
 <rect x="38" y="112" width="1124" height="178" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="148" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">1 · Forward: learn u(x)</text>
-<text x="60" y="185" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Fixed training grid: 256 points in [0, 1], including both endpoints.</text>
+<text x="60" y="148" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">1 · 순방향: u(x) 학습</text>
+<text x="60" y="185" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">고정 학습 격자: 양 끝점을 포함한 [0, 1] 구간의 점 256개.</text>
 <line x1="150" y1="239" x2="1040" y2="239" stroke="#2269a8" stroke-width="4"/>
 <circle cx="150" cy="239" r="5" fill="#2269a8"/>
 <circle cx="180.68965517241378" cy="239" r="5" fill="#2269a8"/>
@@ -44,8 +44,8 @@
 <text x="150" y="273" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">x = 0; u = 0</text>
 <text x="1040" y="273" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">x = 1; u = 0</text>
 <rect x="38" y="313" width="1124" height="224" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="349" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">2 · Parameterized: learn u(x, length)</text>
-<text x="60" y="386" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">17 lengths from 1 to 2 × 32 interior positions per length = 544 training points.</text>
+<text x="60" y="349" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">2 · 매개변수화: u(x, length) 학습</text>
+<text x="60" y="386" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">1부터 2까지 길이 17개 × 길이별 내부 위치 32개 = 학습점 544개.</text>
 <line x1="150" y1="437" x2="555" y2="437" stroke="#2269a8" stroke-width="3"/>
 <circle cx="162.65625" cy="437" r="5" fill="#2269a8"/>
 <circle cx="187.96875" cy="437" r="5" fill="#2269a8"/>
@@ -101,8 +101,8 @@
 <circle cx="934.6875" cy="509" r="5" fill="#2269a8"/>
 <text x="983" y="516" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">length = 2</text>
 <rect x="38" y="559" width="1124" height="178" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
-<text x="60" y="595" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">3 · Inverse: learn u(x) AND the unknown source f(x)</text>
-<text x="60" y="632" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Same [0, 1] interval + 100 supplied observations of u. No source targets in training.</text>
+<text x="60" y="595" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">3 · 역문제: u(x)와 미지의 소스항 f(x)를 함께 학습</text>
+<text x="60" y="632" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">같은 [0, 1] 구간 + 주어진 u 관측값 100개. 소스항은 학습 목표로 주어지지 않음.</text>
 <line x1="150" y1="685" x2="1040" y2="685" stroke="#2269a8" stroke-width="4"/>
 <circle cx="176.7" cy="685" r="6" fill="#bd6416"/>
 <circle cx="203.4" cy="685" r="6" fill="#bd6416"/>
@@ -121,7 +121,6 @@
 <circle cx="986.5999999999999" cy="685" r="6" fill="#bd6416"/>
 <text x="150" y="720" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">0</text>
 <text x="1040" y="720" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">1</text>
-<text x="550" y="720" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">orange points: observed u</text>
-<text x="38" y="768" font-size="20" fill="#526573" font-weight="400" text-anchor="start">Sampling lives in optimize_lab(); inverse observations are created in main().</text>
+<text x="550" y="720" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">주황색 점: 관측한 u</text>
+<text x="38" y="768" font-size="20" fill="#526573" font-weight="400" text-anchor="start">optimize_lab()에서 샘플링하며, 역문제 관측값은 main()에서 생성.</text>
 </g></svg>
-

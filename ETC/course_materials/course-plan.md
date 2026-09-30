@@ -1,82 +1,88 @@
-# AI4Sci event schedule
+<a id="ai4sci-event-schedule"></a>
+# AI4Sci 행사 일정
 
-Follow [Start Here](../../Start_Here.ipynb) and the [course guide](README.md). The course includes the Introduction, four Labs and eleven levels across four Challenges: Wave, Fluid, Climate and Neural Operators.
+[시작하기](../../Start_Here.ipynb)와 [강좌 안내](README.md)를 따라 진행하세요. 강좌는 소개, 실습 네 개, 파동·유체·기후·신경 연산자 도전 과제 네 개의 레벨 열한 개로 구성됩니다.
 
-## Complete learning sequence
+<a id="complete-learning-sequence"></a>
+## 전체 학습 순서
 
-| Order | Topic | Notebook | Learning outcome |
+| 순서 | 주제 | 노트북 | 학습 목표 |
 |---|---|---|---|
-| Introduction | Introduction to PhysicsNeMo | [Open notebook](../../01_Introduction.ipynb) | Distinguish physics-informed and data-driven learning. |
-| Lab 1 | PINN fundamentals | [Open notebook](../../01_labs/01_pinn/Lab_1_PINN_Fundamentals.ipynb) | Run forward, parameterized and inverse PINNs. |
-| Lab 2 | Projectile ODEs | [Open notebook](../../01_labs/02_projectile/Lab_2_Projectile_Motion.ipynb) | Connect initial conditions and ODE residuals; compare with the analytical trajectory. |
-| Lab 3 | Steady heat conduction | [Open notebook](../../01_labs/03_heat_conduction/Lab_3_Heat_Conduction.ipynb) | Solve a two-material bar and verify interface temperature and heat flux. |
-| Lab 4 | AI Weather Forecasting with FourCastNet | [Open notebook](../../01_labs/04_weather_forecasting/Lab_4_Weather_Forecasting.ipynb) | Generate a 48-hour forecast with pretrained AFNO; compare with ERA5 reanalysis and persistence as lead time increases. |
-| Challenge 1 | Wave dynamics | [Open notebook](../../02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb) | Level 1–3: constant speed, variable speed, circular Robin boundary. |
-| Challenge 2 | Fluid flow | [Open notebook](../../02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb) | Level 1–3: one fixed obstacle, multiple fixed obstacles, time-dependent flow. |
-| Challenge 3 | Educational climate PDEs | [Open notebook](../../02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb) | Level 1–2: temperature transport and atmosphere–ocean equations. Level 2 defaults to the original uncoupled case (`gamma0=0`); nonzero exchange is a separate local experiment. |
-| Challenge 4 | Neural operators | [Open notebook](../../02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb) | Level 1–3: FNO, AFNO and PINO on the same periodic reaction–diffusion problem. |
+| 소개 | PhysicsNeMo 소개 | [노트북 열기](../../01_Introduction.ipynb) | 물리 정보 기반 학습과 데이터 기반 학습을 구분합니다. |
+| 실습 1 | PINN 기초 | [노트북 열기](../../01_labs/01_pinn/Lab_1_PINN_Fundamentals.ipynb) | 순방향, 매개변수화, 역문제 PINN을 실행합니다. |
+| 실습 2 | 포물체 운동 ODE | [노트북 열기](../../01_labs/02_projectile/Lab_2_Projectile_Motion.ipynb) | 초기 조건과 ODE 잔차를 연결하고 해석적 궤적과 비교합니다. |
+| 실습 3 | 정상 열전도 | [노트북 열기](../../01_labs/03_heat_conduction/Lab_3_Heat_Conduction.ipynb) | 두 재료로 이루어진 막대 문제를 풀고 계면 온도와 열유속을 검증합니다. |
+| 실습 4 | FourCastNet을 활용한 AI 일기 예보 | [노트북 열기](../../01_labs/04_weather_forecasting/Lab_4_Weather_Forecasting.ipynb) | 사전 학습된 AFNO로 48시간 예보를 생성하고 예보 선행 시간에 따라 ERA5 재분석 및 지속성 예측과 비교합니다. |
+| 도전 과제 1 | 파동 역학 | [노트북 열기](../../02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb) | 레벨 1–3: 일정한 속도, 가변 속도, 원형 Robin 경계. |
+| 도전 과제 2 | 유체 흐름 | [노트북 열기](../../02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb) | 레벨 1–3: 단일 고정 장애물, 다중 고정 장애물, 시간 의존 흐름. |
+| 도전 과제 3 | 교육용 기후 PDE | [노트북 열기](../../02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb) | 레벨 1–2: 온도 수송과 대기–해양 방정식. 레벨 2의 기본값은 원래의 비결합 경우(`gamma0=0`)이며, 0이 아닌 교환은 별도의 로컬 실험입니다. |
+| 도전 과제 4 | 신경 연산자 | [노트북 열기](../../02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb) | 레벨 1–3: 동일한 주기적 반응–확산 문제에 FNO, AFNO, PINO 적용. |
 
-The instructor has approved replacing the previous Navier–Stokes Lab 4 with pretrained weather inference. Labs 1–3 and all Challenge problems and scoring contracts are unchanged by that replacement. The [previous PINN Lab](../reference_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb) is retained for reference. The shared event sheet and external slides have **not** been changed by this repository update.
+강사는 기존 Navier–Stokes 실습 4를 사전 학습된 날씨 모델 추론으로 대체하는 것을 승인했습니다. 이 대체로 실습 1–3과 모든 도전 과제의 문제 및 채점 규약은 바뀌지 않습니다. [기존 PINN 실습](../reference_labs/04_navier_stokes/Lab_4_Navier_Stokes.ipynb)은 참고용으로 유지합니다. 이 저장소 갱신으로 공동 행사 시트와 외부 슬라이드를 수정하지는 **않았습니다**.
 
-## Event details and source check
+<a id="event-details-and-source-check"></a>
+## 행사 정보와 출처 확인
 
-NVIDIA PhysicsNeMo Tutorial, AI4Science Korea 2026. Wednesday, 30 September 2026, Seoul Dragon City, Seoul. Instructors: Mingyu Yang and Hyungon Ryu, NVIDIA. The [conference website](https://ai4scikorea.org/) describes the wider AI for Science event; this repository contains the PhysicsNeMo tutorial.
+NVIDIA PhysicsNeMo 튜토리얼, AI4Science Korea 2026. 2026년 9월 30일 수요일, 서울 드래곤시티. 강사: NVIDIA의 Mingyu Yang, Hyungon Ryu. [학회 웹사이트](https://ai4scikorea.org/)는 전체 AI for Science 행사를 안내하며, 이 저장소에는 PhysicsNeMo 튜토리얼이 담겨 있습니다.
 
-The schedule and teaching assignments below follow the instructor's supplied agenda, checked on 2026-09-22. Private planning links and internal coordination notes are not distributed with the course. The event slide deck has not been verified in this check.
+아래 일정과 강의 배정은 강사가 제공한 의제를 따르며 2026-09-22에 확인했습니다. 비공개 기획 링크와 내부 조율 메모는 강좌에 포함하여 배포하지 않습니다. 이번 확인에서는 행사 슬라이드 자료를 검증하지 않았습니다.
 
-## 8-hour notebook-aligned teaching plan
+<a id="8-hour-notebook-aligned-teaching-plan"></a>
+## 노트북에 맞춘 8시간 수업 계획
 
-This is the instructor-provided 09:30–17:30 agenda, confirmed on 2026-09-22. It supersedes the earlier local 10:00–17:00 allocation. Do not reuse the earlier registration slot, which overlaps the new first session. The student-facing schedule and notebook links are combined in [Start Here](../../Start_Here.ipynb).
+강사가 제공한 09:30–17:30 일정으로, 2026-09-22에 확인했습니다. 이전에 로컬로 작성한 10:00–17:00 시간 배분을 대체합니다. 이전 등록 시간은 새 첫 세션과 겹치므로 다시 사용하지 마세요. 학생용 일정과 노트북 링크는 [시작하기](../../Start_Here.ipynb)에 함께 정리되어 있습니다.
 
-| Time | Minutes | Category | Notebook-aligned topic | Instructor |
+| 시간 | 분 | 구분 | 노트북에 맞춘 주제 | 강사 |
 |---|---:|---|---|---|
-| 09:30–10:20 | 50 | Introduction | Introduction to NVIDIA PhysicsNeMo | Mingyu Yang |
-| 10:20–10:30 | 10 | Break | Break | |
-| 10:30–11:30 | 60 | Lab | Training Labs: PINN Fundamentals, ODEs and PDEs | Mingyu Yang |
-| 11:30–13:00 | 90 | Lunch | Lunch Break | |
-| 13:00–13:50 | 50 | Challenge | Challenge 1: Advanced Wave Dynamics | Mingyu Yang |
-| 13:50–14:00 | 10 | Break | Break | |
-| 14:00–15:00 | 60 | Challenge | Challenge 2: Fluid Flow Around Fixed Obstacles | Hyungon Ryu |
-| 15:00–15:30 | 30 | Break | Coffee Break | |
-| 15:30–16:20 | 50 | Challenge | Challenge 3: Temperature Transport and Atmosphere–Ocean Coupling | Hyungon Ryu |
-| 16:20–16:30 | 10 | Break | Break | |
-| 16:30–17:20 | 50 | Challenge | Challenge 4: Neural Operators with FNO, AFNO and PINO | Hyungon Ryu |
-| 17:20–17:30 | 10 | Wrap-up | Wrap-up and Q&A | |
-| **Total** | **480** | **Teaching 330 / Lunch 90 / Break 60** | **8 hours** | |
+| 09:30–10:20 | 50 | 소개 | NVIDIA PhysicsNeMo 소개 | Mingyu Yang |
+| 10:20–10:30 | 10 | 휴식 | 휴식 | |
+| 10:30–11:30 | 60 | 실습 | 학습 실습: PINN 기초, ODE, PDE | Mingyu Yang |
+| 11:30–13:00 | 90 | 점심 | 점심시간 | |
+| 13:00–13:50 | 50 | 도전 과제 | 도전 과제 1: 고급 파동 역학 | Hyungon Ryu |
+| 13:50–14:00 | 10 | 휴식 | 휴식 | |
+| 14:00–15:00 | 60 | 도전 과제 | 도전 과제 2: 고정 장애물 주위의 유체 흐름 | Hyungon Ryu |
+| 15:00–15:30 | 30 | 휴식 | 커피 휴식 | |
+| 15:30–16:20 | 50 | 도전 과제 | 도전 과제 3: 온도 수송과 대기–해양 결합 | Hyungon Ryu |
+| 16:20–16:30 | 10 | 휴식 | 휴식 | |
+| 16:30–17:20 | 50 | 도전 과제 | 도전 과제 4: FNO, AFNO, PINO를 활용한 신경 연산자 | Hyungon Ryu |
+| 17:20–17:30 | 10 | 마무리 | 마무리 및 질의응답 | |
+| **합계** | **480** | **수업 330 / 점심 90 / 휴식 60** | **8시간** | |
 
-The published session title and times are retained above. Within the morning Labs, Labs 1–3 train PINNs and Lab 4 runs pretrained weather inference without training. The afternoon Climate session still uses simplified temperature transport and atmosphere–ocean exchange equations, not a weather-forecasting model. All four Labs and all eleven Challenge levels remain in the course. Labs and Challenges have 270 minutes; measure explanation, editing, execution and interpretation time before promising full completion.
+위 표는 공개된 세션 제목과 시간을 유지합니다. 오전 실습에서 실습 1–3은 PINN을 학습하고, 실습 4는 학습 없이 사전 학습된 날씨 모델 추론을 실행합니다. 오후 기후 세션은 여전히 일기 예보 모델이 아닌 단순화한 온도 수송 및 대기–해양 교환 방정식을 사용합니다. 실습 네 개와 도전 과제의 레벨 열한 개를 모두 유지합니다. 실습과 도전 과제에는 270분이 배정되어 있습니다. 전체 완료를 약속하기 전에 설명, 편집, 실행, 해석에 걸리는 시간을 측정하세요.
 
-Use the Introduction to establish coordinates, predictions, derivatives and losses, then show how to edit and run the first problem. Complete environment setup before class. The 60-minute Labs and 50-minute Neural Operators session need particular attention in rehearsal; no level is silently removed or converted to a demonstration.
+소개에서 좌표, 예측, 미분, 손실을 정리한 뒤 첫 문제를 수정하고 실행하는 방법을 보여 주세요. 수업 전에 환경 설정을 완료하세요. 60분 실습과 50분 신경 연산자 세션은 특히 리허설에서 주의해야 합니다. 어떤 레벨도 알리지 않고 빼거나 시연으로 바꾸지 않습니다.
 
-## Learning checkpoints and transitions
+<a id="learning-checkpoints-and-transitions"></a>
+## 학습 확인 지점과 다음 단계
 
-| Session | Before continuing, the learner should be able to... |
+| 세션 | 다음으로 넘어가기 전에 학습자가 할 수 있어야 하는 것 |
 |---|---|
-| Introduction | Trace coordinates → predicted solution → derivatives → equation/condition losses → parameter update; identify PhysicsNeMo, SymPy, PyTorch and course helper responsibilities. |
-| Lab 1 | Distinguish forward, parameterized and inverse problems; explain the first problem's boundary conditions and analytical curve. |
-| Labs 2–3 | Identify initial versus interface conditions, and compare predictions with the applicable analytical solution. |
-| Lab 4 | Trace a 26-field global initial state through eight six-hour AFNO forecast steps; compare forecasts with ERA5 reanalysis and persistence, distinguish regional RMSE from local errors, and explain why inference is not training. |
-| Challenges 1–3 | Follow `create_model`, `create_informer` and `residuals` into their PhysicsNeMo calls; complete and save all required functions; local checks establish syntax/completeness only, and interpret individual condition errors. |
-| Challenge 4 | Explain input-field → solution-field learning, separate the course factories from FNO/AFNO APIs, and identify the spectral PDE loss added by PINO. Compare using the same held-out data. |
+| 소개 | 좌표 → 예측한 해 → 미분 → 방정식/조건 손실 → 매개변수 갱신을 따라가고, PhysicsNeMo, SymPy, PyTorch, 강좌 보조 함수의 역할을 구분합니다. |
+| 실습 1 | 순방향, 매개변수화, 역문제를 구분하고 첫 문제의 경계 조건과 해석해 곡선을 설명합니다. |
+| 실습 2–3 | 초기 조건과 계면 조건을 구분하고 예측값을 해당 해석해와 비교합니다. |
+| 실습 4 | 26개 장으로 이루어진 전 지구 초기 상태를 6시간 간격 AFNO 예보 여덟 단계에 걸쳐 따라갑니다. 예보를 ERA5 재분석 및 지속성 예측과 비교하고, 영역 RMSE와 국소 오차를 구분하며, 추론이 학습이 아닌 이유를 설명합니다. |
+| 도전 과제 1–3 | `create_model`, `create_informer`, `residuals`에서 PhysicsNeMo 호출까지 따라갑니다. 필요한 모든 함수를 완성하고 저장합니다. 로컬 검사는 문법과 완성 여부만 확인한다는 점을 이해하고, 개별 조건 오차를 해석합니다. |
+| 도전 과제 4 | 입력 장 → 해의 장 학습을 설명하고, 강좌의 생성 함수와 FNO/AFNO API를 구분하며, PINO가 추가하는 스펙트럴 PDE 손실을 파악합니다. 동일한 별도 평가 데이터로 비교합니다. |
 
-Record explanation, editing, execution, result interpretation and questions separately in rehearsal. L4 execution speed alone cannot establish that every learner will finish. Do not silently drop levels or turn hands-on work into demonstrations to fit the time slots.
+리허설에서는 설명, 편집, 실행, 결과 해석, 질문 시간을 각각 기록하세요. L4 실행 속도만으로 모든 학습자가 끝낼 수 있다고 판단할 수는 없습니다. 시간표에 맞추려고 알리지 않고 레벨을 빼거나 직접 실습을 시연으로 바꾸지 마세요.
 
-Use the [helper-to-API walkthrough](PHYSICSNEMO_WORKFLOW.md) within the existing Introduction and first Challenge slots. It explains the current programs without changing the timetable, exercise contracts, training budgets or scoring rules.
+기존 소개 및 첫 도전 과제 시간에 [보조 함수에서 API까지 따라가기](PHYSICSNEMO_WORKFLOW.md)를 활용하세요. 이 안내는 시간표, 연습 과제 규약, 학습 실행량, 채점 규칙을 바꾸지 않고 현재 프로그램을 설명합니다.
 
-The Lab 4 notebook uses the pretrained 26-channel FourCastNet1 AFNO checkpoint, with ERA5 at 00 UTC on 1 September 2022 as its only initial state. Each prediction becomes the next input; later ERA5 is held back for verification. Students inspect surface wind, mean sea-level pressure and 2 m temperature over 48 hours. Do not add training or extend the run just to fill a time slot. Use the time to interpret the maps, baseline and lead-time errors. This is a single-case teaching result, not an operational forecast validation; see the [weather validation record](LAB4_WEATHER_VALIDATION.md).
+실습 4 노트북은 사전 학습된 26채널 FourCastNet1 AFNO 체크포인트를 사용하며, 유일한 초기 상태는 2022년 9월 1일 00 UTC의 ERA5입니다. 각 예측이 다음 입력이 되고, 이후 ERA5는 검증용으로 남겨 둡니다. 학생은 48시간 동안의 지표 바람, 평균 해면 기압, 2 m 기온을 살펴봅니다. 시간을 채우기 위해 학습을 추가하거나 실행을 연장하지 마세요. 지도, 기준 예측, 선행 시간별 오차를 해석하는 데 시간을 사용하세요. 이는 단일 사례의 교육용 결과이며 현업 예보 검증이 아닙니다. [날씨 검증 기록](LAB4_WEATHER_VALIDATION.md)을 참고하세요.
 
-Prepare the model and data cache before the session: about 301 MB of checkpoint files and 622 MB of compressed source data, outside the checkout at `~/.cache/ai4sci/weather`. On a fresh Brev L4, cold preparation took 35 seconds and the cached notebook took about 85 seconds for all code cells (90 seconds including kernel startup and notebook saving). Model computation alone took 3.21 seconds. These are separate single-instance measurements, not guaranteed timings or evidence of concurrent-download capacity.
+세션 전에 모델과 데이터 캐시를 준비하세요. 체크포인트 파일은 약 301 MB, 압축된 원본 데이터는 622 MB이며 체크아웃 밖의 `~/.cache/ai4sci/weather`에 저장됩니다. 새 Brev L4에서 캐시 없는 최초 준비는 35초, 캐시를 사용한 노트북은 모든 코드 셀에 약 85초가 걸렸습니다(커널 시작과 노트북 저장 포함 90초). 모델 계산 자체는 3.21초였습니다. 이는 서로 구분되는 단일 인스턴스 측정값이며, 보장되는 시간이나 동시 다운로드 용량의 근거가 아닙니다.
 
-## Instructor decisions
+<a id="instructor-decisions"></a>
+## 강사 결정 사항
 
-| Item | Action |
+| 항목 | 조치 |
 |---|---|
-| Public materials | Align the external agenda and Main material link with the agreed, published course revision; local edits are not a GitHub release. |
-| Participants | Plan for 110 individual participants, not teams. Labs are practice; the four afternoon Challenges are intended for individual ranking. |
-| Assessment | Follow the [evaluation guide](ASSESSMENT.md). The implemented pilot scores original-task completion, averages all Levels within each Challenge and keeps the best attempt; omitted Levels score zero and separate attempts are not combined. Numerical feedback does not affect points. Confirm the pilot rules for the event before class. |
-| Event environment | The plan is one Brev L4 instance per participant and a separate eight-GPU judge. One new L4 instance verified this Lab 4 update; that does not establish 110-instance availability or concurrent startup capacity. Availability and concurrent startup capacity still require confirmation. |
-| Instructor roles | Mingyu Yang: Introduction, Labs and Challenge 1. Hyungon Ryu: Challenges 2–4. Agree on support responsibilities during each segment. |
-| Rehearsal | Measure the full introduction, four Labs and eleven Challenge levels, including editing and result interpretation. |
-| Slides | Confirm the event deck against the current notebook checkpoints: Labs 1–3 use explicit training loops; Lab 4 is pretrained FourCastNet inference and ERA5 verification. Slide files are outside this repository update. |
+| 공개 자료 | 외부 의제와 Main 자료 링크를 합의된 공개 강좌 개정본에 맞추세요. 로컬 수정은 GitHub 배포가 아닙니다. |
+| 참가자 | 팀이 아닌 개인 참가자 110명을 기준으로 계획하세요. 실습은 연습용이며 오후 도전 과제 네 개는 개인 순위 평가를 위한 것입니다. |
+| 평가 | [평가 안내](ASSESSMENT.md)를 따르세요. 구현된 시범 채점은 원래 과제의 완성도를 평가하고, 각 도전 과제의 모든 레벨 점수를 평균하여 가장 좋은 시도를 유지합니다. 빠진 레벨은 0점이며 서로 다른 시도를 합치지 않습니다. 수치 피드백은 점수에 영향을 주지 않습니다. 수업 전에 행사의 시범 채점 규칙을 확인하세요. |
+| 행사 환경 | 참가자마다 Brev L4 인스턴스 하나와 별도의 GPU 여덟 개 채점기를 사용할 계획입니다. 새 L4 인스턴스 하나로 이번 실습 4 갱신을 검증했으나, 인스턴스 110개 확보나 동시 시작 용량이 확인된 것은 아닙니다. 가용성과 동시 시작 용량은 여전히 확인해야 합니다. |
+| 강사 역할 | Mingyu Yang: 소개와 실습. Hyungon Ryu: 도전 과제 1–4. 각 구간의 지원 역할을 합의하세요. |
+| 리허설 | 소개, 실습 네 개, 도전 과제의 레벨 열한 개 전체에 대해 편집과 결과 해석을 포함한 시간을 측정하세요. |
+| 슬라이드 | 행사 슬라이드를 현재 노트북의 학습 확인 지점과 대조하세요. 실습 1–3은 명시적인 학습 반복문을 사용하고, 실습 4는 사전 학습된 FourCastNet 추론과 ERA5 검증을 수행합니다. 슬라이드 파일은 이번 저장소 갱신 범위 밖입니다. |
 
-[Migration notes](MIGRATION.md) explain API and consistency corrections. The supplementary [Wave student notebook](01_Wave_PINN.ipynb) runs the saved Wave Level 1 exercise implementation; complete its marked functions first. It is not a shortened replacement course.
+[이전 안내](MIGRATION.md)는 API와 일관성 수정을 설명합니다. 보충 자료인 [파동 학생 노트북](01_Wave_PINN.ipynb)은 저장된 파동 레벨 1 연습 구현을 실행합니다. 먼저 표시된 함수를 완성하세요. 이 노트북은 강좌를 축약하여 대체하는 자료가 아닙니다.

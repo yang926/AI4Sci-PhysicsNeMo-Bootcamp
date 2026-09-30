@@ -1,51 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1020" viewBox="0 0 1200 1020" role="img" aria-labelledby="title desc">
-  <title id="title">Lab 4: actual pretrained FourCastNet inference and verification flow</title>
-  <desc id="desc">The notebook runs run_forecast.py. load_initial reads only initial ERA5 data and load_model restores a pinned PhysicsNeMo AFNO checkpoint and its saved normalization. Under torch.inference_mode, each of eight passes normalizes the current physical state, applies AFNO, then restores physical units. All 26 predicted fields are fed to the next pass. Four fields are saved in forecast.npz. A separate evaluator compares this file with truth.npz and with persistence. Future ERA5 never enters the forecast model. Model weights remain fixed; no backward pass, PINN residual or optimizer is used.</desc>
+  <title id="title">실습 4: 사전 학습된 FourCastNet의 실제 추론 및 검증 흐름</title>
+  <desc id="desc">노트북은 run_forecast.py를 실행합니다. load_initial은 초기 ERA5 자료만 읽고, load_model은 버전이 고정된 PhysicsNeMo AFNO 체크포인트와 저장된 정규화 정보를 복원합니다. torch.inference_mode에서 여덟 번 반복하며, 매번 현재 물리 상태를 정규화하고 AFNO를 적용한 뒤 물리 단위로 복원합니다. 예측한 26개 장을 모두 다음 반복의 입력으로 사용합니다. 네 개 장을 forecast.npz에 저장합니다. 별도의 평가기가 이 파일을 truth.npz 및 지속성 예측과 비교합니다. 미래 ERA5는 예측 모델에 입력하지 않습니다. 모델 가중치는 고정되며 역전파, PINN 잔차, 옵티마이저를 사용하지 않습니다.</desc>
   <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#526573"/></marker><marker id="loop" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#147d72"/></marker></defs>
   <rect width="1200" height="1020" fill="#ffffff"/>
-  <g font-family="DejaVu Sans, Arial, sans-serif" fill="#172c3c">
-    <text x="44" y="54" font-size="32" font-weight="700">Lab 4 · Follow the forecast through the code</text>
-    <text x="44" y="94" font-size="22" fill="#526573">Notebook run_script() → run_forecast.py / main()</text>
+  <g font-family="Noto Sans CJK KR, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo, DejaVu Sans, Arial, sans-serif" fill="#172c3c">
+    <text x="44" y="54" font-size="32" font-weight="700">실습 4 · 코드에서 예측 과정 따라가기</text>
+    <text x="44" y="94" font-size="22" fill="#526573">노트북 run_script() → run_forecast.py / main()</text>
     <rect x="44" y="129" width="400" height="113" rx="12" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
     <text x="64" y="163" font-size="24" font-weight="700" fill="#2269a8">load_initial(initial.npz)</text>
-    <text x="64" y="198" font-size="22">Only the initial ERA5 state</text>
-    <text x="64" y="229" font-size="20" fill="#526573">26 fields · physical units · FP32</text>
+    <text x="64" y="198" font-size="22">초기 ERA5 상태만 사용</text>
+    <text x="64" y="229" font-size="20" fill="#526573">26개 장 · 물리 단위 · FP32</text>
     <rect x="575" y="129" width="580" height="113" rx="12" fill="#f2eef8" stroke="#7658a3" stroke-width="2"/>
     <text x="597" y="163" font-size="24" font-weight="700" fill="#7658a3">load_model(model_dir, device)</text>
     <text x="597" y="198" font-size="22">AFNO.from_checkpoint(...).eval()</text>
-    <text x="597" y="229" font-size="20" fill="#526573">Pinned weights + saved training mean and std</text>
+    <text x="597" y="229" font-size="20" fill="#526573">고정된 가중치 + 저장된 학습 평균과 표준편차</text>
     <path d="M155 242V319M715 242V319" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
     <rect x="44" y="275" width="478" height="32" fill="#ffffff"/>
-    <text x="44" y="299" font-size="22" font-weight="700">torch.inference_mode() · eight passes</text>
+    <text x="44" y="299" font-size="22" font-weight="700">torch.inference_mode() · 여덟 번 반복</text>
     <g stroke-width="2">
       <rect x="44" y="327" width="215" height="130" rx="12" fill="#eef5fb" stroke="#2269a8"/>
       <rect x="300" y="327" width="245" height="130" rx="12" fill="#f2eef8" stroke="#7658a3"/>
       <rect x="586" y="327" width="250" height="130" rx="12" fill="#eaf6f3" stroke="#147d72"/>
       <rect x="877" y="327" width="278" height="130" rx="12" fill="#f2eef8" stroke="#7658a3"/>
     </g>
-    <text x="64" y="365" font-size="23" font-weight="700">Current state</text><text x="64" y="401" font-size="22">26 global fields</text><text x="64" y="436" font-size="20" fill="#526573">Physical units</text>
-    <text x="320" y="365" font-size="23" font-weight="700">Normalize</text><text x="320" y="401" font-size="22">(current − mean)</text><text x="320" y="436" font-size="22">/ std</text>
-    <text x="606" y="365" font-size="23" font-weight="700" fill="#147d72">PhysicsNeMo</text><text x="606" y="401" font-size="22">AFNO model(...)</text><text x="606" y="436" font-size="20" fill="#526573">Field-to-field map</text>
-    <text x="897" y="365" font-size="23" font-weight="700">Restore units</text><text x="897" y="401" font-size="22">output × std + mean</text><text x="897" y="436" font-size="20" fill="#526573">Next state at +6 h</text>
+    <text x="64" y="365" font-size="23" font-weight="700">현재 상태</text><text x="64" y="401" font-size="22">전 지구 장 26개</text><text x="64" y="436" font-size="20" fill="#526573">물리 단위</text>
+    <text x="320" y="365" font-size="23" font-weight="700">정규화</text><text x="320" y="401" font-size="22">(current − mean)</text><text x="320" y="436" font-size="22">/ std</text>
+    <text x="606" y="365" font-size="23" font-weight="700" fill="#147d72">PhysicsNeMo</text><text x="606" y="401" font-size="22">AFNO model(...)</text><text x="606" y="436" font-size="20" fill="#526573">장에서 장으로 매핑</text>
+    <text x="897" y="365" font-size="23" font-weight="700">단위 복원</text><text x="897" y="401" font-size="22">output × std + mean</text><text x="897" y="436" font-size="20" fill="#526573">6시간 뒤의 다음 상태</text>
     <g fill="none" stroke="#526573" stroke-width="2.5"><path d="M259 390H293" marker-end="url(#arrow)"/><path d="M545 390H579" marker-end="url(#arrow)"/><path d="M836 390H870" marker-end="url(#arrow)"/></g>
     <path d="M1017 457V516H155V464" fill="none" stroke="#147d72" stroke-width="3" marker-end="url(#loop)"/>
     <rect x="278" y="498" width="625" height="38" fill="#ffffff"/>
-    <text x="590" y="524" font-size="22" fill="#147d72" text-anchor="middle">Feed all 26 predictions back in. Weights stay fixed.</text>
+    <text x="590" y="524" font-size="22" fill="#147d72" text-anchor="middle">예측한 26개 장을 모두 재입력합니다. 가중치는 고정합니다.</text>
     <path d="M1017 516V584H832" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
     <rect x="44" y="552" width="773" height="112" rx="12" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
     <text x="64" y="589" font-size="24" font-weight="700">forecast.npz</text>
-    <text x="64" y="624" font-size="22">Save u10m, v10m, msl, t2m at 0, 6, …, 48 h.</text>
-    <text x="64" y="653" font-size="20" fill="#526573">Four inspection fields, not the full 26-field recurrent state</text>
+    <text x="64" y="624" font-size="22">0, 6, …, 48시간의 u10m, v10m, msl, t2m 저장</text>
+    <text x="64" y="653" font-size="20" fill="#526573">반복 입력용 26개 장 전체가 아닌, 확인할 4개 장만 저장</text>
     <path d="M430 664V724" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
     <rect x="870" y="628" width="285" height="133" rx="12" fill="#fff4e8" stroke="#bd6416" stroke-width="2"/>
-    <text x="890" y="665" font-size="24" font-weight="700" fill="#bd6416">truth.npz</text><text x="890" y="703" font-size="22">Separate ERA5 fields</text><text x="890" y="738" font-size="20" fill="#526573">Verification only</text>
+    <text x="890" y="665" font-size="24" font-weight="700" fill="#bd6416">truth.npz</text><text x="890" y="703" font-size="22">별도의 ERA5 장</text><text x="890" y="738" font-size="20" fill="#526573">검증에만 사용</text>
     <path d="M1012 761V800H833" fill="none" stroke="#bd6416" stroke-width="2.5" marker-end="url(#arrow)"/>
     <rect x="44" y="733" width="773" height="167" rx="12" fill="#f5f7f9" stroke="#526573" stroke-width="2"/>
     <text x="64" y="770" font-size="24" font-weight="700">evaluate_weather.py</text>
     <text x="64" y="807" font-size="22">load_pair() → evaluate() → plot_maps() / save_gif()</text>
-    <text x="64" y="844" font-size="22">Compare forecast with ERA5 and unchanged-initial persistence.</text>
-    <text x="64" y="880" font-size="20" fill="#526573">Area-weighted RMSE; positive leads only; global + East Asia</text>
+    <text x="64" y="844" font-size="22">예측을 ERA5 및 초기 상태를 유지한 지속성 예측과 비교</text>
+    <text x="64" y="880" font-size="20" fill="#526573">면적 가중 RMSE · 초기 시각 제외 · 전 지구 + 동아시아</text>
     <rect x="44" y="926" width="1111" height="60" rx="10" fill="#eaf6f3"/>
-    <text x="600" y="965" font-size="23" font-weight="700" fill="#147d72" text-anchor="middle">Inference, not training: no optimizer, backward pass or PINN residual.</text>
+    <text x="600" y="965" font-size="23" font-weight="700" fill="#147d72" text-anchor="middle">추론 실습: 옵티마이저, 역전파, PINN 잔차를 사용하지 않습니다.</text>
   </g>
 </svg>
