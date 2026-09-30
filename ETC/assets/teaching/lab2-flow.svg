@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="930" viewBox="0 0 1200 930" role="img" aria-labelledby="title desc">
+<title id="title">Lab 2 · how motion becomes a training signal</title><desc id="desc">Time enters ProjectileModel, which uses a PhysicsNeMo FullyConnected network. PyTorch autograd supplies second time derivatives to PhysicsInformer, which evaluates the symbolic ProjectileEquation residuals. Initial position and velocity losses are calculated separately at time zero. Adam with cosine learning rate schedule updates weights. Analytical motion is used after training for evaluation.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs><rect width="1200" height="930" fill="#ffffff"/><g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 2 · how motion becomes a training signal</text><text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<rect x="38" y="116" width="245" height="173" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Sample time</text>
+<text x="60" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">loss_terms():</text>
+<text x="60" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">t ∈ [0, 5] s</text>
+<text x="60" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Initial checks: t = 0</text>
+<rect x="334" y="116" width="434" height="173" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="356" y="152" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">ProjectileModel.forward</text>
+<text x="356" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Normalized time → mlp(1, 2)</text>
+<text x="356" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">PhysicsNeMo FullyConnected</text>
+<text x="356" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">→ physical positions (x, y)</text>
+<rect x="820" y="116" width="342" height="173" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="842" y="152" font-size="24" fill="#7658a3" font-weight="600" text-anchor="start">PyTorch derivative()</text>
+<text x="842" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Autograd with respect to t.</text>
+<text x="842" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">x_tt and y_tt are supplied</text>
+<text x="842" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">to PhysicsInformer.</text>
+<path d="M 283 205 H 334" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 768 205 H 820" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="351" width="427" height="174" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="387" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">ProjectileEquation(PDE)</text>
+<text x="60" y="424" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">self.equations stores ode_x, ode_y.</text>
+<text x="60" y="453" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">These are symbolic expressions,</text>
+<text x="60" y="482" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">not an extra neural network.</text>
+<text x="60" y="511" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Defined in projectile_eqn.py.</text>
+<rect x="525" y="351" width="637" height="174" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="547" y="387" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">residuals(...) → physics.forward(...)</text>
+<text x="547" y="424" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">PhysicsInformer evaluates the ODE residuals.</text>
+<text x="547" y="453" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">It receives x_tt / y_tt; it does not infer time itself.</text>
+<text x="547" y="482" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">loss_terms() scales acceleration residuals by 9.81.</text>
+<text x="547" y="511" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The initial-condition checks use the model at t = 0.</text>
+<path d="M 465 438 H 525" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 994 289 V 351" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="588" width="537" height="172" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="624" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">loss_terms()</text>
+<text x="60" y="661" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">physics</text>
+<text x="60" y="690" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">initial_position</text>
+<text x="60" y="719" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">initial_velocity</text>
+<text x="60" y="748" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Sum these three scalar losses.</text>
+<rect x="637" y="588" width="525" height="172" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="659" y="624" font-size="24" fill="#7658a3" font-weight="600" text-anchor="start">optimize_projectile()</text>
+<text x="659" y="661" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">zero_grad → loss.backward → step</text>
+<text x="659" y="690" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">PyTorch Adam + cosine learning rate</text>
+<text x="659" y="719" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">5,000 updates by default.</text>
+<text x="659" y="748" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Each update changes the network weights.</text>
+<path d="M 835 525 V 557 H 308 V 588" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 575 675 H 637" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="38" y="813" font-size="21" fill="#526573" font-weight="400" text-anchor="start">The model at t = 0 supplies position and velocity losses directly, alongside the ODE residual loss.</text>
+<rect x="38" y="840" width="1124" height="67" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="876" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">evaluate() → 0–5 s accuracy; 5–8 s extrapolation is reported separately.</text>
+</g></svg>

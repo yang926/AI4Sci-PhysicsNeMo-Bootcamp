@@ -1,0 +1,15 @@
+# Copyright (c) 2024 NVIDIA Corporation.  All rights reserved.
+# To build this : $ singularity build --fakeroot --sandbox AI-Powered-Physics-Bootcamp.sif ETC/environment/Singularity
+# To Run this : $ singularity run --writable --nv AI-Powered-Physics-Bootcamp.sif jupyter-lab --no-browser --allow-root --ip=0.0.0.0 --port=8888 --NotebookApp.token="" --notebook-dir=./
+
+Bootstrap: docker
+FROM: nvcr.io/nvidia/physicsnemo/physicsnemo:25.11
+
+%environment
+%post
+    pip3 install gdown ipympl cdsapi
+    pip3 install --upgrade nbconvert
+
+%runscript
+    "$@"
+

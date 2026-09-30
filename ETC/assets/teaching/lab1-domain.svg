@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
+<title id="title">Lab 1 · one equation, three learning tasks</title><desc id="desc">Forward and inverse solve on the interval zero to one. Forward uses 256 fixed points including endpoints. Parameterized training uses seventeen lengths between one and two with thirty-two positions per length. Inverse also uses one hundred solution observations; the source is learned, not supplied.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs>
+<rect width="1200" height="780" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 1 · one equation, three learning tasks</text>
+<text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<rect x="38" y="112" width="1124" height="178" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="148" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">1 · Forward: learn u(x)</text>
+<text x="60" y="185" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Fixed training grid: 256 points in [0, 1], including both endpoints.</text>
+<line x1="150" y1="239" x2="1040" y2="239" stroke="#2269a8" stroke-width="4"/>
+<circle cx="150" cy="239" r="5" fill="#2269a8"/>
+<circle cx="180.68965517241378" cy="239" r="5" fill="#2269a8"/>
+<circle cx="211.3793103448276" cy="239" r="5" fill="#2269a8"/>
+<circle cx="242.0689655172414" cy="239" r="5" fill="#2269a8"/>
+<circle cx="272.7586206896552" cy="239" r="5" fill="#2269a8"/>
+<circle cx="303.44827586206895" cy="239" r="5" fill="#2269a8"/>
+<circle cx="334.1379310344828" cy="239" r="5" fill="#2269a8"/>
+<circle cx="364.8275862068965" cy="239" r="5" fill="#2269a8"/>
+<circle cx="395.51724137931035" cy="239" r="5" fill="#2269a8"/>
+<circle cx="426.2068965517241" cy="239" r="5" fill="#2269a8"/>
+<circle cx="456.8965517241379" cy="239" r="5" fill="#2269a8"/>
+<circle cx="487.58620689655174" cy="239" r="5" fill="#2269a8"/>
+<circle cx="518.2758620689656" cy="239" r="5" fill="#2269a8"/>
+<circle cx="548.9655172413793" cy="239" r="5" fill="#2269a8"/>
+<circle cx="579.655172413793" cy="239" r="5" fill="#2269a8"/>
+<circle cx="610.344827586207" cy="239" r="5" fill="#2269a8"/>
+<circle cx="641.0344827586207" cy="239" r="5" fill="#2269a8"/>
+<circle cx="671.7241379310345" cy="239" r="5" fill="#2269a8"/>
+<circle cx="702.4137931034483" cy="239" r="5" fill="#2269a8"/>
+<circle cx="733.1034482758621" cy="239" r="5" fill="#2269a8"/>
+<circle cx="763.7931034482758" cy="239" r="5" fill="#2269a8"/>
+<circle cx="794.4827586206897" cy="239" r="5" fill="#2269a8"/>
+<circle cx="825.1724137931035" cy="239" r="5" fill="#2269a8"/>
+<circle cx="855.8620689655172" cy="239" r="5" fill="#2269a8"/>
+<circle cx="886.551724137931" cy="239" r="5" fill="#2269a8"/>
+<circle cx="917.2413793103449" cy="239" r="5" fill="#2269a8"/>
+<circle cx="947.9310344827586" cy="239" r="5" fill="#2269a8"/>
+<circle cx="978.6206896551724" cy="239" r="5" fill="#2269a8"/>
+<circle cx="1009.3103448275862" cy="239" r="5" fill="#2269a8"/>
+<circle cx="1040" cy="239" r="5" fill="#2269a8"/>
+<circle cx="150" cy="239" r="9" fill="#bd6416"/>
+<circle cx="1040" cy="239" r="9" fill="#bd6416"/>
+<text x="150" y="273" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">x = 0; u = 0</text>
+<text x="1040" y="273" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">x = 1; u = 0</text>
+<rect x="38" y="313" width="1124" height="224" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="349" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">2 · Parameterized: learn u(x, length)</text>
+<text x="60" y="386" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">17 lengths from 1 to 2 × 32 interior positions per length = 544 training points.</text>
+<line x1="150" y1="437" x2="555" y2="437" stroke="#2269a8" stroke-width="3"/>
+<circle cx="162.65625" cy="437" r="5" fill="#2269a8"/>
+<circle cx="187.96875" cy="437" r="5" fill="#2269a8"/>
+<circle cx="213.28125" cy="437" r="5" fill="#2269a8"/>
+<circle cx="238.59375" cy="437" r="5" fill="#2269a8"/>
+<circle cx="263.90625" cy="437" r="5" fill="#2269a8"/>
+<circle cx="289.21875" cy="437" r="5" fill="#2269a8"/>
+<circle cx="314.53125" cy="437" r="5" fill="#2269a8"/>
+<circle cx="339.84375" cy="437" r="5" fill="#2269a8"/>
+<circle cx="365.15625" cy="437" r="5" fill="#2269a8"/>
+<circle cx="390.46875" cy="437" r="5" fill="#2269a8"/>
+<circle cx="415.78125" cy="437" r="5" fill="#2269a8"/>
+<circle cx="441.09375" cy="437" r="5" fill="#2269a8"/>
+<circle cx="466.40625" cy="437" r="5" fill="#2269a8"/>
+<circle cx="491.71875" cy="437" r="5" fill="#2269a8"/>
+<circle cx="517.03125" cy="437" r="5" fill="#2269a8"/>
+<circle cx="542.34375" cy="437" r="5" fill="#2269a8"/>
+<text x="578" y="444" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">length = 1</text>
+<line x1="150" y1="473" x2="757.5" y2="473" stroke="#2269a8" stroke-width="3"/>
+<circle cx="168.984375" cy="473" r="5" fill="#2269a8"/>
+<circle cx="206.953125" cy="473" r="5" fill="#2269a8"/>
+<circle cx="244.921875" cy="473" r="5" fill="#2269a8"/>
+<circle cx="282.890625" cy="473" r="5" fill="#2269a8"/>
+<circle cx="320.859375" cy="473" r="5" fill="#2269a8"/>
+<circle cx="358.828125" cy="473" r="5" fill="#2269a8"/>
+<circle cx="396.796875" cy="473" r="5" fill="#2269a8"/>
+<circle cx="434.765625" cy="473" r="5" fill="#2269a8"/>
+<circle cx="472.734375" cy="473" r="5" fill="#2269a8"/>
+<circle cx="510.703125" cy="473" r="5" fill="#2269a8"/>
+<circle cx="548.671875" cy="473" r="5" fill="#2269a8"/>
+<circle cx="586.640625" cy="473" r="5" fill="#2269a8"/>
+<circle cx="624.609375" cy="473" r="5" fill="#2269a8"/>
+<circle cx="662.578125" cy="473" r="5" fill="#2269a8"/>
+<circle cx="700.546875" cy="473" r="5" fill="#2269a8"/>
+<circle cx="738.515625" cy="473" r="5" fill="#2269a8"/>
+<text x="780.5" y="480" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">length = 1.5</text>
+<line x1="150" y1="509" x2="960" y2="509" stroke="#2269a8" stroke-width="3"/>
+<circle cx="175.3125" cy="509" r="5" fill="#2269a8"/>
+<circle cx="225.9375" cy="509" r="5" fill="#2269a8"/>
+<circle cx="276.5625" cy="509" r="5" fill="#2269a8"/>
+<circle cx="327.1875" cy="509" r="5" fill="#2269a8"/>
+<circle cx="377.8125" cy="509" r="5" fill="#2269a8"/>
+<circle cx="428.4375" cy="509" r="5" fill="#2269a8"/>
+<circle cx="479.0625" cy="509" r="5" fill="#2269a8"/>
+<circle cx="529.6875" cy="509" r="5" fill="#2269a8"/>
+<circle cx="580.3125" cy="509" r="5" fill="#2269a8"/>
+<circle cx="630.9375" cy="509" r="5" fill="#2269a8"/>
+<circle cx="681.5625" cy="509" r="5" fill="#2269a8"/>
+<circle cx="732.1875" cy="509" r="5" fill="#2269a8"/>
+<circle cx="782.8125" cy="509" r="5" fill="#2269a8"/>
+<circle cx="833.4375" cy="509" r="5" fill="#2269a8"/>
+<circle cx="884.0625" cy="509" r="5" fill="#2269a8"/>
+<circle cx="934.6875" cy="509" r="5" fill="#2269a8"/>
+<text x="983" y="516" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">length = 2</text>
+<rect x="38" y="559" width="1124" height="178" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="595" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">3 · Inverse: learn u(x) AND the unknown source f(x)</text>
+<text x="60" y="632" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Same [0, 1] interval + 100 supplied observations of u. No source targets in training.</text>
+<line x1="150" y1="685" x2="1040" y2="685" stroke="#2269a8" stroke-width="4"/>
+<circle cx="176.7" cy="685" r="6" fill="#bd6416"/>
+<circle cx="203.4" cy="685" r="6" fill="#bd6416"/>
+<circle cx="256.8" cy="685" r="6" fill="#bd6416"/>
+<circle cx="310.2" cy="685" r="6" fill="#bd6416"/>
+<circle cx="345.8" cy="685" r="6" fill="#bd6416"/>
+<circle cx="425.9" cy="685" r="6" fill="#bd6416"/>
+<circle cx="488.2" cy="685" r="6" fill="#bd6416"/>
+<circle cx="541.6" cy="685" r="6" fill="#bd6416"/>
+<circle cx="612.8" cy="685" r="6" fill="#bd6416"/>
+<circle cx="639.5" cy="685" r="6" fill="#bd6416"/>
+<circle cx="710.7" cy="685" r="6" fill="#bd6416"/>
+<circle cx="790.8" cy="685" r="6" fill="#bd6416"/>
+<circle cx="862" cy="685" r="6" fill="#bd6416"/>
+<circle cx="888.6999999999999" cy="685" r="6" fill="#bd6416"/>
+<circle cx="986.5999999999999" cy="685" r="6" fill="#bd6416"/>
+<text x="150" y="720" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">0</text>
+<text x="1040" y="720" font-size="20" fill="#172c3c" font-weight="400" text-anchor="start">1</text>
+<text x="550" y="720" font-size="20" fill="#bd6416" font-weight="400" text-anchor="middle">orange points: observed u</text>
+<text x="38" y="768" font-size="20" fill="#526573" font-weight="400" text-anchor="start">Sampling lives in optimize_lab(); inverse observations are created in main().</text>
+</g></svg>
+

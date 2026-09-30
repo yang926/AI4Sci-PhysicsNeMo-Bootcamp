@@ -1,0 +1,270 @@
+{
+  "date": "2026-09-15",
+  "physicsnemo": "2.2.2",
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.11.0-1016-nvidia-x86_64-with-glibc2.39",
+    "packages": {
+      "nvidia-physicsnemo": "2.2.2",
+      "torch": "2.14.0+cpu",
+      "numpy": "2.5.2",
+      "h5py": "3.16.0",
+      "PyYAML": "6.0.3",
+      "matplotlib": "3.11.2",
+      "pytest": "9.1.1"
+    }
+  },
+  "unit": {
+    "passed": 36,
+    "subtests_passed": 8
+  },
+  "smoke": {
+    "cases": 18,
+    "steps_each": 20,
+    "passed": true
+  },
+  "improvement": [
+    {
+      "case": "projectile",
+      "steps": 500,
+      "metric": "heldout_solution_rmse",
+      "before": 54.82265853881836,
+      "after": 0.759793221950531,
+      "required_after_before_ratio": 0.99,
+      "actual_after_before_ratio": 0.013859109393838373,
+      "passed": true,
+      "scope": "Held-out improvement only; full convergence is not certified."
+    },
+    {
+      "case": "diffusion",
+      "steps": 500,
+      "metric": "heldout_solution_rmse",
+      "before": 43.79256057739258,
+      "after": 0.06410261243581772,
+      "required_after_before_ratio": 0.99,
+      "actual_after_before_ratio": 0.0014637785868339924,
+      "passed": true,
+      "scope": "Held-out improvement only; full convergence is not certified."
+    },
+    {
+      "case": "wave_l1",
+      "steps": 500,
+      "metric": "analytical_reference_relative_l2",
+      "before": 1.684273600578308,
+      "after": 0.6446376442909241,
+      "required_after_before_ratio": 0.99,
+      "actual_after_before_ratio": 0.3827392675807439,
+      "passed": true,
+      "scope": "Held-out improvement only; full convergence is not certified."
+    },
+    {
+      "case": "operators_l1",
+      "steps": 500,
+      "metric": "test_relative_l2",
+      "before": 1.0068883895874023,
+      "after": 0.016633816063404083,
+      "required_after_before_ratio": 0.99,
+      "actual_after_before_ratio": 0.016520019731501925,
+      "passed": true,
+      "scope": "Held-out improvement only; full convergence is not certified."
+    },
+    {
+      "case": "operators_l2",
+      "steps": 500,
+      "metric": "test_relative_l2",
+      "before": 1.073968529701233,
+      "after": 0.3139120936393738,
+      "required_after_before_ratio": 0.99,
+      "actual_after_before_ratio": 0.29229170590939096,
+      "passed": true,
+      "scope": "Held-out improvement only; full convergence is not certified."
+    },
+    {
+      "case": "operators_l3",
+      "steps": 500,
+      "metric": "test_relative_l2",
+      "before": 1.0068883895874023,
+      "after": 0.01214523334056139,
+      "required_after_before_ratio": 0.99,
+      "actual_after_before_ratio": 0.01206214458937023,
+      "passed": true,
+      "scope": "Held-out improvement only; full convergence is not certified."
+    }
+  ],
+  "notebooks": {
+    "count": 12,
+    "steps": 2,
+    "embedded_plots": 20,
+    "passed": true,
+    "language": "English",
+    "cases": [
+      {
+        "id": "start",
+        "source": "Start_Here.ipynb",
+        "sha256": "4b4fc048c9ea161f196c0fd74a77ace8d66ad305bdeabb2801d90a7e2ca183a0",
+        "passed": true,
+        "embedded_images": 0,
+        "seconds": 0.6763942018151283
+      },
+      {
+        "id": "preflight",
+        "source": "ai4sci/00_environment_check.ipynb",
+        "sha256": "3637e4157bb52e8e31f9c60c4a9e104f08568dc7c5d8ed4e05137d2f801adfc7",
+        "passed": true,
+        "embedded_images": 0,
+        "seconds": 8.017918111756444
+      },
+      {
+        "id": "intro",
+        "source": "tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb",
+        "sha256": "e2ed292b488dc1798f15df368428054eaabcc3befc81eb2bbb1ac8fc1123a873",
+        "passed": true,
+        "embedded_images": 0,
+        "seconds": 0.6298535885289311
+      },
+      {
+        "id": "lab1",
+        "source": "tutorial/introduction/Introductory_Notebook.ipynb",
+        "sha256": "fe83f4f6363d9ccd66bb370b0bb296e7e0b84118653b899f0867a3dd15b06e8c",
+        "passed": true,
+        "embedded_images": 4,
+        "seconds": 24.176692474633455
+      },
+      {
+        "id": "lab2",
+        "source": "tutorial/projectile/Getting_Started_Projectile.ipynb",
+        "sha256": "f70aa012fdbd03dbb27e4481ff583be7ec860ea210b9bc5fcd99f77f6805c8b5",
+        "passed": true,
+        "embedded_images": 1,
+        "seconds": 9.173034523613751
+      },
+      {
+        "id": "lab3",
+        "source": "tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb",
+        "sha256": "6af5a31861a48299a92372331c53883eaa937a8ce23e2934408e1b210218868c",
+        "passed": true,
+        "embedded_images": 2,
+        "seconds": 15.711698453873396
+      },
+      {
+        "id": "lab4",
+        "source": "tutorial/navier_stokes/Weather-forecasting-navier-stokes.ipynb",
+        "sha256": "5642e1ab960876c5f70d6e29a1db1f2345a3ab57b1d721e7296f40fc286fb7c5",
+        "passed": true,
+        "embedded_images": 1,
+        "seconds": 8.565369271673262
+      },
+      {
+        "id": "wave",
+        "source": "challenge/wave/Advanced_Wave_Dynamics.ipynb",
+        "sha256": "cc7b6d98252e255aadcf3e3f0db3c2385a9aeaaf7ee52b1fe59616fb23dc1b0f",
+        "passed": true,
+        "embedded_images": 3,
+        "seconds": 22.25599594414234
+      },
+      {
+        "id": "fluid",
+        "source": "challenge/fuild/Fluid_Structure_Interaction.ipynb",
+        "sha256": "4ca34328fad1186e45a09d78d870fa705c34e9fc6f3d888d4f9c91780b4bb8c5",
+        "passed": true,
+        "embedded_images": 3,
+        "seconds": 22.273622686974704
+      },
+      {
+        "id": "climate",
+        "source": "challenge/climate/Multi-Physics_Climate_Modeling.ipynb",
+        "sha256": "29116b024a681f3af2ff1ab4a7609dd1c8c694855a722f4d9415e8f902016590",
+        "passed": true,
+        "embedded_images": 2,
+        "seconds": 15.225138630717993
+      },
+      {
+        "id": "operators",
+        "source": "challenge/neural_operator/Advanced_Neural_Operators.ipynb",
+        "sha256": "45efe95c76aa7a99bb6ef4e2f1fe2b68153d471e68fe65084b40d0f4f39849b6",
+        "passed": true,
+        "embedded_images": 3,
+        "seconds": 78.74099963065237
+      },
+      {
+        "id": "wave_reference",
+        "source": "ai4sci/01_Wave_PINN.ipynb",
+        "sha256": "287c71e801e7f5729580a37eeb7b39b1d522d9662564c893ace32b2c189dc8f9",
+        "passed": true,
+        "embedded_images": 1,
+        "seconds": 7.730544529855251
+      }
+    ]
+  },
+  "preserved_binary_assets": 45,
+  "gpu_tested": false,
+  "container_build_tested": false,
+  "full_convergence_certified": false,
+  "measured_source_hashes": {
+    "ai4sci/00_environment_check.ipynb": "3637e4157bb52e8e31f9c60c4a9e104f08568dc7c5d8ed4e05137d2f801adfc7",
+    "ai4sci/01_Wave_PINN.ipynb": "287c71e801e7f5729580a37eeb7b39b1d522d9662564c893ace32b2c189dc8f9",
+    "ai4sci/run_notebooks.py": "9226002f3a17395159e08828fef82d5d5b59b5ac4879efcfb2bdb3dc4eb41184",
+    "ai4sci/run_validation.py": "8e9074c2b9faf1d426e885b8e0a04ed0c1073c21c4d84f04c8a4fe821b3da64e",
+    "ai4sci/validate_materials.py": "ba3a4dda4cdb9f381fe4607855519de8119360c1a594495887f1c1a061862e68",
+    "ai4sci/wave/conf/config_wave.yaml": "4037135b74c86ed485b6b6eba9721f54979f783813aa72a06af4bed7419e793b",
+    "ai4sci/wave/test_reference.py": "16ed7ec7da09511e7b0be92b62beaef4bad78a2d52b4c621b672350c3f248ff1",
+    "ai4sci/wave/wave_baseline.py": "cf7f836e17d3cd4c2e18cacaeabbcaa1cc9fdcc0ea08f5411d28bf55163b2f10",
+    "ai4sci/wave/wave_reference.py": "43d640b89cade7ec0d755474eead5b1decb5199f7b6f3d1a997d5f5cfbc10924",
+    "challenge/climate/Multi-Physics_Climate_Modeling.ipynb": "29116b024a681f3af2ff1ab4a7609dd1c8c694855a722f4d9415e8f902016590",
+    "challenge/climate/climate_l1.py": "828fec6a0587e06acdca611426151fb9ec23b9f9beb8e6e3a6b4a8fee6bd4a6f",
+    "challenge/climate/climate_l2.py": "e427af9c9f0c0b4d59497863ef37e38e9a786ab8eb25bb3feb28312995f7aa58",
+    "challenge/climate/conf/config_atmos.yaml": "4d6842d59311e90ac2afbc617502801f16e155437a3cffd056d1ac8203226592",
+    "challenge/climate/conf/config_coupled.yaml": "9145bf2b7cc47f6e2752e589f395a98112c948d156ccf108bd73ab63a05ac540",
+    "challenge/fuild/Fluid_Structure_Interaction.ipynb": "4ca34328fad1186e45a09d78d870fa705c34e9fc6f3d888d4f9c91780b4bb8c5",
+    "challenge/fuild/chip_2d_l1.py": "ea30df3fd7dc1c5b18890f20db70c872c85d8413f3b51f1dbcdff31516db22bc",
+    "challenge/fuild/chip_2d_l2.py": "d765b82f4366714eb8ecd61be7417beb9ac9136423ad1720b496142c081e92ed",
+    "challenge/fuild/chip_2d_l3.py": "79940a1388cc47880fef4f58c1640ff6f531fcb2405e60b6a1b5417ad9d452b8",
+    "challenge/fuild/conf/config_chip_2d.yaml": "0bedb361b3a23fdb783e79c98b976065040c30186a1b51d570f5ff3f47f57f1e",
+    "challenge/fuild/fluid_geometry.py": "bd914b3fbb6f70c6eb5117cf1e2396daf6bd094407ad206173a73e88a9194ff1",
+    "challenge/neural_operator/Advanced_Neural_Operators.ipynb": "45efe95c76aa7a99bb6ef4e2f1fe2b68153d471e68fe65084b40d0f4f39849b6",
+    "challenge/neural_operator/conf/config_AFNO.yaml": "af74f20797e5cff450f3c6b261f3faf574afdf04aa0e07088ab95e490f705b98",
+    "challenge/neural_operator/conf/config_FNO.yaml": "76935c588263c1eb5e13ec342976f0a8ea3f220398b1133ae9b403945edaa1c3",
+    "challenge/neural_operator/conf/config_PINO.yaml": "2f4d2465e2e3a37e9dfd559a128ed5a706c7058e3d9eb62793e265c61ecdabbf",
+    "challenge/neural_operator/fno_physicsnemo_l1.py": "526d65cbba17b3d7fcec5e57c59185c6d60c012bb734ae2435ccc26fa19c25d0",
+    "challenge/neural_operator/fno_physicsnemo_l2.py": "e2a3b597fcb34d8e9244af82a11635cb5782391d0c0ae235e4b4131a9d679547",
+    "challenge/neural_operator/fno_physicsnemo_l3.py": "63ff1579d1b7ee9b38cfbad50e677ed768ab6b5ca00a90a07bb14d3839e0dfea",
+    "challenge/neural_operator/generate_data.py": "5a28bc006a8aacd493037dc3f92b0f04ab14ef24690214f340c646c38e714072",
+    "challenge/neural_operator/operator_training.py": "f1fc3687d530ceb151c63327ac77d9837586bbee1134aec32b59996d874d58c0",
+    "challenge/pinn_runtime.py": "a8f70a3c471f06a8f78380047f526e7dd443d71f433b947cffa58628dd8502ef",
+    "challenge/utils_metrics.py": "e03a27ea2b26f656dc99731d3af85d586619d45d25a7e18d4e23c391b5921610",
+    "challenge/wave/Advanced_Wave_Dynamics.ipynb": "cc7b6d98252e255aadcf3e3f0db3c2385a9aeaaf7ee52b1fe59616fb23dc1b0f",
+    "challenge/wave/conf/config_wave.yaml": "a98e88e18045616af6498d1c51958291c9fd892b03c28a847431b3ee87beca40",
+    "challenge/wave/wave_l1.py": "5dc45e1a244aa935cc82ebf3679c11267fcbbacc19710659aa4e92ff91dc9a4c",
+    "challenge/wave/wave_l2.py": "5ab165db567df16019bc2ba5cb7edd380c46234eaef4a06071137c739e174ec7",
+    "challenge/wave/wave_l3.py": "081517c56bd9e8637cbc5b4d70ab11d72d222f1de441a5a5a40f947f1f86ed7b",
+    "tests/test_neural_operator.py": "629c8b3bb83c1555fcc246486e84f955fbea3457c69ea2b7aeccf62a9f61c4bd",
+    "tests/test_pinn_challenges.py": "78caf7ba6fe8c790410d8d5cf2f10e760e6886dd8611f8af258c7d77ff1a5f67",
+    "tests/test_tutorials.py": "3684cd88a41162b7613b9d0033520f284aecee5dfe49ea36fcbb72f5fdcde89a",
+    "tutorial/diffusion_1d/Diffusion_Problem_Notebook.ipynb": "6af5a31861a48299a92372331c53883eaa937a8ce23e2934408e1b210218868c",
+    "tutorial/diffusion_1d/source_code/conf/config.yaml": "aa55d158e05d5256c73a520d5df10921147d3da7fa6ed08a085490c9545cbb77",
+    "tutorial/diffusion_1d/source_code/conf/config_param.yaml": "aa55d158e05d5256c73a520d5df10921147d3da7fa6ed08a085490c9545cbb77",
+    "tutorial/diffusion_1d/source_code/diffusion_bar.py": "f4a90dbbf403ddf105c1300f0025dbeebcdb7fc3cabfc3d5f74376a79136fc62",
+    "tutorial/diffusion_1d/source_code/diffusion_bar_parameterized.py": "0e4caccdc30d9cbc226f00d3379468c8f4f1c3adfbc64cfbbc16150dedf3bdfc",
+    "tutorial/diffusion_1d/source_code/plot_results.py": "07c1c12899d5cf38c6ecc1b939204c28988a45cc910317512939bd936b5d13ca",
+    "tutorial/diffusion_1d/source_code/plot_results_parameterized.py": "ee6f094f299ac3dd86b49d72d0031fae7a5a80ee7d3e8e652a9cb5b5422eba6b",
+    "tutorial/introduction/Getting_Started_PhysicsNeMo.ipynb": "e2ed292b488dc1798f15df368428054eaabcc3befc81eb2bbb1ac8fc1123a873",
+    "tutorial/introduction/Introductory_Notebook.ipynb": "fe83f4f6363d9ccd66bb370b0bb296e7e0b84118653b899f0867a3dd15b06e8c",
+    "tutorial/introduction/source_code/pinn_basics.py": "2e8bbd81a2d523e5a0ccba5d97584738f870fcf9fc86e09b7244a5382bdf7598",
+    "tutorial/navier_stokes/Weather-forecasting-navier-stokes.ipynb": "5642e1ab960876c5f70d6e29a1db1f2345a3ab57b1d721e7296f40fc286fb7c5",
+    "tutorial/navier_stokes/source_code/conf/config.yaml": "e55b9cc7c630690edaffd449c3e8988e29a676c621a7a7eb7a057c4b402934b7",
+    "tutorial/navier_stokes/source_code/navier_stokes.py": "7986afa4e6b5984925cec82420a8b8f8948730a16207ecbdc0ea4f7a37dc1a88",
+    "tutorial/projectile/Getting_Started_Projectile.ipynb": "f70aa012fdbd03dbb27e4481ff583be7ec860ea210b9bc5fcd99f77f6805c8b5",
+    "tutorial/projectile/source_code/conf/config.yaml": "aa55d158e05d5256c73a520d5df10921147d3da7fa6ed08a085490c9545cbb77",
+    "tutorial/projectile/source_code/projectile.py": "2b88c1701556e1425f6948dfc89c3f94dab8a94b9483ded6dcf48e98fe0f6683",
+    "tutorial/projectile/source_code/projectile_eqn.py": "c6a16c9d6ec9a95cc2cb9271c7d0f33e5fdafb0abb4ac17042cdc8a17d3ea9af",
+    "tutorial/runtime.py": "da852f6a7cafb9f10112bc85a9a9b008ffe8162648e8179444e49ea09b1124ec"
+  },
+  "english_only_scan": {
+    "text_files": 75,
+    "hangul_matches": 0,
+    "decoded_json_checked": true,
+    "original_raster_images_checked": 32,
+    "original_pdf_checked": 1
+  },
+  "tests_language": "English"
+}

@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="956" viewBox="0 0 1200 956" role="img" aria-labelledby="title desc">
+<title id="title">Challenge 3 · One square, time, and two temperature fields</title>
+<desc id="desc">Interior and boundary samples occupy the same square from zero to pi. Initial samples use t zero; PDE and boundary samples span zero to two pi. Level one predicts T, level two predicts Ta and To with zero heat exchange in the default baseline.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+<path d="M0,0 L8,4 L0,8Z" fill="#526573"/>
+</marker>
+</defs>
+<rect width="1200" height="956" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="40" y="52" font-size="34" fill="#172c3c" text-anchor="start" font-weight="650">Challenge 3 · One square, time, and two temperature fields</text>
+<text x="40" y="91" font-size="24" fill="#526573" text-anchor="start" font-weight="400">A space-time training domain, not a weather map or a forecast dataset.</text>
+<text x="65" y="144" font-size="27" fill="#172c3c" text-anchor="start" font-weight="600">Same square for both levels</text>
+<rect x="95" y="184" width="390" height="390" fill="#eef5fc" stroke="#bd6416" stroke-width="4"/>
+<circle cx="119" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="167" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="215" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="263" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="311" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="359" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="407" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="455" cy="207" r="4.4" fill="#2269a8"/>
+<circle cx="122" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="170" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="218" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="266" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="314" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="362" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="410" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="458" cy="255" r="4.4" fill="#2269a8"/>
+<circle cx="119" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="167" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="215" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="263" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="311" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="359" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="407" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="455" cy="303" r="4.4" fill="#2269a8"/>
+<circle cx="122" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="170" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="218" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="266" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="314" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="362" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="410" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="458" cy="351" r="4.4" fill="#2269a8"/>
+<circle cx="119" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="167" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="215" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="263" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="311" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="359" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="407" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="455" cy="399" r="4.4" fill="#2269a8"/>
+<circle cx="122" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="170" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="218" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="266" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="314" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="362" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="410" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="458" cy="447" r="4.4" fill="#2269a8"/>
+<circle cx="119" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="167" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="215" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="263" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="311" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="359" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="407" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="455" cy="495" r="4.4" fill="#2269a8"/>
+<circle cx="122" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="170" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="218" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="266" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="314" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="362" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="410" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="458" cy="543" r="4.4" fill="#2269a8"/>
+<circle cx="95" cy="184" r="5" fill="#bd6416"/>
+<circle cx="95" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="184" r="5" fill="#bd6416"/>
+<circle cx="485" cy="184" r="5" fill="#bd6416"/>
+<circle cx="143.75" cy="184" r="5" fill="#bd6416"/>
+<circle cx="143.75" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="232.75" r="5" fill="#bd6416"/>
+<circle cx="485" cy="232.75" r="5" fill="#bd6416"/>
+<circle cx="192.5" cy="184" r="5" fill="#bd6416"/>
+<circle cx="192.5" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="281.5" r="5" fill="#bd6416"/>
+<circle cx="485" cy="281.5" r="5" fill="#bd6416"/>
+<circle cx="241.25" cy="184" r="5" fill="#bd6416"/>
+<circle cx="241.25" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="330.25" r="5" fill="#bd6416"/>
+<circle cx="485" cy="330.25" r="5" fill="#bd6416"/>
+<circle cx="290" cy="184" r="5" fill="#bd6416"/>
+<circle cx="290" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="379" r="5" fill="#bd6416"/>
+<circle cx="485" cy="379" r="5" fill="#bd6416"/>
+<circle cx="338.75" cy="184" r="5" fill="#bd6416"/>
+<circle cx="338.75" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="427.75" r="5" fill="#bd6416"/>
+<circle cx="485" cy="427.75" r="5" fill="#bd6416"/>
+<circle cx="387.5" cy="184" r="5" fill="#bd6416"/>
+<circle cx="387.5" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="476.5" r="5" fill="#bd6416"/>
+<circle cx="485" cy="476.5" r="5" fill="#bd6416"/>
+<circle cx="436.25" cy="184" r="5" fill="#bd6416"/>
+<circle cx="436.25" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="525.25" r="5" fill="#bd6416"/>
+<circle cx="485" cy="525.25" r="5" fill="#bd6416"/>
+<circle cx="485" cy="184" r="5" fill="#bd6416"/>
+<circle cx="485" cy="574" r="5" fill="#bd6416"/>
+<circle cx="95" cy="574" r="5" fill="#bd6416"/>
+<circle cx="485" cy="574" r="5" fill="#bd6416"/>
+<text x="89" y="609" font-size="23" fill="#526573" text-anchor="start" font-weight="400">0</text>
+<text x="477" y="609" font-size="23" fill="#526573" text-anchor="start" font-weight="400">π</text>
+<text x="296" y="610" font-size="23" fill="#526573" text-anchor="start" font-weight="400">x</text>
+<text x="66" y="198" font-size="23" fill="#526573" text-anchor="start" font-weight="400">π</text>
+<text x="57" y="387" font-size="23" fill="#526573" text-anchor="start" font-weight="400">y</text>
+<text x="65" y="574" font-size="23" fill="#526573" text-anchor="start" font-weight="400">0</text>
+<rect x="560" y="165" width="600" height="104" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="580" y="201" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">Level 1: one field</text>
+<text x="580" y="237" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">(x, y, t) → T</text>
+<rect x="560" y="319" width="250" height="100" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="580" y="355" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">Atmosphere</text>
+<text x="580" y="391" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Ta(x, y, t)</text>
+<rect x="907" y="319" width="253" height="100" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="927" y="355" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">Ocean</text>
+<text x="927" y="391" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">To(x, y, t)</text>
+<path d="M815 351H898" fill="none" stroke="#526573" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#arrow)"/>
+<path d="M899 392H815" fill="none" stroke="#526573" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#arrow)"/>
+<text x="560" y="300" font-size="26" fill="#172c3c" text-anchor="start" font-weight="600">Level 2: two fields on the same square</text>
+<text x="560" y="462" font-size="22" fill="#526573" text-anchor="start" font-weight="400">Heat exchange is a PDE term, not a third axis.</text>
+<text x="560" y="494" font-size="22" fill="#526573" text-anchor="start" font-weight="400">Default gamma0 = 0: exchange is OFF.</text>
+<text x="560" y="526" font-size="22" fill="#526573" text-anchor="start" font-weight="400">Nonzero gamma0 is a separate experiment.</text>
+<text x="560" y="558" font-size="22" fill="#526573" text-anchor="start" font-weight="400">This diagram does not change the baseline.</text>
+<path d="M95 690H1090" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="95" y="736" font-size="24" fill="#172c3c" text-anchor="middle" font-weight="400">t = 0</text>
+<text x="1075" y="736" font-size="24" fill="#172c3c" text-anchor="middle" font-weight="400">t = 2π</text>
+<circle cx="165" cy="690" r="5" fill="#2269a8"/>
+<circle cx="260" cy="690" r="5" fill="#2269a8"/>
+<circle cx="355" cy="690" r="5" fill="#2269a8"/>
+<circle cx="450" cy="690" r="5" fill="#2269a8"/>
+<circle cx="545" cy="690" r="5" fill="#2269a8"/>
+<circle cx="640" cy="690" r="5" fill="#2269a8"/>
+<circle cx="735" cy="690" r="5" fill="#2269a8"/>
+<circle cx="830" cy="690" r="5" fill="#2269a8"/>
+<circle cx="925" cy="690" r="5" fill="#2269a8"/>
+<circle cx="1020" cy="690" r="5" fill="#2269a8"/>
+<circle cx="95" cy="690" r="7" fill="#bd6416"/>
+<text x="95" y="656" font-size="23" fill="#bd6416" text-anchor="start" font-weight="400">Initial points</text>
+<text x="504" y="656" font-size="23" fill="#2269a8" text-anchor="start" font-weight="400">Interior and boundary points span time</text>
+<rect x="40" y="783" width="1120" height="107" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="819" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Where to find the domain</text>
+<text x="60" y="855" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">sample_square: [0, π]² • sample_time: [0, 2π] • initial points use t = 0</text>
+<text x="40" y="928" font-size="21" fill="#526573" text-anchor="start" font-weight="400">Sampling schematic only. Point locations do not show temperature values.</text>
+</g>
+</svg>

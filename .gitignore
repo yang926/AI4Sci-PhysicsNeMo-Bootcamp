@@ -1,0 +1,27 @@
+.ipynb_checkpoints
+__pycache__
+.Trash_0
+.cursor/
+
+# Personal run artifacts and credentials
+ETC/course_materials/wave/runs/
+**/outputs/
+/ETC/reference_labs/04_navier_stokes/instructor_models/
+.env
+.env.*
+.cdsapirc
+*.pem
+
+# Reproducible execution results stay separate from teaching source.
+.venv/
+.pytest_cache/
+ETC/validation-runs/
+/ETC/environment/LOCAL_UV_SETUP.md
+/ETC/environment/requirements-wsl-cuda.lock.txt
+/ETC/course_materials/LOCAL_EVENT_NOTES.md
+**/runs/
+**/datasets/Reaction_Diffusion/
+**/datasets/smoke_*/
+
+# macOS resource fork metadata is not course content.
+._*

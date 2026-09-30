@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="966" viewBox="0 0 1200 966" role="img" aria-labelledby="title desc">
+<title id="title">Challenge 2 · From your code to the loss</title>
+<desc id="desc">Student geometry controls fluid samples; student equations populate a PDE object consumed by PhysicsInformer; student conditions enter separate boundary and integral losses. The sum trains a FullyConnected neural network with PyTorch Adam.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+<path d="M0,0 L8,4 L0,8Z" fill="#526573"/>
+</marker>
+</defs>
+<rect width="1200" height="966" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="40" y="52" font-size="34" fill="#172c3c" text-anchor="start" font-weight="650">Challenge 2 · From your code to the loss</text>
+<text x="40" y="91" font-size="24" fill="#526573" text-anchor="start" font-weight="400">Three student functions enter three different parts of the training program.</text>
+<rect x="40" y="130" width="345" height="128" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_geometry</text>
+<text x="60" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">rectangle descriptions</text>
+<text x="60" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ block_geometry</text>
+<rect x="425" y="130" width="350" height="128" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="445" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_equations</text>
+<text x="445" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">NavierStokes2D(PDE)</text>
+<text x="445" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ self.equations</text>
+<rect x="815" y="130" width="345" height="128" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="835" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_conditions</text>
+<text x="835" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">inlet / outlet / walls / flux</text>
+<text x="835" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Level 3: initial state too</text>
+<path d="M210 258V293" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M600 258V293" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M986 258V512" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="40" y="295" width="345" height="152" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="331" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Sample the fluid</text>
+<text x="60" y="367" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">sample_interior / sample_walls</text>
+<text x="60" y="399" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">sample_inlet / sample_flux</text>
+<text x="60" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Level 3: time_sample</text>
+<rect x="425" y="295" width="350" height="152" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="445" y="331" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">create_informer</text>
+<text x="445" y="367" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PhysicsNeMo PhysicsInformer</text>
+<text x="445" y="399" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">spatial derivatives</text>
+<text x="445" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">and symbolic PDE residuals</text>
+<rect x="40" y="490" width="345" height="160" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="60" y="526" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">create_model</text>
+<text x="60" y="562" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PhysicsNeMo FullyConnected</text>
+<text x="60" y="594" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L1/2: (x, y) → (u, v, p)</text>
+<text x="60" y="626" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L3: (x, y, t) → (u, v, p)</text>
+<path d="M212 447V488" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M385 565H407V419H423" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="43" y="689" font-size="21" fill="#526573" text-anchor="start" font-weight="400">residuals supplies fields;</text>
+<text x="43" y="719" font-size="21" fill="#526573" text-anchor="start" font-weight="400">PyTorch supplies time derivatives.</text>
+<rect x="425" y="515" width="350" height="135" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="445" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">PDE losses</text>
+<text x="445" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">residuals → informer.forward</text>
+<text x="445" y="619" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">SDF-weighted residual squares</text>
+<path d="M600 447V512" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="815" y="515" width="345" height="135" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="835" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Condition losses</text>
+<text x="835" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">condition_tensor targets</text>
+<text x="835" y="619" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">compare with model fields</text>
+<path d="M385 620H407V470H794V606H813" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="425" y="755" width="735" height="132" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="445" y="791" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">loss_terms → record_step → total loss</text>
+<text x="445" y="827" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PyTorch: zero_grad → backward → Adam.step</text>
+<text x="445" y="859" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Update network weights, not PDE expressions.</text>
+<path d="M600 650V750" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M989 650V750" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M425 823H20V570H38" fill="none" stroke="#7658a3" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#arrow)"/>
+<text x="40" y="933" font-size="22" fill="#526573" text-anchor="start" font-weight="400">Solid shape chooses where to train. Conditions and equations choose what to enforce.</text>
+</g>
+</svg>

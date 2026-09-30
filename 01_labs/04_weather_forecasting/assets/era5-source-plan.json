@@ -1,0 +1,639 @@
+{
+  "initial_time_utc": "2022-09-01T00:00:00Z",
+  "metadata_url": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3/.zmetadata",
+  "metadata_sha256": "1d146045a5907243d64c073a91d1ed80a78f58be1f058f7b438bf0ec31f76596",
+  "planned_compressed_chunk_bytes": 621736282,
+  "weather_object_count": 45,
+  "requests": [
+    {
+      "key": "latitude/0",
+      "variable": "latitude",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/latitude/0",
+        "generation": "1695106090869994",
+        "size": "844",
+        "md5Hash": "JX6fRsxgIQnpv4tc8jt6fA==",
+        "crc32c": "CMpaxg=="
+      }
+    },
+    {
+      "key": "longitude/0",
+      "variable": "longitude",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/longitude/0",
+        "generation": "1695107131734434",
+        "size": "1587",
+        "md5Hash": "kB4jVZwNnqjefmCsOAx5JA==",
+        "crc32c": "PDPzIg=="
+      }
+    },
+    {
+      "key": "level/0",
+      "variable": "level",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/level/0",
+        "generation": "1695106502581836",
+        "size": "95",
+        "md5Hash": "8Ym/SGlzbsniSIuPRX4onQ==",
+        "crc32c": "lqjbaw=="
+      }
+    },
+    {
+      "key": "time/15",
+      "variable": "time",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/time/15",
+        "generation": "1699598530107612",
+        "size": "3577",
+        "md5Hash": "sURuLfgSM/5v8gW1KhwlTg==",
+        "crc32c": "YD3OOA=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075272.0.0",
+        "generation": "1695412445790525",
+        "size": "3324237",
+        "md5Hash": "NE5FfwW0p43MX4lQTmyCfg==",
+        "crc32c": "VjcSaw=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075272.0.0",
+        "generation": "1695412445024900",
+        "size": "3348837",
+        "md5Hash": "swAZYZavBtKiBVoZnVTmtQ==",
+        "crc32c": "MB6krg=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075272.0.0",
+        "generation": "1695412444193963",
+        "size": "2328503",
+        "md5Hash": "94a/eyB2KYWa1+MwYPpCBg==",
+        "crc32c": "B1OoHQ=="
+      }
+    },
+    {
+      "variable": "surface_pressure",
+      "key": "surface_pressure/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/surface_pressure/1075272.0.0",
+        "generation": "1695412441088735",
+        "size": "2378709",
+        "md5Hash": "JPFv3Z/So70ITrDKjnQ5FA==",
+        "crc32c": "TNwnCg=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075272.0.0",
+        "generation": "1695412443520102",
+        "size": "2168683",
+        "md5Hash": "o66RFsN3E2NoJOgtM1EAsQ==",
+        "crc32c": "WrKmXg=="
+      }
+    },
+    {
+      "variable": "total_column_water_vapour",
+      "key": "total_column_water_vapour/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/total_column_water_vapour/1075272.0.0",
+        "generation": "1695412439036947",
+        "size": "2931384",
+        "md5Hash": "RtpSUIXRT1tzcmxTOmRFGA==",
+        "crc32c": "1YUAmg=="
+      }
+    },
+    {
+      "variable": "100m_u_component_of_wind",
+      "key": "100m_u_component_of_wind/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/100m_u_component_of_wind/1075272.0.0",
+        "generation": "1695412465657547",
+        "size": "3310080",
+        "md5Hash": "ktCwNA6uY4DAGZplzBQBqQ==",
+        "crc32c": "NxbViQ=="
+      }
+    },
+    {
+      "variable": "100m_v_component_of_wind",
+      "key": "100m_v_component_of_wind/1075272.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/100m_v_component_of_wind/1075272.0.0",
+        "generation": "1695412466424276",
+        "size": "3346136",
+        "md5Hash": "bm4Hkmpt4JpITYxqywSY2Q==",
+        "crc32c": "dIzUlg=="
+      }
+    },
+    {
+      "variable": "temperature",
+      "key": "temperature/1075272.0.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/temperature/1075272.0.0.0",
+        "generation": "1695412658901065",
+        "size": "85263897",
+        "md5Hash": "pTxfxMI3sC8iPHpm25MTlw==",
+        "crc32c": "Xo0hnw=="
+      }
+    },
+    {
+      "variable": "u_component_of_wind",
+      "key": "u_component_of_wind/1075272.0.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/u_component_of_wind/1075272.0.0.0",
+        "generation": "1695412677132936",
+        "size": "117997297",
+        "md5Hash": "xfySYh1fXFCfrK+SnIj3xw==",
+        "crc32c": "xfAo/Q=="
+      }
+    },
+    {
+      "variable": "v_component_of_wind",
+      "key": "v_component_of_wind/1075272.0.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/v_component_of_wind/1075272.0.0.0",
+        "generation": "1695412696387254",
+        "size": "122036715",
+        "md5Hash": "TDaRNwKeej1pH/JTz0IgVg==",
+        "crc32c": "ZK3MIw=="
+      }
+    },
+    {
+      "variable": "geopotential",
+      "key": "geopotential/1075272.0.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/geopotential/1075272.0.0.0",
+        "generation": "1695412628918656",
+        "size": "80279567",
+        "md5Hash": "EYns5oDk5BNlp+nEXYmZag==",
+        "crc32c": "LMNEWw=="
+      }
+    },
+    {
+      "variable": "specific_humidity",
+      "key": "specific_humidity/1075272.0.0.0",
+      "lead_hours": 0,
+      "purpose": "initial",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/specific_humidity/1075272.0.0.0",
+        "generation": "1695412645214022",
+        "size": "103753218",
+        "md5Hash": "uBjNi7C+uAIw2/rQINWshA==",
+        "crc32c": "slhXTA=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075278.0.0",
+      "lead_hours": 6,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075278.0.0",
+        "generation": "1695412445776643",
+        "size": "3316272",
+        "md5Hash": "lBzKK4l0+4hlyEHTG+V/2Q==",
+        "crc32c": "FW3uGA=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075278.0.0",
+      "lead_hours": 6,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075278.0.0",
+        "generation": "1695412445028332",
+        "size": "3340753",
+        "md5Hash": "RgoxtPT4ik51r/NMZU4T5w==",
+        "crc32c": "sk2IGA=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075278.0.0",
+      "lead_hours": 6,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075278.0.0",
+        "generation": "1695412443559639",
+        "size": "2169863",
+        "md5Hash": "rZHBqIxGGLTA2EAqYVDuZw==",
+        "crc32c": "MF9MBQ=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075278.0.0",
+      "lead_hours": 6,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075278.0.0",
+        "generation": "1695412444180791",
+        "size": "2326939",
+        "md5Hash": "WvzJ3CBU7vA8NsidawBlxA==",
+        "crc32c": "p8I01g=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075284.0.0",
+      "lead_hours": 12,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075284.0.0",
+        "generation": "1695412445799385",
+        "size": "3318678",
+        "md5Hash": "ZtmlzXavlvoR+86G+3iM+g==",
+        "crc32c": "bfKXhA=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075284.0.0",
+      "lead_hours": 12,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075284.0.0",
+        "generation": "1695412445018719",
+        "size": "3338157",
+        "md5Hash": "8BXDvuAuxtuU1Qqwz9Jywg==",
+        "crc32c": "tDePVA=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075284.0.0",
+      "lead_hours": 12,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075284.0.0",
+        "generation": "1695412443553278",
+        "size": "2168588",
+        "md5Hash": "Mkh4seE9GMa2zhsuF978sQ==",
+        "crc32c": "t9PQHQ=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075284.0.0",
+      "lead_hours": 12,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075284.0.0",
+        "generation": "1695412444172799",
+        "size": "2327439",
+        "md5Hash": "seWILJOsw9pc3LVDB6B9zw==",
+        "crc32c": "cwg8qw=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075290.0.0",
+      "lead_hours": 18,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075290.0.0",
+        "generation": "1695412445791588",
+        "size": "3322628",
+        "md5Hash": "U4VZfDsFUbmr4H3+2n4uAg==",
+        "crc32c": "d57p0g=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075290.0.0",
+      "lead_hours": 18,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075290.0.0",
+        "generation": "1695412445007882",
+        "size": "3337406",
+        "md5Hash": "AZJTMMXRcuvnucEX/U4Z5A==",
+        "crc32c": "i1AiXQ=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075290.0.0",
+      "lead_hours": 18,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075290.0.0",
+        "generation": "1695412443546687",
+        "size": "2168694",
+        "md5Hash": "b0Mp3lCVVMN0Wby3r2KjkQ==",
+        "crc32c": "l4hjKw=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075290.0.0",
+      "lead_hours": 18,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075290.0.0",
+        "generation": "1695412444151939",
+        "size": "2330820",
+        "md5Hash": "ZYwfLMXkKP22zLjvGdknrg==",
+        "crc32c": "hKB2/A=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075296.0.0",
+      "lead_hours": 24,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075296.0.0",
+        "generation": "1695446907512818",
+        "size": "3324822",
+        "md5Hash": "qdI6blOolblJtS/fwNnVeg==",
+        "crc32c": "1SCLYA=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075296.0.0",
+      "lead_hours": 24,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075296.0.0",
+        "generation": "1695446906577616",
+        "size": "3338642",
+        "md5Hash": "C1DP8z9OAQB1BhPpZpUjWg==",
+        "crc32c": "0hS4qw=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075296.0.0",
+      "lead_hours": 24,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075296.0.0",
+        "generation": "1695446904884280",
+        "size": "2171133",
+        "md5Hash": "cconnScgitksbz4cy0YtUw==",
+        "crc32c": "fTU/Kg=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075296.0.0",
+      "lead_hours": 24,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075296.0.0",
+        "generation": "1695446905708133",
+        "size": "2324858",
+        "md5Hash": "x9IWAisuLVGSTXMl57Ro/A==",
+        "crc32c": "Q01PlA=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075302.0.0",
+      "lead_hours": 30,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075302.0.0",
+        "generation": "1695446907512746",
+        "size": "3313563",
+        "md5Hash": "nranawHUsN6FqXTcnq+7iw==",
+        "crc32c": "rjwgvg=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075302.0.0",
+      "lead_hours": 30,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075302.0.0",
+        "generation": "1695446906592706",
+        "size": "3335190",
+        "md5Hash": "D+OadWGy5YIJ/M6NOturfw==",
+        "crc32c": "4DVdGg=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075302.0.0",
+      "lead_hours": 30,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075302.0.0",
+        "generation": "1695446904871439",
+        "size": "2172029",
+        "md5Hash": "N+/Dx7B4qslKzXkyx0iSSg==",
+        "crc32c": "cTLAjQ=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075302.0.0",
+      "lead_hours": 30,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075302.0.0",
+        "generation": "1695446905692471",
+        "size": "2323222",
+        "md5Hash": "axQ9E48ZVPuWbyBgpUvyFw==",
+        "crc32c": "PnoHcQ=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075308.0.0",
+      "lead_hours": 36,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075308.0.0",
+        "generation": "1695446907542922",
+        "size": "3316041",
+        "md5Hash": "ELEWQDxB5jukwV2WD4ie3w==",
+        "crc32c": "YbF1ew=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075308.0.0",
+      "lead_hours": 36,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075308.0.0",
+        "generation": "1695446906609192",
+        "size": "3340987",
+        "md5Hash": "wmNzlvzGG8Ctwb+Mh7A6gg==",
+        "crc32c": "WN7exw=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075308.0.0",
+      "lead_hours": 36,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075308.0.0",
+        "generation": "1695446904905038",
+        "size": "2174215",
+        "md5Hash": "zYuvoayGTOAfxjQzQUmEaw==",
+        "crc32c": "vqrIVQ=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075308.0.0",
+      "lead_hours": 36,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075308.0.0",
+        "generation": "1695446905699904",
+        "size": "2325033",
+        "md5Hash": "V/8BC3YcXtcEhMqiCrlxBA==",
+        "crc32c": "+/33tg=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075314.0.0",
+      "lead_hours": 42,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075314.0.0",
+        "generation": "1695446907606537",
+        "size": "3320840",
+        "md5Hash": "oZ2V0ps2a5PwMmTc0p0nOg==",
+        "crc32c": "xtFYnA=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075314.0.0",
+      "lead_hours": 42,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075314.0.0",
+        "generation": "1695446906571266",
+        "size": "3338789",
+        "md5Hash": "NEDcXdgLidlomctHx0YMZg==",
+        "crc32c": "LtAVMA=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075314.0.0",
+      "lead_hours": 42,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075314.0.0",
+        "generation": "1695446904870944",
+        "size": "2178660",
+        "md5Hash": "hnPSpcKyu1jM5t8I1jL+Ew==",
+        "crc32c": "9Vv9gQ=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075314.0.0",
+      "lead_hours": 42,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075314.0.0",
+        "generation": "1695446905661836",
+        "size": "2328317",
+        "md5Hash": "0y9hWeIiAKIa+ZtUCwbxJw==",
+        "crc32c": "SrZtrg=="
+      }
+    },
+    {
+      "variable": "10m_u_component_of_wind",
+      "key": "10m_u_component_of_wind/1075320.0.0",
+      "lead_hours": 48,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_u_component_of_wind/1075320.0.0",
+        "generation": "1695369578693102",
+        "size": "3321107",
+        "md5Hash": "2dmst63Qz086Fy+djcqTyQ==",
+        "crc32c": "8UweJA=="
+      }
+    },
+    {
+      "variable": "10m_v_component_of_wind",
+      "key": "10m_v_component_of_wind/1075320.0.0",
+      "lead_hours": 48,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/10m_v_component_of_wind/1075320.0.0",
+        "generation": "1695369577807560",
+        "size": "3343417",
+        "md5Hash": "BOckSVB5PN9V5yIg7Qo0og==",
+        "crc32c": "MdvL/A=="
+      }
+    },
+    {
+      "variable": "mean_sea_level_pressure",
+      "key": "mean_sea_level_pressure/1075320.0.0",
+      "lead_hours": 48,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/mean_sea_level_pressure/1075320.0.0",
+        "generation": "1695369576295561",
+        "size": "2177375",
+        "md5Hash": "XJ/wASg2ffZM/fOBfA8C3g==",
+        "crc32c": "ISK3tA=="
+      }
+    },
+    {
+      "variable": "2m_temperature",
+      "key": "2m_temperature/1075320.0.0",
+      "lead_hours": 48,
+      "purpose": "truth",
+      "object_metadata": {
+        "name": "ar/full_37-1h-0p25deg-chunk-1.zarr-v3/2m_temperature/1075320.0.0",
+        "generation": "1695369576988440",
+        "size": "2328439",
+        "md5Hash": "SoLKjIZ3fMNJFnWOKrf2gg==",
+        "crc32c": "mjBwDA=="
+      }
+    }
+  ],
+  "max_download_bytes": 2000000000
+}

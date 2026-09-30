@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">How sample_circle constructs a filled disk and its boundary</title>
+<desc id="desc">Pick an angle theta and a radius r. The Cartesian point is x equals r cosine theta, y equals r sine theta. Interior radius is square root U with U uniform in zero to one, which samples area uniformly. Boundary radius is exactly one. The center is zero zero and the outer radius is one. No mesh or circle object is constructed.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#526573"/></marker></defs>
+<rect width="1200" height="720" fill="#ffffff"/>
+<g font-family="Arial, sans-serif" fill="#172c3c">
+<text x="36" y="45" font-size="30" font-weight="bold">How is the circle expressed in code?</text>
+<text x="36" y="81" font-size="22" fill="#526573">ETC/runtime/pinn.py → sample_circle(count, device, boundary=False)</text>
+<circle cx="290" cy="310" r="166" fill="#edf5fb" stroke="#2269a8" stroke-width="2"/>
+<g stroke="#526573" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+<path marker-end="url(#arrow)" d="M90 310H507"/><path marker-end="url(#arrow)" d="M290 502V113"/></g>
+<g font-size="22"><text x="515" y="318">x</text><text x="267" y="120">y</text>
+<text x="270" y="337">0</text><text x="452" y="338">1</text><text x="307" y="155">1</text></g>
+<path d="M290 310L394 222" stroke="#147d72" stroke-width="4"/>
+<path d="M394 222V310M290 222H394" fill="none" stroke="#526573" stroke-dasharray="5 5" stroke-width="1.5"/>
+<path d="M336 310A46 46 0 0 0 325 280" fill="none" stroke="#147d72" stroke-width="2"/>
+<circle cx="394" cy="222" r="7" fill="#147d72"/>
+<g font-size="24"><text x="348" y="299">θ</text><text x="328" y="254">r</text>
+<text x="340" y="359">r cos θ</text><text x="176" y="247">r sin θ</text>
+<text x="355" y="202">point (x, y)</text></g>
+<text x="102" y="537" font-size="25">x = r cos θ</text><text x="303" y="537" font-size="25">y = r sin θ</text>
+<text x="92" y="578" font-size="22" fill="#526573">θ turns the point around the center.</text>
+<text x="92" y="611" font-size="22" fill="#526573">r sets its distance from the center.</text>
+<rect x="593" y="119" width="560" height="109" rx="8" fill="#f1f5f8"/>
+<text x="618" y="154" font-size="24" font-weight="bold">1. Draw the angle</text>
+<text x="618" y="194" font-size="25">θ = 2π × rand(...)     →     0 ≤ θ &lt; 2π</text>
+<rect x="593" y="252" width="560" height="154" rx="8" fill="#edf5fb"/>
+<circle cx="622" cy="285" r="6" fill="#2269a8"/>
+<text x="640" y="294" font-size="24" font-weight="bold">2a. Interior points: fill the disk</text>
+<text x="618" y="333" font-size="25">r = sqrt(rand_like(θ))</text>
+<text x="618" y="370" font-size="22">Uniform area: area inside r is proportional to r².</text>
+<rect x="593" y="430" width="560" height="119" rx="8" fill="#fff3e7"/>
+<rect x="616" y="457" width="12" height="12" fill="#bd6416"/>
+<text x="640" y="470" font-size="24" font-weight="bold">2b. Boundary: stay on the circle</text>
+<text x="618" y="513" font-size="25">r = ones_like(θ)     →     r = 1</text>
+<rect x="593" y="573" width="560" height="70" rx="8" fill="#eef6f4"/>
+<text x="618" y="616" font-size="24">3. Return the (x, y) coordinate pairs</text>
+<text x="36" y="685" font-size="22">The sampler defines WHERE. student_conditions defines WHAT to enforce on these points.</text>
+</g></svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1010" viewBox="0 0 1200 1010" role="img" aria-labelledby="title desc">
+<title id="title">Lab 3 · learn two fields, then reuse the saved model</title><desc id="desc">Position and conductivity enter two PhysicsNeMo FullyConnected networks inside CompositeBar. Separate Diffusion PDEs evaluate the left and right field and DiffusionInterface evaluates temperature and flux jumps at x equals one. Three PhysicsInformer objects calculate these residuals. Losses update both networks using Adam then L-BFGS. Saved weights can be loaded for new conductivities without further training.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs><rect width="1200" height="1010" fill="#ffffff"/><g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 3 · learn two fields, then reuse the saved model</text><text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<rect x="38" y="116" width="333" height="173" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">loss_terms(): inputs</text>
+<text x="60" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">x_l, x_r and x_i = 1</text>
+<text x="60" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">D₁ = 10, or D₁ ∈ [5, 25].</text>
+<text x="60" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Fixed or parameterized run.</text>
+<rect x="425" y="116" width="737" height="173" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="447" y="152" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">CompositeBar.forward → left / right networks</text>
+<text x="447" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Each mlp() is a PhysicsNeMo FullyConnected network.</text>
+<text x="447" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Output transforms impose the two endpoint temperatures exactly.</text>
+<text x="447" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Family inputs: x and the normalized resistance ratio D₂ / D₁.</text>
+<path d="M 371 205 H 425" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="348" width="485" height="173" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="384" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">PDE objects store equations</text>
+<text x="60" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Diffusion(field='u_1', conductivity='D1')</text>
+<text x="60" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Diffusion(field='u_2', conductivity=D2)</text>
+<text x="60" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">DiffusionInterface(): temperature / flux</text>
+<text x="60" y="508" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">These PDE objects are not network layers.</text>
+<rect x="580" y="348" width="582" height="173" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="602" y="384" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">Three PhysicsInformer objects</text>
+<text x="602" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">physics[0]: left diffusion residual</text>
+<text x="602" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">physics[1]: right diffusion residual</text>
+<text x="602" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">physics[2]: interface temperature / flux</text>
+<text x="602" y="508" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">All differentiate the predicted fields in x.</text>
+<path d="M 523 435 H 580" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 935 289 V 348" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="582" width="568" height="174" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="618" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">loss_terms()</text>
+<text x="60" y="655" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">physics + interface_temperature</text>
+<text x="60" y="684" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">                + interface_flux + boundary</text>
+<text x="60" y="713" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Endpoint transforms make boundary loss zero.</text>
+<text x="60" y="742" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The interface values are still learned.</text>
+<rect x="666" y="582" width="496" height="174" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="688" y="618" font-size="24" fill="#7658a3" font-weight="600" text-anchor="start">optimize_lab()</text>
+<text x="688" y="655" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">200 Adam calls: random batches</text>
+<text x="688" y="684" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">100 L-BFGS calls: fixed points</text>
+<text x="688" y="713" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Both networks receive gradient updates.</text>
+<text x="688" y="742" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">L-BFGS may repeat its closure per call.</text>
+<path d="M 860 521 V 552 H 317 V 582" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 606 669 H 666" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="819" width="302" height="149" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="855" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">save_run()</text>
+<text x="60" y="892" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Write model.pt</text>
+<text x="60" y="921" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">and the training results.</text>
+<rect x="390" y="819" width="410" height="149" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="412" y="855" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">load_checkpoint()</text>
+<text x="412" y="892" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">infer_checkpoint(..., dvals)</text>
+<text x="412" y="921" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Reload the parameterized model.</text>
+<text x="412" y="950" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Choose new D₁ inside [5, 25].</text>
+<rect x="850" y="819" width="312" height="149" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="872" y="855" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">material_fields()</text>
+<text x="872" y="892" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Temperature + heat flux</text>
+<text x="872" y="921" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">No optimizer calls.</text>
+<text x="872" y="950" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">No retraining.</text>
+<path d="M 340 893 H 390" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 800 893 H 850" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 980 756 V 789 H 187 V 819" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="38" y="998" font-size="21" fill="#526573" font-weight="400" text-anchor="start">Check both sides of x = 1. Matching temperature alone does not establish matching heat flux.</text></g></svg>

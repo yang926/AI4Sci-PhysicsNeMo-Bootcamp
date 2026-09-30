@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="950" viewBox="0 0 1200 950" role="img" aria-labelledby="title desc">
+<title id="title">Lab 1 · where the equation enters learning</title><desc id="desc">Coordinates enter BasicPINN. The Poisson1D PDE object stores symbolic equations and is separate from the network. PhysicsInformer computes numerical residuals using predicted fields and coordinates. Boundary and inverse observation losses join the physics loss. Full batch L-BFGS updates the network weights. Analytical functions are used for evaluation; inverse solution observations are also supplied as training data.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs>
+<rect width="1200" height="950" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 1 · where the equation enters learning</text>
+<text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<rect x="38" y="116" width="245" height="171" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Inputs</text>
+<text x="60" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">x; add length in</text>
+<text x="60" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">family mode.</text>
+<text x="60" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Fixed grid points.</text>
+<rect x="334" y="116" width="454" height="171" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="356" y="152" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">BasicPINN</text>
+<text x="356" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Forward/family: FullyConnected.</text>
+<text x="356" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse: two FourierMLPs.</text>
+<text x="356" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">forward() → u; source() → f</text>
+<rect x="837" y="116" width="325" height="171" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="859" y="152" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Predicted tensors</text>
+<text x="859" y="189" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">u(x), or u(x, length)</text>
+<text x="859" y="218" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse also predicts f(x).</text>
+<text x="859" y="247" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Not SymPy placeholders.</text>
+<path d="M 284 198 H 334" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 788 198 H 837" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="348" width="414" height="151" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="384" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">Poisson1D(PDE)</text>
+<text x="60" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">self.equations stores symbols.</text>
+<text x="60" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">It is not a network layer.</text>
+<text x="60" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">u_xx − f; f = 1 unless inverse.</text>
+<rect x="512" y="348" width="650" height="151" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="534" y="384" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">informer(...) → PhysicsInformer</text>
+<text x="534" y="421" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">coordinates + predicted fields → numerical residual</text>
+<text x="534" y="450" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Autodiff evaluates the spatial derivative u_xx.</text>
+<text x="534" y="479" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">loss_terms() squares and averages the residual.</text>
+<path d="M 452 423 H 512" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 995 287 V 348" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="38" y="571" width="615" height="174" rx="14" fill="#fff5e9" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="607" font-size="24" fill="#bd6416" font-weight="600" text-anchor="start">loss_terms(): total training objective</text>
+<text x="60" y="644" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Physics + 10 × boundary penalty.</text>
+<text x="60" y="673" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse: add weighted solution-observation loss.</text>
+<text x="60" y="702" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Inverse endpoints are exact in BasicPINN.forward.</text>
+<text x="60" y="731" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Source targets are evaluation-only.</text>
+<rect x="713" y="571" width="449" height="174" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="735" y="607" font-size="24" fill="#7658a3" font-weight="600" text-anchor="start">optimize_lab()</text>
+<text x="735" y="644" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">PyTorch L-BFGS only.</text>
+<text x="735" y="673" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">1,000 optimizer.step(closure) calls.</text>
+<text x="735" y="702" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">closure: zero_grad → loss → backward</text>
+<text x="735" y="731" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The optimizer updates model weights.</text>
+<path d="M 807 499 V 533 H 347 V 571" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M 653 658 H 713" fill="none" stroke="#526573" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="38" y="800" font-size="21" fill="#526573" font-weight="400" text-anchor="start">Boundary checks call the model at x = 0 and x = length; they bypass PhysicsInformer.</text>
+<text x="38" y="836" font-size="21" fill="#526573" font-weight="400" text-anchor="start">Inverse observations constrain the solution network; the PDE links that solution to the source network.</text>
+<rect x="38" y="864" width="1124" height="61" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="900" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">evaluate() → solution, PDE and boundary errors; inverse also checks f.</text>
+
+</g></svg>

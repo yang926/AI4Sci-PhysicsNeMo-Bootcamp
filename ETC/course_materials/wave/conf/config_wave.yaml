@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023 - 2024 NVIDIA CORPORATION & AFFILIATES.
+# SPDX-License-Identifier: Apache-2.0
+# Explicit-loop configuration for PhysicsNeMo 2.2.2. These are not Hydra defaults.
+training:
+  steps: 10000
+  learning_rate: 0.001
+model:
+  width: 64
+  layers: 3
+samples:
+  interior: 128
+  initial: 64
+  boundary: 64

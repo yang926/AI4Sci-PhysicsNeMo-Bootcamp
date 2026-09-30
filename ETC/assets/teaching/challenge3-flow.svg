@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="922" viewBox="0 0 1200 922" role="img" aria-labelledby="title desc">
+<title id="title">Challenge 3 · Four student functions, four roles</title>
+<desc id="desc">Parameters enter ClimatePDE, equations become PhysicsInformer residuals, conditions form separate losses, and student_solution supplies comparison plots only. Neural network weights are updated by Adam; the analytic comparison does not train the model.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+<path d="M0,0 L8,4 L0,8Z" fill="#526573"/>
+</marker>
+</defs>
+<rect width="1200" height="922" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="40" y="52" font-size="34" fill="#172c3c" text-anchor="start" font-weight="650">Challenge 3 · Four student functions, four roles</text>
+<text x="40" y="91" font-size="24" fill="#526573" text-anchor="start" font-weight="400">The physical model and the neural network are separate objects.</text>
+<rect x="40" y="130" width="347" height="126" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_parameters</text>
+<text x="60" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">physical_parameters</text>
+<text x="60" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">validates coefficients</text>
+<rect x="425" y="130" width="350" height="126" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="445" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_equations</text>
+<text x="445" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">ClimatePDE(params)</text>
+<text x="445" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ self.equations</text>
+<rect x="815" y="130" width="345" height="126" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="835" y="166" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_conditions</text>
+<text x="835" y="202" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">initial and boundary targets</text>
+<text x="835" y="234" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">for every output field</text>
+<path d="M387 194H423" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M600 256V292" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M987 256V511" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="40" y="295" width="347" height="158" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="60" y="331" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">Sample (x, y, t)</text>
+<text x="60" y="367" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">sample_square / sample_time</text>
+<text x="60" y="399" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">create_model → FullyConnected</text>
+<text x="60" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L1: T    L2: Ta, To</text>
+<rect x="425" y="295" width="350" height="158" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="445" y="331" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">create_informer</text>
+<text x="445" y="367" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PhysicsNeMo PhysicsInformer</text>
+<text x="445" y="399" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">spatial derivatives and PDE</text>
+<text x="445" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">residuals for each field</text>
+<path d="M387 374H423" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="40" y="494" font-size="21" fill="#526573" text-anchor="start" font-weight="400">residuals supplies model fields</text>
+<text x="40" y="524" font-size="21" fill="#526573" text-anchor="start" font-weight="400">and PyTorch time derivatives.</text>
+<rect x="425" y="515" width="350" height="128" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="445" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">PDE loss</text>
+<text x="445" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">informer.forward</text>
+<text x="445" y="619" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">squared numerical residuals</text>
+<path d="M600 453V512" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="815" y="515" width="345" height="128" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="835" y="551" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Initial / boundary loss</text>
+<text x="835" y="587" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">condition_tensor</text>
+<text x="835" y="619" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">compare targets and fields</text>
+<path d="M213 453V475H795V597H813" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="425" y="711" width="735" height="127" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="445" y="747" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">loss_terms → record_step → total loss</text>
+<text x="445" y="783" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PyTorch: zero_grad → backward → Adam.step</text>
+<text x="445" y="815" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Update the same network through both branches.</text>
+<path d="M600 643V708" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M987 643V708" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="40" y="590" width="347" height="248" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="626" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">student_solution</text>
+<text x="60" y="662" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Baseline comparison only</text>
+<text x="60" y="694" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ comparison</text>
+<text x="60" y="726" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">→ reference_errors_over_time</text>
+<text x="60" y="758" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">
+</text>
+<text x="60" y="790" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Not a training target.</text>
+<text x="60" y="822" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Not independently verified.</text>
+<text x="40" y="888" font-size="22" fill="#526573" text-anchor="start" font-weight="400">A small local residual means consistency with your implementation, not proof it is correct.</text>
+</g>
+</svg>

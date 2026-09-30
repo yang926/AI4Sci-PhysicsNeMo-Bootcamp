@@ -1,0 +1,6 @@
+# Measured original-data FP32 class preset. --recipe upstream replays the source settings.
+steps: 3000
+batch_size: 2048
+learning_rate: 0.001
+layer_size: 256
+num_layers: 6

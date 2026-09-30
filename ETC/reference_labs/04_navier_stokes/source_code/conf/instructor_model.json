@@ -1,0 +1,4 @@
+{
+  "status": "pending_review",
+  "review_note": "No instructor checkpoint is approved for distribution. Completion of any training run, including 50000 updates, does not grant approval. Review original-data initial fit, PDE and flow diagnostics, and visualization before publishing checkpoint provenance and hashes."
+}

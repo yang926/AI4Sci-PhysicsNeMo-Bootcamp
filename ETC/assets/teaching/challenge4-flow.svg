@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="995" viewBox="0 0 1200 995" role="img" aria-labelledby="title desc">
+<title id="title">Challenge 4 · Factories, field losses, and PINO</title>
+<desc id="desc">Student dataset and model factories are called by operator_training.run. Data loss compares normalized fields. Level three adds student PDE through spectral PhysicsInformer on denormalized fields, then scales residuals; both loss branches update the same FNO model.</desc>
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
+<path d="M0,0 L8,4 L0,8Z" fill="#526573"/>
+</marker>
+</defs>
+<rect width="1200" height="995" fill="#ffffff"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="40" y="52" font-size="34" fill="#172c3c" text-anchor="start" font-weight="650">Challenge 4 · Factories, field losses, and PINO</text>
+<text x="40" y="91" font-size="24" fill="#526573" text-anchor="start" font-weight="400">The same FNO weights receive both gradients in Level 3 (PINO).</text>
+<rect x="40" y="131" width="350" height="156" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="167" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Training data</text>
+<text x="60" y="203" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">load_data → train-only stats</text>
+<text x="60" y="235" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">normalize all three splits</text>
+<text x="60" y="267" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">keep train / val / test separate</text>
+<rect x="425" y="131" width="350" height="156" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="445" y="167" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">build_datasets</text>
+<text x="445" y="203" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Your factory → TensorDataset</text>
+<text x="445" y="235" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">checked_datasets → loaders</text>
+<text x="445" y="267" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">pairs are already normalized</text>
+<rect x="815" y="131" width="345" height="156" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="835" y="167" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">build_model</text>
+<text x="835" y="203" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Your PhysicsNeMo model</text>
+<text x="835" y="235" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L1/3: FNO    L2: AFNO</text>
+<text x="835" y="267" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">predict_field → normalized u</text>
+<path d="M390 208H422" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M775 208H812" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="815" y="356" width="345" height="132" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="835" y="392" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Data loss: every level</text>
+<text x="835" y="428" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Compare normalized u</text>
+<text x="835" y="460" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">with normalized target</text>
+<path d="M987 287V353" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="40" y="356" width="350" height="132" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>
+<text x="60" y="392" font-size="25" fill="#bd6416" text-anchor="start" font-weight="600">Level 3 only</text>
+<text x="60" y="428" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">ReactionDiffusionPDE</text>
+<text x="60" y="460" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">your self.equations</text>
+<rect x="425" y="356" width="350" height="132" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="445" y="392" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">build_physics</text>
+<text x="445" y="428" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PhysicsNeMo PhysicsInformer</text>
+<text x="445" y="460" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">grad_method = spectral</text>
+<path d="M390 424H422" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="425" y="558" width="350" height="155" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="445" y="594" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">physics_residual</text>
+<text x="445" y="630" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">BatchedPhysicsInformer</text>
+<text x="445" y="662" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">one sample at a time</text>
+<text x="445" y="694" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">physical u and f → residual</text>
+<path d="M600 488V555" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="40" y="558" width="350" height="155" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="594" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Restore physical units</text>
+<text x="60" y="630" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Denormalize prediction u</text>
+<text x="60" y="662" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">and input forcing f</text>
+<text x="60" y="694" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">before evaluating the PDE</text>
+<path d="M985 287V314H15V637H38" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M390 637H422" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="815" y="558" width="345" height="155" rx="14" fill="#eef5fc" stroke="#2269a8" stroke-width="2"/>
+<text x="835" y="594" font-size="25" fill="#2269a8" text-anchor="start" font-weight="600">Physics loss: L3 only</text>
+<text x="835" y="630" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Scale residual by f_std</text>
+<text x="835" y="662" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">then mean of squared values</text>
+<text x="835" y="694" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">No coordinate autograd</text>
+<path d="M775 637H812" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<rect x="425" y="783" width="735" height="132" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
+<text x="445" y="819" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">data_loss + physics_weight × physics_loss</text>
+<text x="445" y="855" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PyTorch: zero_grad → loss.backward → Adam.step</text>
+<text x="445" y="887" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L1/2: physics_loss = 0; only the data-loss branch is active.</text>
+<path d="M985 713V780" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<path d="M1160 423H1182V850H1162" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="40" y="962" font-size="21" fill="#526573" text-anchor="start" font-weight="400">The shared trainer handles normalization, units, batching and updates; your factories plug into it.</text>
+</g>
+</svg>

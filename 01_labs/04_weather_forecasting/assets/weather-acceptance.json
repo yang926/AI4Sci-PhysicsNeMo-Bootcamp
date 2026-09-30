@@ -1,0 +1,29 @@
+{
+  "status": "predeclared before actual ERA5 forecast inference",
+  "scope": "Single prespecified retrospective weather case, suitable for a forecast-and-verification lesson only; not an operational weather benchmark",
+  "initial_time_utc": "2022-09-01T00:00:00Z",
+  "forecast_leads_hours": [6,12,18,24,30,36,42,48],
+  "checkpoint": "NVIDIA fourcastnet1 c67a63995f6c8e0e557eb3d791f32f437e9b02d5, official26-channel order and normalization",
+  "input_rule": "Only initial ERA5 state; no future truth, no feeding correct state back into forecast",
+  "truth": "Later ERA5 reanalysis, not direct observations",
+  "source_preprocessing": "Exact model-grid ordering; documented NVIDIA IFS mixed-phase RH from ERA5 q/T/p, including the official derived-RH bounds0..100percent. No other input field clipping, forecast clipping or amplitude rescaling.",
+  "metrics": "Cos(latitude)-weighted physical-unit errors; no absolute-pressure relative-percent accuracy",
+  "regions": {"global": "all720x1440 model-grid cells", "east_asia": {"latitude": [10,55], "longitude": [100,160]}},
+  "acceptance": {
+    "finite_all_steps_and_channels": true,
+    "initial_frame_exact": true,
+    "global_and_east_asia_24h_and_48h": {
+      "wind_vector_rmse_m_s_max": 6.0,
+      "mean_sea_level_pressure_rmse_hpa_max": 5.0,
+      "temperature_2m_rmse_kelvin_max": 3.0,
+      "wind_vector_mse_less_than_persistence": true,
+      "pressure_mse_less_than_persistence": true,
+      "temperature_mse_less_than_persistence": true
+    },
+    "all_positive_leads_reported_even_if_some_are_worse_than_persistence": true,
+    "fixed_color_scales_and_no_spatial_alignment": true
+  },
+  "runtime": "Report measured local GPU time and peak memory. L4 remains unmeasured; do not substitute local timings.",
+  "failure_policy": "Report any failed criterion. Do not pick another date, shorten horizon or change thresholds to relabel this run as passed. Corrections require identified preprocessing or implementation bugs and explicit records.",
+  "integration": "Published as the weather forecasting Lab 4 after local candidate validation; the previous PINN lab is preserved under ETC/reference_labs. L4 runtime must be measured separately."
+}

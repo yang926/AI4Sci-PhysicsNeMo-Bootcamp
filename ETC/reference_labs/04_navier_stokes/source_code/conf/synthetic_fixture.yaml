@@ -1,0 +1,6 @@
+# Separate analytic regression; never selected by the student notebook.
+steps: 3000
+batch_size: 128
+learning_rate: 0.001
+layer_size: 64
+num_layers: 3

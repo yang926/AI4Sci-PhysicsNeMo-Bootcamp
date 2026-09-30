@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="770" viewBox="0 0 1200 770" role="img" aria-labelledby="title desc">
+<title id="title">Lab 3 · two materials and one shared interface</title><desc id="desc">The bar covers zero to two with a material interface at one. The left conductivity is ten for the fixed run, or ranges from five to twenty five for the parameterized run. The right conductivity is fixed at 0.1. Endpoint temperatures are fixed at zero and one hundred. Two networks learn the fields, and their temperature and heat flux must match at the interface. The problem is steady and has no time input.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526573"/></marker></defs><rect width="1200" height="770" fill="#ffffff"/><g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="38" y="48" font-size="30" fill="#172c3c" font-weight="600" text-anchor="start">Lab 3 · two materials and one shared interface</text><text x="38" y="85" font-size="19" fill="#526573" font-weight="400" text-anchor="start">Code map · schematic, not a training result</text>
+<text x="40" y="145" font-size="25" fill="#172c3c" font-weight="600" text-anchor="start">Physical domain: 0 ≤ x ≤ 2; interface at x = 1</text>
+<rect x="120" y="200" width="475" height="120" fill="#eef5fb" stroke="#2269a8" stroke-width="3"/><rect x="595" y="200" width="475" height="120" fill="#fff5e9" stroke="#bd6416" stroke-width="3"/>
+<text x="357" y="249" font-size="26" fill="#2269a8" font-weight="600" text-anchor="middle">Material 1: D₁ = 10</text>
+<text x="357" y="292" font-size="22" fill="#172c3c" font-weight="400" text-anchor="middle">learned temperature u₁(x)</text>
+<text x="832" y="249" font-size="26" fill="#bd6416" font-weight="600" text-anchor="middle">Material 2: D₂ = 0.1</text>
+<text x="832" y="292" font-size="22" fill="#172c3c" font-weight="400" text-anchor="middle">learned temperature u₂(x)</text>
+<text x="120" y="178" font-size="24" fill="#2269a8" font-weight="600" text-anchor="middle">T(0) = 0</text>
+<text x="1070" y="178" font-size="24" fill="#bd6416" font-weight="600" text-anchor="middle">T(2) = 100</text>
+<circle cx="135" cy="336" r="5" fill="#2269a8"/>
+<circle cx="166.42857142857142" cy="336" r="5" fill="#2269a8"/>
+<circle cx="197.85714285714286" cy="336" r="5" fill="#2269a8"/>
+<circle cx="229.28571428571428" cy="336" r="5" fill="#2269a8"/>
+<circle cx="260.7142857142857" cy="336" r="5" fill="#2269a8"/>
+<circle cx="292.1428571428571" cy="336" r="5" fill="#2269a8"/>
+<circle cx="323.57142857142856" cy="336" r="5" fill="#2269a8"/>
+<circle cx="355" cy="336" r="5" fill="#2269a8"/>
+<circle cx="386.42857142857144" cy="336" r="5" fill="#2269a8"/>
+<circle cx="417.85714285714283" cy="336" r="5" fill="#2269a8"/>
+<circle cx="449.2857142857143" cy="336" r="5" fill="#2269a8"/>
+<circle cx="480.7142857142857" cy="336" r="5" fill="#2269a8"/>
+<circle cx="512.1428571428571" cy="336" r="5" fill="#2269a8"/>
+<circle cx="543.5714285714286" cy="336" r="5" fill="#2269a8"/>
+<circle cx="575" cy="336" r="5" fill="#2269a8"/>
+<circle cx="615" cy="336" r="5" fill="#bd6416"/>
+<circle cx="646.4285714285714" cy="336" r="5" fill="#bd6416"/>
+<circle cx="677.8571428571429" cy="336" r="5" fill="#bd6416"/>
+<circle cx="709.2857142857143" cy="336" r="5" fill="#bd6416"/>
+<circle cx="740.7142857142857" cy="336" r="5" fill="#bd6416"/>
+<circle cx="772.1428571428571" cy="336" r="5" fill="#bd6416"/>
+<circle cx="803.5714285714286" cy="336" r="5" fill="#bd6416"/>
+<circle cx="835" cy="336" r="5" fill="#bd6416"/>
+<circle cx="866.4285714285714" cy="336" r="5" fill="#bd6416"/>
+<circle cx="897.8571428571429" cy="336" r="5" fill="#bd6416"/>
+<circle cx="929.2857142857142" cy="336" r="5" fill="#bd6416"/>
+<circle cx="960.7142857142858" cy="336" r="5" fill="#bd6416"/>
+<circle cx="992.1428571428571" cy="336" r="5" fill="#bd6416"/>
+<circle cx="1023.5714285714286" cy="336" r="5" fill="#bd6416"/>
+<circle cx="1055" cy="336" r="5" fill="#bd6416"/>
+<line x1="595" y1="183" x2="595" y2="364" stroke="#172c3c" stroke-width="3" stroke-dasharray="5 4"/>
+<text x="120" y="375" font-size="22" fill="#172c3c" font-weight="400" text-anchor="start">x = 0</text>
+<text x="595" y="398" font-size="22" fill="#172c3c" font-weight="400" text-anchor="middle">x = 1</text>
+<text x="1070" y="375" font-size="22" fill="#172c3c" font-weight="400" text-anchor="end">x = 2</text>
+<rect x="38" y="431" width="552" height="157" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="467" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Inside each material</text>
+<text x="60" y="504" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">left points: x_l ∈ [0, 1]</text>
+<text x="60" y="537" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">right points: x_r = 1 + x_l</text>
+<text x="60" y="570" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Steady problem: no time input.</text>
+<rect x="626" y="431" width="536" height="157" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
+<text x="648" y="467" font-size="24" fill="#147d72" font-weight="600" text-anchor="start">At the interface: x_i = 1</text>
+<text x="648" y="504" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Learn u₁ = u₂ and D₁ u₁,x = D₂ u₂,x.</text>
+<text x="648" y="537" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">Equal temperature and equal heat flux.</text>
+<text x="648" y="570" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The slope itself may jump.</text>
+<rect x="38" y="619" width="1124" height="119" rx="14" fill="#eef5fb" stroke="#2269a8" stroke-width="2"/>
+<text x="60" y="655" font-size="24" fill="#2269a8" font-weight="600" text-anchor="start">Parameterized run: vary D₁, not the bar geometry</text>
+<text x="60" y="692" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">D₁ ∈ [5, 25]; both networks receive x and the normalized resistance ratio D₂ / D₁.</text>
+<text x="60" y="725" font-size="21" fill="#172c3c" font-weight="400" text-anchor="start">The left boundary stays at 0, the right stays at 100, and the interface stays at x = 1.</text>
+<text x="38" y="765" font-size="20" fill="#526573" font-weight="400" text-anchor="start">loss_terms() sets the samples; CompositeBar.forward() imposes only the endpoint temperatures.</text></g></svg>
+

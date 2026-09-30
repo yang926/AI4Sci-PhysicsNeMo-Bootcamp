@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1070" viewBox="0 0 1200 1070" role="img" aria-labelledby="title desc">
+<title id="title">Wave student functions meet neural-network predictions in the losses</title>
+<desc id="desc">The network maps x y t to displacement. Separately, student_speed and student_equations construct a WaveEquation2D PDE object. create_informer builds PhysicsInformer from that object. residuals evaluates the equation on neural-network predictions with spatial and temporal derivatives. student_conditions follows conditions and condition_tensor into initial and boundary losses. Those losses and the PDE loss are summed, then backward and Adam update the network weights only.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#526573"/></marker></defs>
+<rect width="1200" height="1070" fill="#ffffff"/>
+<g font-family="Arial, sans-serif" fill="#172c3c">
+<text x="36" y="46" font-size="30" font-weight="bold">Your equations are not network layers</text>
+<text x="36" y="83" font-size="22" fill="#526573">Two separate objects meet when the loss evaluates the predicted field.</text>
+<text x="36" y="126" font-size="22" fill="#147d72">NETWORK: supplied model, trainable weights</text>
+<rect x="36" y="147" width="238" height="97" rx="8" fill="#edf5fb"/>
+<text x="56" y="183" font-size="24" font-weight="bold">Sampled (x, y, t)</text><text x="56" y="220" font-size="22">spatial_sample()</text>
+<rect x="343" y="147" width="426" height="97" rx="8" fill="#eef6f4"/>
+<text x="363" y="183" font-size="24" font-weight="bold">create_model(3, 1, ...)</text><text x="363" y="220" font-size="22">PhysicsNeMo FullyConnected</text>
+<rect x="838" y="147" width="326" height="97" rx="8" fill="#edf5fb"/>
+<text x="858" y="183" font-size="23" font-weight="bold">Predicted displacement</text><text x="858" y="220" font-size="22">uθ = model(x, y, t)</text>
+<g stroke="#526573" stroke-width="2" fill="none" marker-end="url(#arrow)">
+<path marker-end="url(#arrow)" d="M274 195H337"/><path marker-end="url(#arrow)" d="M769 195H832"/>
+<path marker-end="url(#arrow)" d="M1164 195H1184V550H1166"/>
+<path marker-end="url(#arrow)" d="M998 244V277H15V689H34"/></g>
+<text x="36" y="317" font-size="22" fill="#bd6416">PDE: your symbolic problem definition</text>
+<rect x="36" y="337" width="270" height="104" rx="8" fill="#fff3e7"/>
+<text x="56" y="375" font-size="24" font-weight="bold">student_speed</text><text x="56" y="414" font-size="22">Prescribed speed field</text>
+<rect x="364" y="337" width="306" height="104" rx="8" fill="#fff3e7"/>
+<text x="384" y="375" font-size="24" font-weight="bold">student_equations</text><text x="384" y="414" font-size="22">SymPy residual dictionary</text>
+<rect x="728" y="337" width="436" height="104" rx="8" fill="#eef6f4"/>
+<text x="748" y="375" font-size="24" font-weight="bold">WaveEquation2D(PDE)</text><text x="748" y="414" font-size="22">Your expressions → self.equations</text>
+<g stroke="#526573" stroke-width="2" fill="none" marker-end="url(#arrow)">
+<path marker-end="url(#arrow)" d="M306 389H358"/><path marker-end="url(#arrow)" d="M670 389H722"/><path marker-end="url(#arrow)" d="M943 441V492"/></g>
+<rect x="630" y="495" width="534" height="131" rx="8" fill="#eef6f4"/>
+<text x="650" y="531" font-size="23" font-weight="bold">create_informer → PhysicsInformer</text>
+<text x="650" y="568" font-size="22">residuals(...): evaluate on predicted uθ</text>
+<text x="650" y="605" font-size="22">Spatial autodiff + supplied u__t, u__t__t</text>
+<rect x="36" y="495" width="500" height="90" rx="8" fill="#fff3e7"/>
+<text x="56" y="532" font-size="24" font-weight="bold">student_conditions</text><text x="56" y="567" font-size="22">Initial values and boundary expression</text>
+<g stroke="#526573" stroke-width="2" fill="none" marker-end="url(#arrow)">
+<path marker-end="url(#arrow)" d="M284 585V619"/><path marker-end="url(#arrow)" d="M895 626V663"/></g>
+<rect x="36" y="622" width="500" height="124" rx="8" fill="#f4eff9"/>
+<text x="56" y="658" font-size="24" font-weight="bold">conditions() → condition_tensor()</text>
+<text x="56" y="695" font-size="22">Evaluate with network predictions</text>
+<text x="56" y="731" font-size="22">t = 0 for IC; boundary=True for BC</text>
+<rect x="630" y="666" width="534" height="80" rx="8" fill="#edf5fb"/>
+<text x="650" y="700" font-size="24" font-weight="bold">PDE loss</text><text x="650" y="731" font-size="22">Mean squared numerical residual</text>
+<g stroke="#526573" stroke-width="2" fill="none" marker-end="url(#arrow)">
+<path d="M284 746V758" marker-end="none"/><path marker-end="url(#arrow)" d="M284 793V811"/>
+<path d="M895 746V758" marker-end="none"/><path marker-end="url(#arrow)" d="M895 793V811"/></g>
+<text x="49" y="786" font-size="22">Initial displacement + velocity + boundary</text>
+<text x="760" y="786" font-size="22">PDE residual</text>
+<rect x="36" y="815" width="1128" height="83" rx="8" fill="#f1f5f8"/>
+<text x="60" y="850" font-size="25" font-weight="bold">loss_terms() → four losses → record_step() → total</text>
+<text x="60" y="882" font-size="22">The model sees your problem through these numerical errors.</text>
+<path d="M600 898V932" fill="none" stroke="#526573" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="188" y="936" width="824" height="79" rx="8" fill="#f4eff9"/>
+<text x="210" y="969" font-size="24" font-weight="bold">total.backward() → optimizer.step() → next training step</text>
+<text x="210" y="1002" font-size="22">PyTorch Adam updates weights, not your Python definitions.</text>
+<text x="36" y="1050" font-size="20" fill="#526573">Orange: your definitions · Teal: PhysicsNeMo · Purple: PyTorch / tensor evaluation · Arrows: data or construction</text>
+</g></svg>
