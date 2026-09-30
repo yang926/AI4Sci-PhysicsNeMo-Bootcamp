@@ -116,17 +116,21 @@ def result_html(metrics, output):
         per_time = analytical.get("per_time")
         if isinstance(per_time, list) and per_time:
             time_rows = []
+            columns = [("time", "Time"), ("rmse", "RMSE"), ("relative_l2", "Relative L2")]
+            if any(isinstance(row, dict) and "reference_max" in row for row in per_time):
+                columns += [("reference_max", "Expression max |T|"),
+                            ("initial_scale_rmse", "RMSE / initial RMS")]
             for entry in per_time:
                 if not isinstance(entry, dict):
                     continue
                 values = [_format(entry.get(key)) if type(entry.get(key)) in (int, float)
-                          else "—" for key in ("time", "rmse", "relative_l2")]
+                          else "—" for key, _ in columns]
                 time_rows.append('<tr><th scope="row">' + values[0] + "</th><td>"
-                                 + values[1] + "</td><td>" + values[2] + "</td></tr>")
+                                 + "</td><td>".join(values[1:]) + "</td></tr>")
             if time_rows:
                 table += ("<table><caption>" + comparison_label + " at each evaluation time</caption>"
-                          '<thead><tr><th scope="col">Time</th><th scope="col">RMSE</th>'
-                          '<th scope="col">Relative L2</th></tr></thead><tbody>'
+                          '<thead><tr>' + "".join(f'<th scope="col">{label}</th>' for _, label in columns)
+                          + '</tr></thead><tbody>'
                           + "".join(time_rows) + "</tbody></table>")
     elif analytical == {}:
         table += "<p>No analytical comparison is available for this case. This does not mean zero error.</p>"

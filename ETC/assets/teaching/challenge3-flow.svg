@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="922" viewBox="0 0 1200 922" role="img" aria-labelledby="title desc">
 <title id="title">Challenge 3 · Four student functions, four roles</title>
-<desc id="desc">Parameters enter ClimatePDE, equations become PhysicsInformer residuals, conditions form separate losses, and student_solution supplies comparison plots only. Neural network weights are updated by Adam; the analytic comparison does not train the model.</desc>
+<desc id="desc">Parameters enter ClimatePDE, equations become PhysicsInformer residuals, conditions form separate losses, and student_solution supplies comparison plots only. Physical inputs are scaled inside autograd. Neural network weights are updated by Adam followed by L-BFGS on fixed collocation points; the analytic comparison does not train the model.</desc>
 <defs>
 <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse">
 <path d="M0,0 L8,4 L0,8Z" fill="#526573"/>
@@ -27,7 +27,7 @@
 <path d="M987 256V511" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <rect x="40" y="295" width="347" height="158" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
 <text x="60" y="331" font-size="25" fill="#147d72" text-anchor="start" font-weight="600">Sample (x, y, t)</text>
-<text x="60" y="367" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">sample_square / sample_time</text>
+<text x="60" y="367" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">Fresh samples → fixed Sobol/grid</text>
 <text x="60" y="399" font-size="20" fill="#172c3c" text-anchor="start" font-weight="400">create_model → FullyConnected</text>
 <text x="60" y="431" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">L1: T    L2: Ta, To</text>
 <rect x="425" y="295" width="350" height="158" rx="14" fill="#edf8f5" stroke="#147d72" stroke-width="2"/>
@@ -49,9 +49,9 @@
 <text x="835" y="619" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">compare targets and fields</text>
 <path d="M213 453V475H795V597H813" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <rect x="425" y="711" width="735" height="127" rx="14" fill="#f5f1fb" stroke="#7658a3" stroke-width="2"/>
-<text x="445" y="747" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">loss_terms → record_step → total loss</text>
-<text x="445" y="783" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PyTorch: zero_grad → backward → Adam.step</text>
-<text x="445" y="815" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Update the same network through both branches.</text>
+<text x="445" y="747" font-size="25" fill="#7658a3" text-anchor="start" font-weight="600">loss_terms → total loss → optimize_climate</text>
+<text x="445" y="783" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">PyTorch: Adam → L-BFGS with a closure</text>
+<text x="445" y="815" font-size="21" fill="#172c3c" text-anchor="start" font-weight="400">Update the same FP32 network from PDE and conditions.</text>
 <path d="M600 643V708" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <path d="M987 643V708" fill="none" stroke="#526573" stroke-width="3"  marker-end="url(#arrow)"/>
 <rect x="40" y="590" width="347" height="248" rx="14" fill="#fff3e6" stroke="#bd6416" stroke-width="2"/>

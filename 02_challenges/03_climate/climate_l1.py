@@ -93,19 +93,20 @@ class ClimatePDE(PDE):
         self.equations = student_equations(x, y, t, fields, params)
 
 
-def loss_terms(model, informer, config, device, exercise=None):
+def loss_terms(model, informer, config, device, exercise=None, points=None):
     exercise = conditions(student_conditions) if exercise is None else exercise
     count = config["samples"]
-    xy = sample_square(count["interior"], device)
-    pde = residuals(model, informer, xy, sample_time(len(xy), TIME_END, device), FIELD_NAMES)
+    xy = sample_square(count["interior"], device) if points is None else points["interior_xy"]
+    pde_t = sample_time(len(xy), TIME_END, device) if points is None else points["interior_t"]
+    pde = residuals(model, informer, xy, pde_t, FIELD_NAMES)
     losses = {"pde_" + name: value.square().mean() for name, value in pde.items()}
-    initial_xy = sample_square(count["initial"], device)
+    initial_xy = sample_square(count["initial"], device) if points is None else points["initial_xy"]
     fields = evaluate_fields(model, initial_xy, torch.zeros(len(initial_xy), 1, device=device), FIELD_NAMES)
     for name, value in fields.items():
         target = condition_tensor(exercise, "initial_" + name, initial_xy)
         losses["initial_" + name] = (value - target).square().mean()
-    boundary_xy = sample_square(count["boundary"], device, boundary=True)
-    boundary_t = sample_time(len(boundary_xy), TIME_END, device)
+    boundary_xy = sample_square(count["boundary"], device, boundary=True) if points is None else points["boundary_xy"]
+    boundary_t = sample_time(len(boundary_xy), TIME_END, device) if points is None else points["boundary_t"]
     boundary = evaluate_fields(model, boundary_xy, boundary_t, FIELD_NAMES)
     for name, value in boundary.items():
         target = condition_tensor(exercise, "boundary_" + name, boundary_xy, boundary_t)
@@ -114,6 +115,7 @@ def loss_terms(model, informer, config, device, exercise=None):
 
 
 def main():
+    from ETC.runtime.climate import ClimateModel, optimization_budget, optimize_climate, temperature_errors
     args, config = parse_args(__file__, __doc__, "config_atmos.yaml")
     params = physical_parameters(student_parameters, DEFAULT_PHYSICS)
     exercise = conditions(student_conditions)
@@ -131,8 +133,8 @@ def main():
     pde = ClimatePDE(params=params)
     informer = create_informer(pde, args.device)
     evaluation_informer = create_evaluation_informer(ClimatePDE, args.device, params=params)
-    model = create_model(3, len(FIELD_NAMES), config, args.device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=config["training"]["learning_rate"])
+    model = ClimateModel(create_model(3, len(FIELD_NAMES), config, args.device), TIME_END)
+    config["input_transform"] = {"model_class": "ClimateModel", "extent": [math.pi, math.pi, TIME_END]}
     if args.output_dir.exists():
         raise FileExistsError("Choose a new --output-dir; previous results are preserved.")
     initial = heldout_losses(loss_terms, model, evaluation_informer, config, args.device, args.seed)
@@ -140,25 +142,33 @@ def main():
     reference = comparison(xy, time)
     before_error = reference_errors(model, xy, time, FIELD_NAMES, reference)
     history = [heldout_row(0, "heldout_before_training", initial)]
-    for step in range(1, args.steps + 1):
-        optimizer.zero_grad(set_to_none=True)
-        losses = loss_terms(model, informer, config, args.device, exercise)
-        total = record_step(step, losses, history)
-        total.backward()
-        optimizer.step()
+    def training_loss(points=None):
+        return loss_terms(model, informer, config, args.device, exercise, points=points)
+
+    def progress(step, phase, losses):
+        row = heldout_row(step, phase, losses)
+        history.append(row)
+        if step == 1 or step % 100 == 0:
+            print(f"step {step}/{args.steps} ({phase}): loss={row['total']:.6g}", flush=True)
+
+    adam_steps, lbfgs_steps = optimization_budget(args.steps)
+    optimization = optimize_climate(model, training_loss, config, args.device, TIME_END,
+                                    adam_steps=adam_steps, lbfgs_steps=lbfgs_steps, callback=progress)
     final = heldout_losses(loss_terms, model, evaluation_informer, config, args.device, args.seed)
     history.append(heldout_row(args.steps, "heldout_after_training", final))
     metrics = {name + "_rmse": float(value.sqrt()) for name, value in final.items()}
     metrics.update({"physics": params, "training_physics": params,
+                    "training_recipe": "Adam cosine decay, then fixed-point L-BFGS",
+                    "optimization": optimization, "preview_time": TIME_END / 2,
+                    "training_seconds": optimization["training_seconds"],
+                    "training_seconds_scope": "Adam and L-BFGS; excludes model import, evaluation and plotting.",
                     "analytic_exercise": {"source": "student_solution", "independently_checked": False},
                     "comparison_source": "student_solution",
                     "comparison_label": "Learner-supplied solution",
                     "evaluation_conditions": "student_conditions", "initial_reference_error": before_error,
                     "final_reference_error": reference_errors(model, xy, time, FIELD_NAMES, reference),
                     "evaluation_equations": "student_equations",
-                    "reference_over_time": reference_errors_over_time(
-                        model, xy, TIME_END, FIELD_NAMES,
-                        comparison)})
+                    "reference_over_time": temperature_errors(model, xy, TIME_END, FIELD_NAMES, comparison)})
     save_results(args, config, model, history, xy, time, FIELD_NAMES, metrics, reference=reference, notes=[
         "The comparison uses student_solution and does not independently certify its correctness.",
         "The baseline comparison is disabled when advection, source, or relaxation is enabled.",

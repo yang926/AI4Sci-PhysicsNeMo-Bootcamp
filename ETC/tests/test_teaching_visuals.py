@@ -18,7 +18,7 @@ CODE_HASHES = {
     "01_labs/04_weather_forecasting/Lab_4_Weather_Forecasting.ipynb": "7d92dc28f9495b2a6625072685f786459de11810271b4a387858eef5c19316eb",
     "02_challenges/01_wave/Challenge_1_Wave_Dynamics.ipynb": "fb2d2e819a5a896cbc5ee3ae56093161d6e8fdf9b6f6231cd8c83e07a5560887",
     "02_challenges/02_fluid/Challenge_2_Fluid_Flow.ipynb": "74367d9abafbbfac64967df5dc075cefcbf2afe39c57ab31186d0c6cdf9372d6",
-    "02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb": "c17b0b64c13997c65c24fc1a82243c892847cf60f6531baffe9bd3692204d2ba",
+    "02_challenges/03_climate/Challenge_3_Climate_Modeling.ipynb": "0b0e599f257a3e05d70b41a35beca16f2614c88a7248cdf8708093da2c0530f9",
     "02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb": "3e764c52d8e983196087f2ee287302cd9deed60d7f619cfceaeb083014d029ee"
 }
 NS = "{http://www.w3.org/2000/svg}"
@@ -104,4 +104,3 @@ def test_weather_visual_is_inference_not_the_archived_pinn():
     assert "truth.npz" in labels and "fixed" in labels.lower()
     assert "no optimizer" in labels.lower()
     assert "Taylor" not in labels
-

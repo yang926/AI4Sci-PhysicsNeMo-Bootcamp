@@ -94,6 +94,12 @@ The Labs illustrate the same division with different code. Their helpers `mlp(ni
 
 Follow each lesson's existing optimizer recipe. Lab 1's L-BFGS uses `optimizer.step(closure)`, and that closure recomputes the loss and calls `backward` on fixed training points. The Wave excerpt above shows Adam. Both use PyTorch to optimize the model; the different loop shapes reflect the chosen optimizer.
 
+Climate uses [ETC/runtime/climate.py](../runtime/climate.py) for an Adam warm-up followed by L-BFGS. Its default 5,000 optimizer calls consist of 1,500 Adam updates with a cosine learning-rate schedule from `0.001` to `0.00001`, then 3,500 L-BFGS calls. Adam uses fresh samples. L-BFGS reuses 4,096 Sobol interior points and initial/boundary grids including endpoints (2,116 points each), so each closure evaluates the same objective. A closure can run several times within one optimizer call; `STEPS` is not the number of gradient evaluations. A two-call execution check uses Adam only.
+
+The Climate network remains a three-layer, 64-unit FP32 MLP. `ClimateModel.forward` scales the physical inputs to `[-1,1]` before passing them to `FullyConnected`. Because this scaling stays in the autograd graph, spatial and time derivatives retain their physical-coordinate factors. Both optimizers minimize the original PDE, initial-condition and boundary-condition losses; `student_solution` supplies comparison only.
+
+The same helper file's `temperature_errors` checks eight times, including the early transient at `t=0.25`, `0.5` and `1`. Each row reports the learner expression's maximum absolute temperature alongside RMSE. RMSE / initial RMS uses the initial-temperature norm as a fixed scale; ordinary relative L2 still uses the reference norm at each evaluation time. These comparisons help interpret diffusion toward zero without changing the reported absolute errors.
+
 ## How Challenge 4 changes the inputs and derivatives
 
 In [Challenge 4](../../02_challenges/04_neural_operators/Challenge_4_Neural_Operators.ipynb), the input is a whole forcing field and the output is a whole solution field, each with shape `[batch, 1, n, n]`. Level 1 builds `physicsnemo.models.fno.FNO`; Level 2 builds `physicsnemo.models.afno.AFNO`; Level 3 uses FNO with an additional physics loss, which makes its training physics-informed neural operator training (PINO). FNO and AFNO name architectures; PINO names the use of physics in the training objective.

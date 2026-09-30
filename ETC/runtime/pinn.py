@@ -299,6 +299,8 @@ def _write_results(destination, args, config, model, history, coordinates, time,
             limits = [{} for _ in names]
         try:
             for ax, value, title, scale in zip(axes.flat, values, titles, limits):
+                if type(metrics.get("preview_time")) in (int, float):
+                    title += f", t={metrics['preview_time']:.4g}"
                 image = ax.scatter(arrays["coordinates"][:, 0], arrays["coordinates"][:, 1], c=value,
                                    s=10, cmap="viridis", **scale)
                 ax.set(title=title, xlabel="x", ylabel="y", aspect="equal")
