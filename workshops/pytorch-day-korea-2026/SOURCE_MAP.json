@@ -1,0 +1,88 @@
+{
+  "repository": "https://github.com/yang926/AI4Sci-PhysicsNeMo-Bootcamp",
+  "commit": "42870e2d144ce4e176c06f1e37a94080a81c11b4",
+  "files": [
+    {
+      "source": "01_labs/01_pinn/source_code/pinn_basics.py",
+      "destination": "src/pinn_basics.py",
+      "upstream_sha256": "3fd273b559f5c60c6c9b1874a8a812cda92d47a5e3d4e72e465b6b399928e4ee",
+      "adapted_sha256": "ade8343d135b24862d8a88708efecf6665f68dc4b32be4060b85674cf7c764ea",
+      "edits": [
+        {
+          "before": "sys.path.insert(0, str(Path(__file__).resolve().parents[3]))\nfrom ETC.runtime.labs import parser, setup, mlp, informer, save_run",
+          "after": "from .lab_runtime import parser, setup, mlp, informer, save_run"
+        },
+        {
+          "before": "Path(\"outputs/pinn_basics\")",
+          "after": "Path(\"runs/pinn_basics\")"
+        }
+      ]
+    },
+    {
+      "source": "ETC/runtime/labs.py",
+      "destination": "src/lab_runtime.py",
+      "upstream_sha256": "1f6ad8f5b567c0ccb5ca1f155afa16ead5484ecfd8510f37b74f0aa852e48ef7",
+      "adapted_sha256": "376c63a61b9a0a52e26139ebb6bba8bd0721cbeeeb810d061af24f7de0c8a86a",
+      "edits": [
+        {
+          "before": "from ETC.runtime.artifacts import staged_output",
+          "after": "from .artifacts import staged_output"
+        },
+        {
+          "before": "Path(\"outputs\") / \"labs\"",
+          "after": "Path(\"runs\") / \"labs\""
+        }
+      ]
+    },
+    {
+      "source": "ETC/runtime/artifacts.py",
+      "destination": "src/artifacts.py",
+      "upstream_sha256": "783e99626616c8be5f4400839d4c144404d82059bd62219235591973f6ab41c7",
+      "adapted_sha256": "783e99626616c8be5f4400839d4c144404d82059bd62219235591973f6ab41c7",
+      "edits": []
+    },
+    {
+      "source": "02_challenges/04_neural_operators/operator_training.py",
+      "destination": "src/operator_training.py",
+      "upstream_sha256": "0036aa38746864a9f71fcf1eaf7331f85079bddc6f083426425fda271bcdc289",
+      "adapted_sha256": "2b7d3197eeb95e7fb53a5a60b458980b9c2340377b096e3309e74105ddf30550",
+      "edits": [
+        {
+          "before": "sys.path.insert(0, str(MODULE_DIR.parents[1]))\nfrom ETC.runtime.artifacts import staged_output",
+          "after": "WORKSHOP_DIR = MODULE_DIR.parent\nfrom .artifacts import staged_output"
+        },
+        {
+          "before": "MODULE_DIR / f\"conf/config_{config_names[level]}.yaml\"",
+          "after": "WORKSHOP_DIR / f\"config/config_{config_names[level]}.yaml\""
+        },
+        {
+          "before": "MODULE_DIR / \"datasets/Reaction_Diffusion\"",
+          "after": "WORKSHOP_DIR / \"data/reaction_diffusion\""
+        },
+        {
+          "before": "MODULE_DIR / f\"outputs/level{level}\"",
+          "after": "WORKSHOP_DIR / f\"runs/fno-level{level}\""
+        }
+      ]
+    },
+    {
+      "source": "02_challenges/04_neural_operators/generate_data.py",
+      "destination": "src/generate_data.py",
+      "upstream_sha256": "f1517f9796906c0b0dc94b20e1e0908782926e5c374f65883cd6a60284b0affc",
+      "adapted_sha256": "4c78eaf3ffa5ab635bf3a08020eb7bc79ebec25308b81baef497c5a74be677e8",
+      "edits": [
+        {
+          "before": "MODULE_DIR / \"datasets/Reaction_Diffusion\"",
+          "after": "MODULE_DIR.parent / \"data/reaction_diffusion\""
+        }
+      ]
+    },
+    {
+      "source": "02_challenges/04_neural_operators/conf/config_FNO.yaml",
+      "destination": "config/config_FNO.yaml",
+      "upstream_sha256": "99f88aa070ec2333f188289d385883495e38352ed052466430499d7266b2be16",
+      "adapted_sha256": "99f88aa070ec2333f188289d385883495e38352ed052466430499d7266b2be16",
+      "edits": []
+    }
+  ]
+}
