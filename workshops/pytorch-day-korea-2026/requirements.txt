@@ -1,0 +1,11 @@
+# Direct workshop dependencies, pinned to the original course CUDA environment.
+# Students use the already prepared Brev kernel; do not install during class.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.10.0+cu128
+nvidia-physicsnemo[sym]==2.2.2
+numpy==2.5.2
+sympy==1.14.0
+PyYAML==6.0.3
+h5py==3.16.0
+matplotlib==3.11.2
+ipykernel==7.3.0
